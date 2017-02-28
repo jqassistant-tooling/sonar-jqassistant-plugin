@@ -3,6 +3,9 @@ package com.buschmais.jqassistant.sonar.sonarrules.profile;
 import java.io.Writer;
 import java.util.*;
 
+import com.buschmais.jqassistant.core.analysis.api.rule.*;
+import com.buschmais.jqassistant.core.rule.api.writer.RuleSetWriter;
+import com.buschmais.jqassistant.core.rule.impl.writer.RuleSetWriterImpl;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,22 +19,6 @@ import org.sonar.api.rules.RuleFinder;
 import org.sonar.api.rules.RuleParam;
 import org.sonar.plugins.java.Java;
 
-import com.buschmais.jqassistant.core.analysis.api.RuleException;
-import com.buschmais.jqassistant.core.analysis.api.RuleSetWriter;
-import com.buschmais.jqassistant.core.analysis.api.rule.AbstractExecutableRule;
-import com.buschmais.jqassistant.core.analysis.api.rule.AggregationVerification;
-import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
-import com.buschmais.jqassistant.core.analysis.api.rule.Constraint;
-import com.buschmais.jqassistant.core.analysis.api.rule.CypherExecutable;
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
-import com.buschmais.jqassistant.core.analysis.api.rule.Group;
-import com.buschmais.jqassistant.core.analysis.api.rule.Report;
-import com.buschmais.jqassistant.core.analysis.api.rule.RowCountVerification;
-import com.buschmais.jqassistant.core.analysis.api.rule.RuleSet;
-import com.buschmais.jqassistant.core.analysis.api.rule.RuleSetBuilder;
-import com.buschmais.jqassistant.core.analysis.api.rule.Severity;
-import com.buschmais.jqassistant.core.analysis.api.rule.Verification;
-import com.buschmais.jqassistant.core.analysis.impl.RuleSetWriterImpl;
 import com.buschmais.jqassistant.sonar.plugin.JQAssistant;
 import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantRuleType;
 import com.buschmais.jqassistant.sonar.sonarrules.rule.AbstractTemplateRule;
@@ -80,7 +67,7 @@ public class JQAssistantProfileExporter extends ProfileExporter {
                 } else {
                     executable = createExecutableFromTemplate(activeRule, check);
                 }
-                Set<String> requiresConcepts = executable.getRequiresConcepts();
+                Set<String> requiresConcepts = executable.getRequiresConcepts().keySet();
                 executables.put(executable, requiresConcepts);
                 if (executable instanceof Concept) {
                     builder.addConcept((Concept) executable);
@@ -105,10 +92,16 @@ public class JQAssistantProfileExporter extends ProfileExporter {
         }
     }
 
-    private Set<String> getRequiresConcepts(String requiresConcepts) {
-        if (requiresConcepts == null)
-            return Collections.emptySet();
-        return new HashSet<>(Arrays.asList(StringUtils.splitByWholeSeparator(requiresConcepts, ",")));
+    private Map<String, Boolean> getRequiresConcepts(String requiresConcepts) {
+        if (requiresConcepts == null) {
+            return Collections.emptyMap();
+        }
+        HashMap<String, Boolean> concepts = new HashMap<>();
+        for (String concept : StringUtils.splitByWholeSeparator(requiresConcepts, ",")) {
+            concepts.put(concept, null);
+        }
+        ;
+        return concepts;
     }
 
     /**
@@ -176,8 +169,8 @@ public class JQAssistantProfileExporter extends ProfileExporter {
         }
         String cypher = cypherParam.getDefaultValue();
         RuleParam requiresConceptsParam = rule.getParam(RuleParameter.RequiresConcepts.getName());
-        Set<String> requiresConcepts = requiresConceptsParam != null ? getRequiresConcepts(requiresConceptsParam.getDefaultValue()) : Collections
-                .<String>emptySet();
+        Map<String, Boolean> requiresConcepts = requiresConceptsParam != null ? getRequiresConcepts(requiresConceptsParam.getDefaultValue()) : Collections
+                .<String,Boolean>emptyMap();
         return createExecutableFromRule(rule, cypher, requiresConcepts);
     }
 
@@ -188,7 +181,7 @@ public class JQAssistantProfileExporter extends ProfileExporter {
      * @param cypher The cypher expression.
      * @return The executable.
      */
-    private AbstractExecutableRule createExecutableFromRule(Rule rule, String cypher, Set<String> requiresConcepts) {
+    private AbstractExecutableRule createExecutableFromRule(Rule rule, String cypher, Map<String, Boolean> requiresConcepts) {
         RuleParam typeParam = rule.getParam(RuleParameter.Type.getName());
         if (typeParam == null) {
             throw new IllegalStateException("Cannot determine type of rule for " + rule);
@@ -243,7 +236,7 @@ public class JQAssistantProfileExporter extends ProfileExporter {
         } else {
             verification = new RowCountVerification();
         }
-        Set<String> requiresConcepts = getRequiresConcepts(check.getRequiresConcepts());
+        Map<String,Boolean> requiresConcepts = getRequiresConcepts(check.getRequiresConcepts());
         Report report = Report.Builder.newInstance().primaryColumn(check.getPrimaryReportColumn()).get();
         if (check instanceof ConceptTemplateRule) {
             executable = Concept.Builder.newConcept().id(id).description(description).severity(severity).executable(new CypherExecutable(cypher)).requiresConceptIds(requiresConcepts).verification(verification).report(report).get();

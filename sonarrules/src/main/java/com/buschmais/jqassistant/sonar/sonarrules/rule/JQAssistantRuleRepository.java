@@ -9,24 +9,15 @@ import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.plugins.java.Java;
 
-import com.buschmais.jqassistant.core.analysis.api.RuleException;
-import com.buschmais.jqassistant.core.analysis.api.RuleSetReader;
-import com.buschmais.jqassistant.core.analysis.api.rule.AggregationVerification;
-import com.buschmais.jqassistant.core.analysis.api.rule.Concept;
-import com.buschmais.jqassistant.core.analysis.api.rule.Constraint;
-import com.buschmais.jqassistant.core.analysis.api.rule.CypherExecutable;
-import com.buschmais.jqassistant.core.analysis.api.rule.Executable;
-import com.buschmais.jqassistant.core.analysis.api.rule.ExecutableRule;
-import com.buschmais.jqassistant.core.analysis.api.rule.RuleSet;
-import com.buschmais.jqassistant.core.analysis.api.rule.RuleSetBuilder;
-import com.buschmais.jqassistant.core.analysis.api.rule.Verification;
-import com.buschmais.jqassistant.core.analysis.api.rule.source.RuleSource;
-import com.buschmais.jqassistant.core.analysis.impl.XmlRuleSetReader;
+import com.buschmais.jqassistant.core.analysis.api.rule.*;
 import com.buschmais.jqassistant.core.plugin.api.PluginConfigurationReader;
 import com.buschmais.jqassistant.core.plugin.api.PluginRepositoryException;
 import com.buschmais.jqassistant.core.plugin.api.RulePluginRepository;
 import com.buschmais.jqassistant.core.plugin.impl.PluginConfigurationReaderImpl;
 import com.buschmais.jqassistant.core.plugin.impl.RulePluginRepositoryImpl;
+import com.buschmais.jqassistant.core.rule.api.reader.RuleSetReader;
+import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
+import com.buschmais.jqassistant.core.rule.impl.reader.XmlRuleSetReader;
 import com.buschmais.jqassistant.sonar.plugin.JQAssistant;
 import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantRuleType;
 
@@ -108,7 +99,7 @@ public final class JQAssistantRuleRepository implements RulesDefinition {
         rule.setSeverity(RulePriority.valueOf(executableRule.getSeverity().name()).name());
         rule.setMarkdownDescription(executableRule.getDescription());
         StringBuilder requiresConcepts = new StringBuilder();
-        for (String requiredConcept : executableRule.getRequiresConcepts()) {
+        for (String requiredConcept : executableRule.getRequiresConcepts().keySet()) {
             if (requiresConcepts.length() > 0) {
                 requiresConcepts.append(",");
             }
