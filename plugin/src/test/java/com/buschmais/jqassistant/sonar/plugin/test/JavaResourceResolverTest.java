@@ -37,7 +37,7 @@ public class JavaResourceResolverTest {
 	@Test
 	public void type() {
 		java.io.File javaFile = new File(JavaResourceResolverTest.class.getName().replace('.', '/').concat(".java"));
-		Iterable<InputFile> it = Collections.singletonList((InputFile)new DefaultInputFile(null, javaFile.getPath()));
+		Iterable<InputFile> it = Collections.singletonList((InputFile)new DefaultInputFile(javaFile.getPath()));
 		when(fileSystem.predicates()).thenReturn(predicates);
 		when(fileSystem.inputFiles(Matchers.any(FilePredicate.class))).thenReturn(it);
 		JavaResourceResolver resourceResolver = new JavaResourceResolver(fileSystem);

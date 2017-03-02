@@ -1,6 +1,8 @@
 package com.buschmais.jqassistant.sonar.plugin.sensor;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -11,6 +13,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
+import com.buschmais.jqassistant.core.shared.xml.JAXBUnmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
@@ -22,13 +25,7 @@ import org.sonar.api.platform.ComponentContainer;
 import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 
-import com.buschmais.jqassistant.core.report.schema.v1.ConceptType;
-import com.buschmais.jqassistant.core.report.schema.v1.ConstraintType;
-import com.buschmais.jqassistant.core.report.schema.v1.GroupType;
-import com.buschmais.jqassistant.core.report.schema.v1.JqassistantReport;
-import com.buschmais.jqassistant.core.report.schema.v1.ObjectFactory;
-import com.buschmais.jqassistant.core.report.schema.v1.RuleType;
-import com.buschmais.jqassistant.core.report.schema.v1.StatusEnumType;
+import com.buschmais.jqassistant.core.report.schema.v1.*;
 import com.buschmais.jqassistant.sonar.plugin.JQAssistant;
 import com.buschmais.jqassistant.sonar.plugin.JQAssistantConfiguration;
 
@@ -46,7 +43,7 @@ public class JQAssistantSensor implements Sensor {
 	private static String theReportFilePath = null;
 
 	private final FileSystem fileSystem;
-	private final JAXBContext reportContext;
+	private final JAXBUnmarshaller<JqassistantReport> jaxbUnmarshaller;
 	private final JQAssistantConfiguration configuration;
 	private final RuleKeyResolver ruleResolver;
 
@@ -79,7 +76,7 @@ public class JQAssistantSensor implements Sensor {
 			this.ruleResolver = ruleResolvers.get(0);
 		}
 
-		this.reportContext = JAXBContext.newInstance(ObjectFactory.class);
+		this.jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class);
 		this.conceptHandler = new IssueConceptHandler(perspectives, languageResourceResolvers);
 		this.constraintHandler = new IssueConstraintHandler(perspectives, languageResourceResolvers);
 	}
@@ -99,7 +96,7 @@ public class JQAssistantSensor implements Sensor {
 
 	@Override
 	public void analyse(Project project, SensorContext sensorContext) {
-		File reportFile = findReportFile(project, "");
+		File reportFile = findReportFile(project);
 		if (reportFile != null) {
 			LOGGER.debug("Use report found at '{}'.", reportFile.getAbsolutePath());
 			JqassistantReport report = readReport(reportFile);
@@ -121,11 +118,10 @@ public class JQAssistantSensor implements Sensor {
 			return theReport;
 		}
 		try {
-			Unmarshaller unmarshaller = reportContext.createUnmarshaller();
-			theReport = unmarshaller.unmarshal(new StreamSource(reportFile), JqassistantReport.class).getValue();
+			theReport = jaxbUnmarshaller.unmarshal(new FileInputStream(reportFile));
 			theReportFilePath = reportFile.getAbsolutePath();
 			return theReport;
-		} catch (JAXBException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
 		}
 	}
@@ -167,19 +163,20 @@ public class JQAssistantSensor implements Sensor {
 	 *
 	 * @return reportFile File object of report xml or null if not found.
 	 */
-	private File findReportFile(Project project, String pathPrefix) {
+	private File findReportFile(Project project) {
 		if(project == null) {
 			return null;
 		}
 		String configReportPath = determineConfiguredReportPath();
-		//for untouched project the file system is not available, so we have to navigate via hardcoded '../' to parent projects
+		//for untouched project the baseDir system is not available, so we have to navigate via hardcoded '../' to parent projects
 		//TODO: Is there a alternative to '../' to resolve parent project paths?
-		File reportFile = fileSystem.resolvePath(pathPrefix+configReportPath);
-		if (reportFile.exists()) {
-			return reportFile;
-		}
+		File baseDir = fileSystem.baseDir();
+        File reportFile = new File(baseDir, configReportPath);
+        if (reportFile.exists()) {
+            return reportFile;
+        }
 		if(project.isModule()) {
-			return findReportFile(project.getParent(), pathPrefix+"../");
+			return findReportFile(project.getParent());
 		}
 		return null;
 	}

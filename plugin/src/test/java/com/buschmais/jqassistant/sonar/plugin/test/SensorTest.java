@@ -83,7 +83,7 @@ public class SensorTest {
 		sensor = new JQAssistantSensor(configuration, resourcePerspectives, componentContainer, moduleFileSystem);
 		String reportFile = SensorTest.class.getResource("/jqassistant-report-no-issue.xml").getFile();
 		when(configuration.getReportPath()).thenReturn(reportFile);
-		when(moduleFileSystem.resolvePath(reportFile)).thenReturn(new File(reportFile));
+		when(moduleFileSystem.baseDir()).thenReturn(new File("/"));
 		Issuable issuable = mock(Issuable.class);
 
 		sensor.analyse(project, sensorContext);
@@ -105,7 +105,7 @@ public class SensorTest {
 		sensor = new JQAssistantSensor(configuration, resourcePerspectives, componentContainer, moduleFileSystem);
 		String reportFile = SensorTest.class.getResource("/jqassistant-report-concept-issue.xml").getFile();
 		when(configuration.getReportPath()).thenReturn(reportFile);
-		when(moduleFileSystem.resolvePath(reportFile)).thenReturn(new File(reportFile));
+		when(moduleFileSystem.baseDir()).thenReturn(new File("/"));
 		when(sensorContext.getResource(project)).thenReturn(project);
 		Issuable issuable = mock(Issuable.class);
 		Issuable.IssueBuilder issueBuilder = mock(Issuable.IssueBuilder.class);
@@ -143,7 +143,7 @@ public class SensorTest {
 		sensor = new JQAssistantSensor(configuration, resourcePerspectives, componentContainer, moduleFileSystem);
 		String reportFile = SensorTest.class.getResource("/jqassistant-report-constraint-issue.xml").getFile();
 		when(configuration.getReportPath()).thenReturn(reportFile);
-		when(moduleFileSystem.resolvePath(reportFile)).thenReturn(new File(reportFile));
+		when(moduleFileSystem.baseDir()).thenReturn(new File("/"));
 		when(sensorContext.getResource(javaResource)).thenReturn(mock(Resource.class));
 		Issuable issuable = mock(Issuable.class);
 		Issuable.IssueBuilder issueBuilder = mock(Issuable.IssueBuilder.class);
