@@ -38,8 +38,7 @@ public class JQAssistantSensor implements Sensor {
     // of new instance of sensor for a project
     // TODO: This works only if we have a single report, also in multi project
     // environment
-    private static JqassistantReport theReport = null;
-    private static String theReportFilePath = null;
+    private static String reportFilePath = null;
 
     private final FileSystem fileSystem;
     private final JAXBUnmarshaller<JqassistantReport> jaxbUnmarshaller;
@@ -95,7 +94,9 @@ public class JQAssistantSensor implements Sensor {
         if (reportFile != null) {
             LOGGER.debug("Use report found at '{}'.", reportFile.getAbsolutePath());
             JqassistantReport report = readReport(reportFile);
-            evaluateReport(project, sensorContext, report);
+            if (report != null) {
+                evaluate(project, sensorContext, report.getGroupOrConceptOrConstraint());
+            }
         } else {
             LOGGER.info("No report found at {} for project {}... (do nothing).", determineConfiguredReportPath(), project.getName());
         }
@@ -107,42 +108,44 @@ public class JQAssistantSensor implements Sensor {
     }
 
     private JqassistantReport readReport(File reportFile) {
-        if (theReport != null && reportFile.getAbsolutePath().equals(theReportFilePath)) {
-            return theReport;
+        if (reportFile.getAbsolutePath().equals(reportFilePath)) {
+            return null;
         }
         try {
-            theReport = jaxbUnmarshaller.unmarshal(new FileInputStream(reportFile));
-            theReportFilePath = reportFile.getAbsolutePath();
-            return theReport;
+            JqassistantReport report = jaxbUnmarshaller.unmarshal(new FileInputStream(reportFile));
+            reportFilePath = reportFile.getAbsolutePath();
+            return report;
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
         }
     }
 
-    private void evaluateReport(Project project, SensorContext sensorContext, JqassistantReport report) {
-        for (GroupType groupType : report.getGroup()) {
-            LOGGER.info("Processing group '{}'", groupType.getId());
-            for (Object rule : groupType.getGroupOrConceptOrConstraint()) {
-                if (rule instanceof RuleType) {
-                    RuleType ruleType = (RuleType) rule;
-                    if (!StatusEnumType.FAILURE.equals(ruleType.getStatus())) {
+    private void evaluate(Project project, SensorContext sensorContext, List<ReferencableRuleType> rules) {
+        for (ReferencableRuleType rule : rules) {
+            if (rule instanceof GroupType) {
+                GroupType groupType = (GroupType) rule;
+                LOGGER.info("Processing group '{}'", groupType.getId());
+                evaluate(project, sensorContext, groupType.getGroupOrConceptOrConstraint());
+            }
+            if (rule instanceof ExecutableRuleType) {
+                ExecutableRuleType ruleType = (ExecutableRuleType) rule;
+                if (!StatusEnumType.FAILURE.equals(ruleType.getStatus())) {
+                    continue;
+                }
+                final String id = ruleType.getId();
+                final RuleKey ruleKey = ruleResolver.resolve(project,
+                        (ruleType instanceof ConceptType) ? JQAssistantRuleType.Concept : JQAssistantRuleType.Constraint, id);
+                if (ruleKey == null) {
+                    LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", id);
+                    continue;
+                }
+                if (ruleType instanceof ConceptType) {
+                    if (configuration.suppressConceptFailures()) {
                         continue;
                     }
-                    final String id = ruleType.getId();
-                    final RuleKey ruleKey = ruleResolver.resolve(project,
-                            (ruleType instanceof ConceptType) ? JQAssistantRuleType.Concept : JQAssistantRuleType.Constraint, id);
-                    if (ruleKey == null) {
-                        LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", id);
-                        continue;
-                    }
-                    if (ruleType instanceof ConceptType) {
-                        if (configuration.suppressConceptFailures()) {
-                            continue;
-                        }
-                        conceptHandler.process(project, sensorContext, (ConceptType) ruleType, ruleKey);
-                    } else if (ruleType instanceof ConstraintType) {
-                        constraintHandler.process(project, sensorContext, (ConstraintType) ruleType, ruleKey);
-                    }
+                    conceptHandler.process(project, sensorContext, (ConceptType) ruleType, ruleKey);
+                } else if (ruleType instanceof ConstraintType) {
+                    constraintHandler.process(project, sensorContext, (ConstraintType) ruleType, ruleKey);
                 }
             }
         }
