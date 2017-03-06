@@ -8,12 +8,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
 
-import com.buschmais.jqassistant.core.shared.xml.JAXBUnmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
@@ -26,6 +22,7 @@ import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 
 import com.buschmais.jqassistant.core.report.schema.v1.*;
+import com.buschmais.jqassistant.core.shared.xml.JAXBUnmarshaller;
 import com.buschmais.jqassistant.sonar.plugin.JQAssistant;
 import com.buschmais.jqassistant.sonar.plugin.JQAssistantConfiguration;
 
@@ -35,161 +32,158 @@ import com.buschmais.jqassistant.sonar.plugin.JQAssistantConfiguration;
 @Phase(name = Phase.Name.DEFAULT)
 public class JQAssistantSensor implements Sensor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
 
-	//avoid multiple loading of report file (maybe a huge file!) while creation of new instance of sensor for a project
-	//TODO: This works only if we have a single report, also in multi project environment
-	private static JqassistantReport theReport = null;
-	private static String theReportFilePath = null;
+    // avoid multiple loading of report file (maybe a huge file!) while creation
+    // of new instance of sensor for a project
+    // TODO: This works only if we have a single report, also in multi project
+    // environment
+    private static JqassistantReport theReport = null;
+    private static String theReportFilePath = null;
 
-	private final FileSystem fileSystem;
-	private final JAXBUnmarshaller<JqassistantReport> jaxbUnmarshaller;
-	private final JQAssistantConfiguration configuration;
-	private final RuleKeyResolver ruleResolver;
+    private final FileSystem fileSystem;
+    private final JAXBUnmarshaller<JqassistantReport> jaxbUnmarshaller;
+    private final JQAssistantConfiguration configuration;
+    private final RuleKeyResolver ruleResolver;
 
-	private final IssueConceptHandler conceptHandler;
-	private final IssueConstraintHandler constraintHandler;
+    private final IssueConceptHandler conceptHandler;
+    private final IssueConstraintHandler constraintHandler;
 
-	public JQAssistantSensor(JQAssistantConfiguration configuration, ResourcePerspectives perspectives, ComponentContainer componentContainerc,
-			FileSystem moduleFileSystem) throws JAXBException {
-		this.configuration = configuration;
-		this.fileSystem = moduleFileSystem;
-		Map<String, LanguageResourceResolver> languageResourceResolvers = new HashMap<>();
-		for (LanguageResourceResolver resolver : componentContainerc.getComponentsByType(LanguageResourceResolver.class)) {
-			languageResourceResolvers.put(resolver.getLanguage().toLowerCase(Locale.ENGLISH), resolver);
-		}
-		List<RuleKeyResolver> ruleResolvers = componentContainerc.getComponentsByType(RuleKeyResolver.class);
-		if(ruleResolvers.isEmpty())
-		{
-			this.ruleResolver = null;
-			LOGGER.error("{} will not work without additional plugin providing a {} implementation.", JQAssistant.NAME, RuleKeyResolver.class.getSimpleName());
-		}
-		else if(ruleResolvers.size() > 1)
-		{
-			this.ruleResolver = null;
-			//this situation should never happen, because the both plugins are using the same repository name preventing the the start of SonarQ from the clash
-			LOGGER.error("Found more than one {} implementation. Uninstall one of the providing plugins ('sonarrules' or 'projectrules')", RuleKeyResolver.class.getSimpleName());
-		}
-		else
-		{
-			//only one present, perfect
-			this.ruleResolver = ruleResolvers.get(0);
-		}
+    public JQAssistantSensor(JQAssistantConfiguration configuration, ResourcePerspectives perspectives, ComponentContainer componentContainerc,
+            FileSystem moduleFileSystem) throws JAXBException {
+        this.configuration = configuration;
+        this.fileSystem = moduleFileSystem;
+        Map<String, LanguageResourceResolver> languageResourceResolvers = new HashMap<>();
+        for (LanguageResourceResolver resolver : componentContainerc.getComponentsByType(LanguageResourceResolver.class)) {
+            languageResourceResolvers.put(resolver.getLanguage().toLowerCase(Locale.ENGLISH), resolver);
+        }
+        List<RuleKeyResolver> ruleResolvers = componentContainerc.getComponentsByType(RuleKeyResolver.class);
+        if (ruleResolvers.isEmpty()) {
+            this.ruleResolver = null;
+            LOGGER.error("{} will not work without additional plugin providing a {} implementation.", JQAssistant.NAME, RuleKeyResolver.class.getSimpleName());
+        } else if (ruleResolvers.size() > 1) {
+            this.ruleResolver = null;
+            // this situation should never happen, because the both plugins are
+            // using the same repository name preventing the the start of SonarQ
+            // from the clash
+            LOGGER.error("Found more than one {} implementation. Uninstall one of the providing plugins ('sonarrules' or 'projectrules')",
+                    RuleKeyResolver.class.getSimpleName());
+        } else {
+            // only one present, perfect
+            this.ruleResolver = ruleResolvers.get(0);
+        }
 
-		this.jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class);
-		this.conceptHandler = new IssueConceptHandler(perspectives, languageResourceResolvers);
-		this.constraintHandler = new IssueConstraintHandler(perspectives, languageResourceResolvers);
-	}
+        this.jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class);
+        this.conceptHandler = new IssueConceptHandler(perspectives, languageResourceResolvers);
+        this.constraintHandler = new IssueConstraintHandler(perspectives, languageResourceResolvers);
+    }
 
-	@Override
-	public boolean shouldExecuteOnProject(Project project) {
-		boolean disabled = configuration.isSensorDisabled();
-		if(disabled)
-		{
-			LOGGER.info("{} is disabled on project {}", JQAssistant.NAME, project.getName());
-		}
-		else if(ruleResolver == null){
-			disabled = true;
-		}
-		return !disabled;
-	}
+    @Override
+    public boolean shouldExecuteOnProject(Project project) {
+        boolean disabled = configuration.isSensorDisabled();
+        if (disabled) {
+            LOGGER.info("{} is disabled on project {}", JQAssistant.NAME, project.getName());
+        } else if (ruleResolver == null) {
+            disabled = true;
+        }
+        return !disabled;
+    }
 
-	@Override
-	public void analyse(Project project, SensorContext sensorContext) {
-		File reportFile = findReportFile(project);
-		if (reportFile != null) {
-			LOGGER.debug("Use report found at '{}'.", reportFile.getAbsolutePath());
-			JqassistantReport report = readReport(reportFile);
-			evaluateReport(project, sensorContext, report);
-		}
-		else
-		{
-			LOGGER.info("No report found at {} for project {}... (do nothing).", determineConfiguredReportPath(), project.getName());
-		}
-	}
+    @Override
+    public void analyse(Project project, SensorContext sensorContext) {
+        File reportFile = findReportFile(project);
+        if (reportFile != null) {
+            LOGGER.debug("Use report found at '{}'.", reportFile.getAbsolutePath());
+            JqassistantReport report = readReport(reportFile);
+            evaluateReport(project, sensorContext, report);
+        } else {
+            LOGGER.info("No report found at {} for project {}... (do nothing).", determineConfiguredReportPath(), project.getName());
+        }
+    }
 
-	@Override
-	public String toString() {
-		return JQAssistant.NAME;
-	}
+    @Override
+    public String toString() {
+        return JQAssistant.NAME;
+    }
 
-	private JqassistantReport readReport(File reportFile) {
-		if(theReport != null && reportFile.getAbsolutePath().equals(theReportFilePath)) {
-			return theReport;
-		}
-		try {
-			theReport = jaxbUnmarshaller.unmarshal(new FileInputStream(reportFile));
-			theReportFilePath = reportFile.getAbsolutePath();
-			return theReport;
-		} catch (IOException e) {
-			throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
-		}
-	}
+    private JqassistantReport readReport(File reportFile) {
+        if (theReport != null && reportFile.getAbsolutePath().equals(theReportFilePath)) {
+            return theReport;
+        }
+        try {
+            theReport = jaxbUnmarshaller.unmarshal(new FileInputStream(reportFile));
+            theReportFilePath = reportFile.getAbsolutePath();
+            return theReport;
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
+        }
+    }
 
-	private void evaluateReport(Project project, SensorContext sensorContext, JqassistantReport report) {
-		for (GroupType groupType : report.getGroup()) {
-			LOGGER.info("Processing group '{}'", groupType.getId());
-			for (RuleType ruleType : groupType.getConceptOrConstraint()) {
-				if (!StatusEnumType.FAILURE.equals(ruleType.getStatus())) {
-					continue;
-				}
-				final String id = ruleType.getId();
-				final RuleKey ruleKey = ruleResolver.resolve(project, (ruleType instanceof ConceptType)? JQAssistantRuleType.Concept : JQAssistantRuleType.Constraint, id);
-				if(ruleKey == null)
-				{
-					LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", id);
-					continue;
-				}
-				if (ruleType instanceof ConceptType) {
-					if(configuration.suppressConceptFailures()) {
-						continue;
-					}
-					conceptHandler.process(project, sensorContext, (ConceptType) ruleType, ruleKey);
-				} else if (ruleType instanceof ConstraintType) {
-					constraintHandler.process(project, sensorContext,(ConstraintType) ruleType, ruleKey);
-				}
-			}
-		}
-	}
+    private void evaluateReport(Project project, SensorContext sensorContext, JqassistantReport report) {
+        for (GroupType groupType : report.getGroup()) {
+            LOGGER.info("Processing group '{}'", groupType.getId());
+            for (Object rule : groupType.getGroupOrConceptOrConstraint()) {
+                if (rule instanceof RuleType) {
+                    RuleType ruleType = (RuleType) rule;
+                    if (!StatusEnumType.FAILURE.equals(ruleType.getStatus())) {
+                        continue;
+                    }
+                    final String id = ruleType.getId();
+                    final RuleKey ruleKey = ruleResolver.resolve(project,
+                            (ruleType instanceof ConceptType) ? JQAssistantRuleType.Concept : JQAssistantRuleType.Constraint, id);
+                    if (ruleKey == null) {
+                        LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", id);
+                        continue;
+                    }
+                    if (ruleType instanceof ConceptType) {
+                        if (configuration.suppressConceptFailures()) {
+                            continue;
+                        }
+                        conceptHandler.process(project, sensorContext, (ConceptType) ruleType, ruleKey);
+                    } else if (ruleType instanceof ConstraintType) {
+                        constraintHandler.process(project, sensorContext, (ConstraintType) ruleType, ruleKey);
+                    }
+                }
+            }
+        }
+    }
 
-	/**
-	 * <ol>
-	 * <li>Look for report file in current project dir</li>
-	 * <li>if not found go to parent and look again (recursive up to root project)</li>
-	 * </ol>
-	 * Return the report xml file or null if not found. Checks whether
-	 * {@link JQAssistant#SETTINGS_KEY_REPORT_PATH} is set or not and looks up
-	 * the passed path or the default build directory.
-	 *
-	 * @return reportFile File object of report xml or null if not found.
-	 */
-	private File findReportFile(Project project) {
-		if(project == null) {
-			return null;
-		}
-		String configReportPath = determineConfiguredReportPath();
-		//for untouched project the baseDir system is not available, so we have to navigate via hardcoded '../' to parent projects
-		//TODO: Is there a alternative to '../' to resolve parent project paths?
-		File baseDir = fileSystem.baseDir();
+    /**
+     * <ol>
+     * <li>Look for report file in current project dir</li>
+     * <li>if not found go to parent and look again (recursive up to root
+     * project)</li>
+     * </ol>
+     * Return the report xml file or null if not found. Checks whether
+     * {@link JQAssistant#SETTINGS_KEY_REPORT_PATH} is set or not and looks up
+     * the passed path or the default build directory.
+     *
+     * @return reportFile File object of report xml or null if not found.
+     */
+    private File findReportFile(Project project) {
+        if (project == null) {
+            return null;
+        }
+        String configReportPath = determineConfiguredReportPath();
+        File baseDir = fileSystem.baseDir();
         File reportFile = new File(baseDir, configReportPath);
         if (reportFile.exists()) {
             return reportFile;
         }
-		if(project.isModule()) {
-			return findReportFile(project.getParent());
-		}
-		return null;
-	}
+        if (project.isModule()) {
+            return findReportFile(project.getParent());
+        }
+        return null;
+    }
 
-	/**
-	 * The path is relative or absolute.
-	 */
-	private String determineConfiguredReportPath()
-	{
-		String configReportPath = configuration.getReportPath();
-		if(configReportPath == null || configReportPath.isEmpty()) {
-			configReportPath = JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH;
-		}
-		return configReportPath;
-	}
+    /**
+     * The path is relative or absolute.
+     */
+    private String determineConfiguredReportPath() {
+        String configReportPath = configuration.getReportPath();
+        if (configReportPath == null || configReportPath.isEmpty()) {
+            configReportPath = JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH;
+        }
+        return configReportPath;
+    }
 }
