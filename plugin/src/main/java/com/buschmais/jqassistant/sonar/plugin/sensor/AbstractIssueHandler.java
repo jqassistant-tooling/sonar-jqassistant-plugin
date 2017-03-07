@@ -14,22 +14,14 @@ import org.sonar.api.resources.Resource;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.rule.Severity;
 
-import com.buschmais.jqassistant.core.report.schema.v1.ColumnHeaderType;
-import com.buschmais.jqassistant.core.report.schema.v1.ColumnType;
-import com.buschmais.jqassistant.core.report.schema.v1.ColumnsHeaderType;
-import com.buschmais.jqassistant.core.report.schema.v1.ElementType;
-import com.buschmais.jqassistant.core.report.schema.v1.ResultType;
-import com.buschmais.jqassistant.core.report.schema.v1.RowType;
-import com.buschmais.jqassistant.core.report.schema.v1.RuleType;
-import com.buschmais.jqassistant.core.report.schema.v1.SeverityType;
-import com.buschmais.jqassistant.core.report.schema.v1.SourceType;
+import com.buschmais.jqassistant.core.report.schema.v1.*;
 
 /**
  * Base class to produce a number of violations defined by instance of {@link T}.
  * @author rzozmann
  *
  */
-abstract class AbstractIssueHandler<T extends RuleType> {
+abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
 
@@ -45,7 +37,7 @@ abstract class AbstractIssueHandler<T extends RuleType> {
 
 	/**
 	 *
-	 * @return The current project, valid inside {@link #process(Project, SensorContext, RuleType, RuleKey)}.
+	 * @return The current project, valid inside {@link #process(Project, SensorContext, ExecutableRuleType, RuleKey)}.
 	 */
 	protected Project getProject() {
 		return project;
