@@ -3,9 +3,6 @@ package com.buschmais.jqassistant.sonar.sonarrules.profile;
 import java.io.Writer;
 import java.util.*;
 
-import com.buschmais.jqassistant.core.analysis.api.rule.*;
-import com.buschmais.jqassistant.core.rule.api.writer.RuleSetWriter;
-import com.buschmais.jqassistant.core.rule.impl.writer.RuleSetWriterImpl;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +16,13 @@ import org.sonar.api.rules.RuleFinder;
 import org.sonar.api.rules.RuleParam;
 import org.sonar.plugins.java.Java;
 
+import com.buschmais.jqassistant.core.analysis.api.rule.*;
+import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
+import com.buschmais.jqassistant.core.rule.api.writer.RuleSetWriter;
+import com.buschmais.jqassistant.core.rule.impl.writer.RuleSetWriterImpl;
 import com.buschmais.jqassistant.sonar.plugin.JQAssistant;
 import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantRuleType;
-import com.buschmais.jqassistant.sonar.sonarrules.rule.AbstractTemplateRule;
-import com.buschmais.jqassistant.sonar.sonarrules.rule.ConceptTemplateRule;
-import com.buschmais.jqassistant.sonar.sonarrules.rule.ConstraintTemplateRule;
-import com.buschmais.jqassistant.sonar.sonarrules.rule.JQAssistantRuleRepository;
-import com.buschmais.jqassistant.sonar.sonarrules.rule.RuleParameter;
+import com.buschmais.jqassistant.sonar.sonarrules.rule.*;
 
 /**
  * A {@link ProfileExporter} implementation which provides rules as permalink for direct usage by the jQAssistant analyzer.
@@ -84,7 +81,7 @@ public class JQAssistantProfileExporter extends ProfileExporter {
             Group group = Group.Builder.newGroup().id(profile.getName()).conceptIds(conceptSeverities).constraintIds(constraintSeverities).get();
             builder.addGroup(group);
             RuleSet ruleSet = builder.getRuleSet();
-            RuleSetWriter ruleSetWriter = new RuleSetWriterImpl();
+            RuleSetWriter ruleSetWriter = new RuleSetWriterImpl(RuleConfiguration.builder().build());
             LOGGER.debug("Exporting rule set " + ruleSet.toString());
             ruleSetWriter.write(ruleSet, writer);
         } catch (RuleException e) {

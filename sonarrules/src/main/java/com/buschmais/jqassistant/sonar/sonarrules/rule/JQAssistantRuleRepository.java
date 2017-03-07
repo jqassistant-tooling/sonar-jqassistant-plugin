@@ -15,6 +15,7 @@ import com.buschmais.jqassistant.core.plugin.api.PluginRepositoryException;
 import com.buschmais.jqassistant.core.plugin.api.RulePluginRepository;
 import com.buschmais.jqassistant.core.plugin.impl.PluginConfigurationReaderImpl;
 import com.buschmais.jqassistant.core.plugin.impl.RulePluginRepositoryImpl;
+import com.buschmais.jqassistant.core.rule.api.reader.RuleConfiguration;
 import com.buschmais.jqassistant.core.rule.api.reader.RuleSetReader;
 import com.buschmais.jqassistant.core.rule.api.source.RuleSource;
 import com.buschmais.jqassistant.core.rule.impl.reader.XmlRuleSetReader;
@@ -64,7 +65,7 @@ public final class JQAssistantRuleRepository implements RulesDefinition {
         }
         List<RuleSource> ruleSources = rulePluginRepository.getRuleSources();
         RuleSetBuilder ruleSetBuilder = RuleSetBuilder.newInstance();
-        RuleSetReader ruleSetReader = new XmlRuleSetReader();
+        RuleSetReader ruleSetReader = new XmlRuleSetReader(RuleConfiguration.builder().build());
         try {
             ruleSetReader.read(ruleSources, ruleSetBuilder);
         } catch (RuleException e) {
