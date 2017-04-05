@@ -3,6 +3,7 @@ package com.buschmais.jqassistant.sonar.sonarrules.rule;
 import java.util.List;
 import java.util.Locale;
 
+import com.buschmais.jqassistant.core.rule.api.reader.AggregationVerification;
 import org.sonar.api.rules.RulePriority;
 import org.sonar.api.server.rule.RuleParamType;
 import org.sonar.api.server.rule.RulesDefinition;
@@ -40,7 +41,7 @@ public final class JQAssistantRuleRepository implements RulesDefinition {
     public void define(Context context) {
     	NewRepository newRepository = context.createRepository(JQAssistant.KEY, Java.KEY);
     	newRepository.setName(JQAssistant.NAME);
-    	
+
     	//load template rules at first, so we can mark all now existing rules in repository as 'template'
     	RulesDefinitionAnnotationLoader annotationRuleParser = new RulesDefinitionAnnotationLoader();
     	annotationRuleParser.load(newRepository, RULE_CLASSES);
@@ -48,12 +49,12 @@ public final class JQAssistantRuleRepository implements RulesDefinition {
     	{
     		rule.setTemplate(true);
     	}
-    	
+
     	createRules(newRepository);
-    	
+
     	newRepository.done();
     }
-    
+
     public void createRules(NewRepository newRepository) {
         PluginConfigurationReader pluginConfigurationReader = new PluginConfigurationReaderImpl(JQAssistantRuleRepository.class
                 .getClassLoader());
@@ -84,7 +85,7 @@ public final class JQAssistantRuleRepository implements RulesDefinition {
 
     /**
      * Create a rule from an executableRule.
-     * 
+     *
      * @param executableRule
      *            The executableRule.
      * @param ruleType
@@ -92,7 +93,7 @@ public final class JQAssistantRuleRepository implements RulesDefinition {
      * @return The rule.
      */
     private void createRule(NewRepository newRepository, ExecutableRule executableRule, JQAssistantRuleType ruleType) {
-    	
+
     	NewRule rule = newRepository.createRule(executableRule.getId());
     	rule.setName(executableRule.getId());
     	rule.setInternalKey(executableRule.getId());
@@ -107,7 +108,7 @@ public final class JQAssistantRuleRepository implements RulesDefinition {
             requiresConcepts.append(requiredConcept);
         }
         //FIXME parameters are changable by the user activating the rule for an project; so It's not safe to parse the parameter in the exporter!
-        createRuleParameter(rule, RuleParameter.Type, ruleType.name(), RuleParamType.STRING);        
+        createRuleParameter(rule, RuleParameter.Type, ruleType.name(), RuleParamType.STRING);
         rule.addTags(ruleType.name().toLowerCase(Locale.ENGLISH));
         if(requiresConcepts.length() > 0)
         {
@@ -126,7 +127,7 @@ public final class JQAssistantRuleRepository implements RulesDefinition {
 
     /**
      * Create a rule parameter.
-     * 
+     *
      * @param rule
      *            The rule.
      * @param ruleParameterDefinition

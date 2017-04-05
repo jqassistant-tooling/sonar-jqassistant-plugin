@@ -3,6 +3,8 @@ package com.buschmais.jqassistant.sonar.sonarrules.profile;
 import java.io.Writer;
 import java.util.*;
 
+import com.buschmais.jqassistant.core.rule.api.reader.AggregationVerification;
+import com.buschmais.jqassistant.core.rule.api.reader.RowCountVerification;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,9 +196,9 @@ public class JQAssistantProfileExporter extends ProfileExporter {
         Verification verification;
         if (aggregation) {
             RuleParam aggregationColumnParam = rule.getParam(RuleParameter.AggregationColumn.getName());
-            verification = new AggregationVerification(aggregationColumnParam != null ? aggregationColumnParam.getDefaultValue() : null);
+            verification = AggregationVerification.builder().column(aggregationColumnParam != null ? aggregationColumnParam.getDefaultValue() : null).build();
         } else {
-            verification = new RowCountVerification();
+            verification = RowCountVerification.builder().build();
         }
         RuleParam primaryReportColumnParam = rule.getParam(RuleParameter.PrimaryReportColumn.getName());
         String primaryReportColumn = primaryReportColumnParam != null ? primaryReportColumnParam.getDefaultValue() : null;
@@ -228,10 +230,11 @@ public class JQAssistantProfileExporter extends ProfileExporter {
         Severity severity = Severity.valueOf(activeRule.getSeverity().name());
         String cypher = check.getCypher();
         Verification verification;
-        if (check.isAggregation()) {
-            verification = new AggregationVerification(check.getAggregationColumn());
+        boolean aggregation = check.isAggregation();
+        if (aggregation) {
+            verification = AggregationVerification.builder().column(check.getAggregationColumn()).build();
         } else {
-            verification = new RowCountVerification();
+            verification = RowCountVerification.builder().build();
         }
         Map<String,Boolean> requiresConcepts = getRequiresConcepts(check.getRequiresConcepts());
         Report report = Report.Builder.newInstance().primaryColumn(check.getPrimaryReportColumn()).get();
