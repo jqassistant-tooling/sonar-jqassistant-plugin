@@ -32,10 +32,4 @@ public final class JQAssistant {
 	 */
 	public static final String SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH = "target/jqassistant/jqassistant-report.xml";
 
-	/**
-	 * Maven properties key to deactivate the creation of issues for concepts
-	 * that do not return a result. Default is true.
-	 */
-	public static final String SETTINGS_KEY_CREATE_EMPTY_CONCEPT_ISSUE = "sonar.jqassistant.createEmptyConceptIssue";
-
 }

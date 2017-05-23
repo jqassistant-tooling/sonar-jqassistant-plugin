@@ -4,10 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.util.Arrays;
@@ -81,9 +78,9 @@ public class SensorTest {
 		when(keyResolver.resolve(any(Project.class), any(JQAssistantRuleType.class), anyString())).thenReturn(constraint.ruleKey());
 		when(componentContainer.getComponentsByType(RuleKeyResolver.class)).thenReturn(Arrays.asList(keyResolver));
 		sensor = new JQAssistantSensor(configuration, resourcePerspectives, componentContainer, moduleFileSystem);
-		String reportFile = SensorTest.class.getResource("/jqassistant-report-no-issue.xml").getFile();
+		String reportFile = "jqassistant-report-no-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
-		when(moduleFileSystem.baseDir()).thenReturn(new File("/"));
+        when(moduleFileSystem.baseDir()).thenReturn(new File(SensorTest.class.getResource("/").getFile()));
 		Issuable issuable = mock(Issuable.class);
 
 		sensor.analyse(project, sensorContext);
@@ -103,9 +100,9 @@ public class SensorTest {
 		when(keyResolver.resolve(any(Project.class), any(JQAssistantRuleType.class), anyString())).thenReturn(rule.ruleKey());
 		when(componentContainer.getComponentsByType(RuleKeyResolver.class)).thenReturn(Arrays.asList(keyResolver));
 		sensor = new JQAssistantSensor(configuration, resourcePerspectives, componentContainer, moduleFileSystem);
-		String reportFile = SensorTest.class.getResource("/jqassistant-report-concept-issue.xml").getFile();
+		String reportFile ="jqassistant-report-concept-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
-		when(moduleFileSystem.baseDir()).thenReturn(new File("/"));
+        when(moduleFileSystem.baseDir()).thenReturn(new File(SensorTest.class.getResource("/").getFile()));
 		when(sensorContext.getResource(project)).thenReturn(project);
 		Issuable issuable = mock(Issuable.class);
 		Issuable.IssueBuilder issueBuilder = mock(Issuable.IssueBuilder.class);
@@ -141,9 +138,9 @@ public class SensorTest {
 		when(keyResolver.resolve(any(Project.class), any(JQAssistantRuleType.class), anyString())).thenReturn(rule.ruleKey());
 		when(componentContainer.getComponentsByType(RuleKeyResolver.class)).thenReturn(Arrays.asList(keyResolver));
 		sensor = new JQAssistantSensor(configuration, resourcePerspectives, componentContainer, moduleFileSystem);
-		String reportFile = SensorTest.class.getResource("/jqassistant-report-constraint-issue.xml").getFile();
+		String reportFile = "jqassistant-report-constraint-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
-		when(moduleFileSystem.baseDir()).thenReturn(new File("/"));
+        when(moduleFileSystem.baseDir()).thenReturn(new File(SensorTest.class.getResource("/").getFile()));
 		when(sensorContext.getResource(javaResource)).thenReturn(mock(Resource.class));
 		Issuable issuable = mock(Issuable.class);
 		Issuable.IssueBuilder issueBuilder = mock(Issuable.IssueBuilder.class);
