@@ -5,7 +5,9 @@ import java.util.List;
 import org.sonar.api.SonarPlugin;
 
 import com.buschmais.jqassistant.sonar.plugin.language.JavaResourceResolver;
+import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantRulesRepository;
 import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantSensor;
+import com.buschmais.jqassistant.sonar.plugin.sensor.RuleKeyResolver;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -15,7 +17,7 @@ public class JQAssistantPlugin extends SonarPlugin {
 
     /**
      * Return the plugin extensions.
-     * 
+     *
      * @return The plugin extensions.
      */
     @SuppressWarnings("rawtypes")
@@ -25,6 +27,8 @@ public class JQAssistantPlugin extends SonarPlugin {
         builder.add(JavaResourceResolver.class);
         builder.add(JQAssistantConfiguration.class);
         builder.addAll(JQAssistantConfiguration.getPropertyDefinitions());
+        builder.add(RuleKeyResolver.class);
+        builder.add(JQAssistantRulesRepository.class);
         return builder.build();
     }
 }

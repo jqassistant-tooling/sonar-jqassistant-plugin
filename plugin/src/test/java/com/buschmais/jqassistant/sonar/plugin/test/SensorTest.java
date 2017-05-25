@@ -75,7 +75,7 @@ public class SensorTest {
 		when(rulesProfile.getActiveRulesByRepository(JQAssistant.KEY)).thenReturn(Arrays.asList(activeConceptRule, activeConstraintRule));
 		when(componentContainer.getComponentsByType(LanguageResourceResolver.class)).thenReturn(Collections.<LanguageResourceResolver> emptyList());
 		RuleKeyResolver keyResolver = mock(RuleKeyResolver.class);
-		when(keyResolver.resolve(any(Project.class), any(JQAssistantRuleType.class), anyString())).thenReturn(constraint.ruleKey());
+		when(keyResolver.resolve(any(JQAssistantRuleType.class))).thenReturn(constraint.ruleKey());
 		when(componentContainer.getComponentsByType(RuleKeyResolver.class)).thenReturn(Arrays.asList(keyResolver));
 		sensor = new JQAssistantSensor(configuration, resourcePerspectives, componentContainer, moduleFileSystem);
 		String reportFile = "jqassistant-report-no-issue.xml";
@@ -97,8 +97,8 @@ public class SensorTest {
 		when(rulesProfile.getActiveRulesByRepository(JQAssistant.KEY)).thenReturn(Arrays.asList(activeRule));
 		when(componentContainer.getComponentsByType(LanguageResourceResolver.class)).thenReturn(Collections.<LanguageResourceResolver> emptyList());
 		RuleKeyResolver keyResolver = mock(RuleKeyResolver.class);
-		when(keyResolver.resolve(any(Project.class), any(JQAssistantRuleType.class), anyString())).thenReturn(rule.ruleKey());
-		when(componentContainer.getComponentsByType(RuleKeyResolver.class)).thenReturn(Arrays.asList(keyResolver));
+		when(keyResolver.resolve(any(JQAssistantRuleType.class))).thenReturn(rule.ruleKey());
+		when(componentContainer.getComponentByType(RuleKeyResolver.class)).thenReturn(keyResolver);
 		sensor = new JQAssistantSensor(configuration, resourcePerspectives, componentContainer, moduleFileSystem);
 		String reportFile ="jqassistant-report-concept-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
@@ -135,8 +135,8 @@ public class SensorTest {
 				javaResource);
 		when(componentContainer.getComponentsByType(LanguageResourceResolver.class)).thenReturn(Arrays.asList(resourceResolver));
 		RuleKeyResolver keyResolver = mock(RuleKeyResolver.class);
-		when(keyResolver.resolve(any(Project.class), any(JQAssistantRuleType.class), anyString())).thenReturn(rule.ruleKey());
-		when(componentContainer.getComponentsByType(RuleKeyResolver.class)).thenReturn(Arrays.asList(keyResolver));
+		when(keyResolver.resolve(any(JQAssistantRuleType.class))).thenReturn(rule.ruleKey());
+		when(componentContainer.getComponentByType(RuleKeyResolver.class)).thenReturn(keyResolver);
 		sensor = new JQAssistantSensor(configuration, resourcePerspectives, componentContainer, moduleFileSystem);
 		String reportFile = "jqassistant-report-constraint-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);

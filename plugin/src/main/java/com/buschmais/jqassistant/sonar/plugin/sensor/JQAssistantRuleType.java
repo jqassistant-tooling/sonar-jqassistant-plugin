@@ -5,5 +5,18 @@ package com.buschmais.jqassistant.sonar.plugin.sensor;
  */
 public enum JQAssistantRuleType {
 
-    Concept, Constraint;
+    Concept {
+        @Override
+        public String getKey() {
+            return JQAssistantRulesRepository.INVALID_CONCEPT_KEY;
+        }
+    },
+    Constraint {
+        @Override
+        public String getKey() {
+            return JQAssistantRulesRepository.CONSTRAINT_VIOLATION_KEY;
+        }
+    };
+
+    public abstract String getKey();
 }

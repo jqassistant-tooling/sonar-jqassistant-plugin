@@ -10,7 +10,9 @@ import org.junit.Test;
 import com.buschmais.jqassistant.sonar.plugin.JQAssistantConfiguration;
 import com.buschmais.jqassistant.sonar.plugin.JQAssistantPlugin;
 import com.buschmais.jqassistant.sonar.plugin.language.JavaResourceResolver;
+import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantRulesRepository;
 import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantSensor;
+import com.buschmais.jqassistant.sonar.plugin.sensor.RuleKeyResolver;
 
 public class PluginTest {
 
@@ -21,5 +23,7 @@ public class PluginTest {
         assertThat(extensions.contains(JQAssistantConfiguration.class), equalTo(true));
         assertThat(extensions.contains(JQAssistantSensor.class), equalTo(true));
         assertThat(extensions.contains(JavaResourceResolver.class), equalTo(true));
+        assertThat(extensions.contains(RuleKeyResolver.class), equalTo(true));
+        assertThat(extensions.contains(JQAssistantRulesRepository.class), equalTo(true));
     }
 }

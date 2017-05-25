@@ -56,22 +56,7 @@ public class JQAssistantSensor implements Sensor {
         for (LanguageResourceResolver resolver : componentContainerc.getComponentsByType(LanguageResourceResolver.class)) {
             languageResourceResolvers.put(resolver.getLanguage().toLowerCase(Locale.ENGLISH), resolver);
         }
-        List<RuleKeyResolver> ruleResolvers = componentContainerc.getComponentsByType(RuleKeyResolver.class);
-        if (ruleResolvers.isEmpty()) {
-            this.ruleResolver = null;
-            LOGGER.error("{} will not work without additional plugin providing a {} implementation.", JQAssistant.NAME, RuleKeyResolver.class.getSimpleName());
-        } else if (ruleResolvers.size() > 1) {
-            this.ruleResolver = null;
-            // this situation should never happen, because the both plugins are
-            // using the same repository name preventing the the start of SonarQ
-            // from the clash
-            LOGGER.error("Found more than one {} implementation. Uninstall one of the providing plugins ('sonarrules' or 'projectrules')",
-                    RuleKeyResolver.class.getSimpleName());
-        } else {
-            // only one present, perfect
-            this.ruleResolver = ruleResolvers.get(0);
-        }
-
+        ruleResolver = componentContainerc.getComponentByType(RuleKeyResolver.class);
         this.jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class);
         this.conceptHandler = new IssueConceptHandler(perspectives, languageResourceResolvers);
         this.constraintHandler = new IssueConstraintHandler(perspectives, languageResourceResolvers);
@@ -92,13 +77,13 @@ public class JQAssistantSensor implements Sensor {
     public void analyse(Project project, SensorContext sensorContext) {
         File reportFile = findReportFile(project);
         if (reportFile != null) {
-            LOGGER.debug("Use report found at '{}'.", reportFile.getAbsolutePath());
+            LOGGER.debug("Using report found at '{}'.", reportFile.getAbsolutePath());
             JqassistantReport report = readReport(reportFile);
             if (report != null) {
                 evaluate(project, sensorContext, report.getGroupOrConceptOrConstraint());
             }
         } else {
-            LOGGER.info("No report found at {} for project {}... (do nothing).", determineConfiguredReportPath(), project.getName());
+            LOGGER.info("No report found at {} for project {}, skipping.", determineConfiguredReportPath(), project.getName());
         }
     }
 
@@ -129,24 +114,31 @@ public class JQAssistantSensor implements Sensor {
             }
             if (rule instanceof ExecutableRuleType) {
                 ExecutableRuleType ruleType = (ExecutableRuleType) rule;
-                if (!StatusEnumType.FAILURE.equals(ruleType.getStatus())) {
-                    continue;
+                if (StatusEnumType.FAILURE.equals(ruleType.getStatus())) {
+                    createIssue(project, sensorContext, ruleType);
                 }
-                final String id = ruleType.getId();
-                final RuleKey ruleKey = ruleResolver.resolve(project,
-                        (ruleType instanceof ConceptType) ? JQAssistantRuleType.Concept : JQAssistantRuleType.Constraint, id);
-                if (ruleKey == null) {
-                    LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", id);
-                    continue;
-                }
-                if (ruleType instanceof ConceptType) {
-                    if (configuration.suppressConceptFailures()) {
-                        continue;
-                    }
+            }
+        }
+    }
+
+    private void createIssue(Project project, SensorContext sensorContext, ExecutableRuleType ruleType) {
+        final String id = ruleType.getId();
+        JQAssistantRuleType jQAssistantRuleType = (ruleType instanceof ConceptType) ? JQAssistantRuleType.Concept : JQAssistantRuleType.Constraint;
+        final RuleKey ruleKey = ruleResolver.resolve(jQAssistantRuleType);
+        if (ruleKey == null) {
+            LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", id);
+        } else {
+            switch (jQAssistantRuleType) {
+            case Concept:
+                if (!configuration.suppressConceptFailures()) {
                     conceptHandler.process(project, sensorContext, (ConceptType) ruleType, ruleKey);
-                } else if (ruleType instanceof ConstraintType) {
-                    constraintHandler.process(project, sensorContext, (ConstraintType) ruleType, ruleKey);
                 }
+                break;
+            case Constraint:
+                constraintHandler.process(project, sensorContext, (ConstraintType) ruleType, ruleKey);
+                break;
+            default:
+                LOGGER.warn("Unsupported rule type {}", jQAssistantRuleType);
             }
         }
     }
