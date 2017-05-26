@@ -1,4 +1,4 @@
-package com.buschmais.jqassistant.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonar.plugin.sensor;
 
 import java.util.Locale;
 import java.util.Map;

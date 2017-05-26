@@ -1,4 +1,4 @@
-package com.buschmais.jqassistant.sonar.plugin.test;
+package org.jqassistant.contrib.sonar.plugin.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.Collections;
 
+import org.jqassistant.contrib.sonar.plugin.language.JavaResourceResolver;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -18,8 +19,6 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.resources.Project;
 import org.sonar.api.resources.Resource;
-
-import com.buschmais.jqassistant.sonar.plugin.language.JavaResourceResolver;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JavaResourceResolverTest {

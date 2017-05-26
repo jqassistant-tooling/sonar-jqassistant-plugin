@@ -1,13 +1,13 @@
-package com.buschmais.jqassistant.sonar.plugin;
+package org.jqassistant.contrib.sonar.plugin;
 
 import java.util.List;
 
+import org.jqassistant.contrib.sonar.plugin.language.JavaResourceResolver;
+import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantRulesRepository;
+import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantSensor;
+import org.jqassistant.contrib.sonar.plugin.sensor.RuleKeyResolver;
 import org.sonar.api.SonarPlugin;
 
-import com.buschmais.jqassistant.sonar.plugin.language.JavaResourceResolver;
-import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantRulesRepository;
-import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantSensor;
-import com.buschmais.jqassistant.sonar.plugin.sensor.RuleKeyResolver;
 import com.google.common.collect.ImmutableList;
 
 /**

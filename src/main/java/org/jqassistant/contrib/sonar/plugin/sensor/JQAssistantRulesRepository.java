@@ -1,15 +1,14 @@
-package com.buschmais.jqassistant.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonar.plugin.sensor;
 
+import org.jqassistant.contrib.sonar.plugin.JQAssistant;
 import org.sonar.api.rule.Severity;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.plugins.java.Java;
 
-import com.buschmais.jqassistant.sonar.plugin.JQAssistant;
-
 /**
  * Dummy repository to define one placeholder rule, used to assign all
  * violations coming from a
- * {@link com.buschmais.jqassistant.sonar.plugin.JQAssistant#SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH
+ * {@link JQAssistant#SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH
  * jQAssistant report} in a local project.
  */
 public final class JQAssistantRulesRepository implements RulesDefinition {

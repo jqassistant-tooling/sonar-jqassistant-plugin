@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.buschmais.jqassistant.sonar.plugin;
+package org.jqassistant.contrib.sonar.plugin;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ import com.google.common.collect.ImmutableList;
 
 /**
  * Define settings for jQAssistant affecting the execution while SONAR run.
- * 
+ *
  * @author rzozmann
  *
  */
@@ -52,7 +52,7 @@ public class JQAssistantConfiguration implements BatchExtension {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return FALSE if jQAssistant is enabled on project.
 	 */
 	public boolean isSensorDisabled() {
@@ -60,7 +60,7 @@ public class JQAssistantConfiguration implements BatchExtension {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return TRUE if failures of concepts (applying them to an artifact) should not be reported as violation in SonarQ.
 	 */
 	public boolean suppressConceptFailures() {

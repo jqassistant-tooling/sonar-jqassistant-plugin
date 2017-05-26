@@ -1,4 +1,4 @@
-package com.buschmais.jqassistant.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonar.plugin.sensor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
+import org.jqassistant.contrib.sonar.plugin.JQAssistant;
+import org.jqassistant.contrib.sonar.plugin.JQAssistantConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
@@ -23,8 +25,6 @@ import org.sonar.api.rule.RuleKey;
 
 import com.buschmais.jqassistant.core.report.schema.v1.*;
 import com.buschmais.jqassistant.core.shared.xml.JAXBUnmarshaller;
-import com.buschmais.jqassistant.sonar.plugin.JQAssistant;
-import com.buschmais.jqassistant.sonar.plugin.JQAssistantConfiguration;
 
 /**
  * {@link Sensor} implementation scanning for jqassistant-report.xml files.
