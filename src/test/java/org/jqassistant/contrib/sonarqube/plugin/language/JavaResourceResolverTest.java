@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonar.plugin.test;
+package org.jqassistant.contrib.sonarqube.plugin.language;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.Collections;
 
-import org.jqassistant.contrib.sonar.plugin.language.JavaResourceResolver;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;

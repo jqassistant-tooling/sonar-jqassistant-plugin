@@ -1,8 +1,9 @@
-package org.jqassistant.contrib.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import java.util.Locale;
 import java.util.Map;
 
+import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.SensorContext;
@@ -26,11 +27,11 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
 
 	private final ResourcePerspectives perspectives;
-	private final Map<String, LanguageResourceResolver> languageResourceResolvers;
+	private final Map<String, ResourceResolver> languageResourceResolvers;
 	private SensorContext sensorContext = null;
 	private Project project = null;
 
-	protected AbstractIssueHandler(ResourcePerspectives perspectives, Map<String, LanguageResourceResolver> languageResourceResolvers) {
+	protected AbstractIssueHandler(ResourcePerspectives perspectives, Map<String, ResourceResolver> languageResourceResolvers) {
 		this.perspectives = perspectives;
 		this.languageResourceResolvers = languageResourceResolvers;
 	}
@@ -174,7 +175,7 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 				return determineAlternativeResource(rowType);
 			}
 			SourceType source = column.getSource();
-			final LanguageResourceResolver resourceResolver = languageResourceResolvers.get(languageElement.getLanguage().toLowerCase(Locale.ENGLISH));
+			final ResourceResolver resourceResolver = languageResourceResolvers.get(languageElement.getLanguage().toLowerCase(Locale.ENGLISH));
 			if (resourceResolver == null) {
 				return determineAlternativeResource(rowType);
 			}

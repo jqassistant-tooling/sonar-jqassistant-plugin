@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 /**
  * The rule types supported by jQAssistant.

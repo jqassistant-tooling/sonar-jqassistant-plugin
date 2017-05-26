@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,8 +10,9 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
-import org.jqassistant.contrib.sonar.plugin.JQAssistant;
-import org.jqassistant.contrib.sonar.plugin.JQAssistantConfiguration;
+import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
+import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
+import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
@@ -33,6 +34,7 @@ import com.buschmais.jqassistant.core.shared.xml.JAXBUnmarshaller;
 public class JQAssistantSensor implements Sensor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
+    private static final String REPORT_NAMESPACE = "http://www.buschmais.com/jqassistant/core/report/schema/v1.3";
 
     // avoid multiple loading of report file (maybe a huge file!) while creation
     // of new instance of sensor for a project
@@ -45,21 +47,24 @@ public class JQAssistantSensor implements Sensor {
     private final JQAssistantConfiguration configuration;
     private final RuleKeyResolver ruleResolver;
 
-    private final IssueConceptHandler conceptHandler;
-    private final IssueConstraintHandler constraintHandler;
+    private final ConceptIssueHandler conceptHandler;
+    private final ConstraintIssueHandler constraintHandler;
 
     public JQAssistantSensor(JQAssistantConfiguration configuration, ResourcePerspectives perspectives, ComponentContainer componentContainerc,
             FileSystem moduleFileSystem) throws JAXBException {
         this.configuration = configuration;
         this.fileSystem = moduleFileSystem;
-        Map<String, LanguageResourceResolver> languageResourceResolvers = new HashMap<>();
-        for (LanguageResourceResolver resolver : componentContainerc.getComponentsByType(LanguageResourceResolver.class)) {
+        Map<String, ResourceResolver> languageResourceResolvers = new HashMap<>();
+        for (ResourceResolver resolver : componentContainerc.getComponentsByType(ResourceResolver.class)) {
             languageResourceResolvers.put(resolver.getLanguage().toLowerCase(Locale.ENGLISH), resolver);
         }
         ruleResolver = componentContainerc.getComponentByType(RuleKeyResolver.class);
-        this.jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class);
-        this.conceptHandler = new IssueConceptHandler(perspectives, languageResourceResolvers);
-        this.constraintHandler = new IssueConstraintHandler(perspectives, languageResourceResolvers);
+        Map<String, String> namespaceMappings = new HashMap<>();
+        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.2", "http://www.buschmais.com/jqassistant/core/report/schema/v1.3");
+        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.0", REPORT_NAMESPACE);
+        this.jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class, namespaceMappings);
+        this.conceptHandler = new ConceptIssueHandler(perspectives, languageResourceResolvers);
+        this.constraintHandler = new ConstraintIssueHandler(perspectives, languageResourceResolvers);
     }
 
     @Override
@@ -130,9 +135,7 @@ public class JQAssistantSensor implements Sensor {
         } else {
             switch (jQAssistantRuleType) {
             case Concept:
-                if (!configuration.suppressConceptFailures()) {
-                    conceptHandler.process(project, sensorContext, (ConceptType) ruleType, ruleKey);
-                }
+                conceptHandler.process(project, sensorContext, (ConceptType) ruleType, ruleKey);
                 break;
             case Constraint:
                 constraintHandler.process(project, sensorContext, (ConstraintType) ruleType, ruleKey);

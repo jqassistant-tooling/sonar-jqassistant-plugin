@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonar.plugin.language;
+package org.jqassistant.contrib.sonarqube.plugin.language;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -6,8 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantSensor;
-import org.jqassistant.contrib.sonar.plugin.sensor.LanguageResourceResolver;
+import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.BatchExtension;
@@ -21,10 +20,10 @@ import org.sonar.plugins.java.Java;
 
 /**
  * Implementation of a
- * {@link LanguageResourceResolver}
+ * {@link ResourceResolver}
  * for java elements.
  */
-public class JavaResourceResolver implements LanguageResourceResolver, BatchExtension {
+public class JavaResourceResolver implements ResourceResolver, BatchExtension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
 

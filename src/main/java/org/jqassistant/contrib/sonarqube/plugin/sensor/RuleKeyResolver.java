@@ -1,6 +1,6 @@
-package org.jqassistant.contrib.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import org.jqassistant.contrib.sonar.plugin.JQAssistant;
+import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.BatchExtension;

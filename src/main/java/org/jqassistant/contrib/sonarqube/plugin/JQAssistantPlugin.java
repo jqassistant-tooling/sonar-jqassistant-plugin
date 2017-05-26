@@ -1,11 +1,11 @@
-package org.jqassistant.contrib.sonar.plugin;
+package org.jqassistant.contrib.sonarqube.plugin;
 
 import java.util.List;
 
-import org.jqassistant.contrib.sonar.plugin.language.JavaResourceResolver;
-import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantRulesRepository;
-import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantSensor;
-import org.jqassistant.contrib.sonar.plugin.sensor.RuleKeyResolver;
+import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
+import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantRulesRepository;
+import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
+import org.jqassistant.contrib.sonarqube.plugin.sensor.RuleKeyResolver;
 import org.sonar.api.SonarPlugin;
 
 import com.google.common.collect.ImmutableList;

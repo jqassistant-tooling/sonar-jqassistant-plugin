@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonarqube.plugin.language;
 
 import org.sonar.api.BatchExtension;
 import org.sonar.api.resources.Project;
@@ -8,7 +8,7 @@ import org.sonar.api.resources.Resource;
  * Defines an interface for resolving resources representing language specific
  * elements, e.g. java classes.
  */
-public interface LanguageResourceResolver extends BatchExtension {
+public interface ResourceResolver extends BatchExtension {
 
 	/**
 	 * Return the language this resolver represents.

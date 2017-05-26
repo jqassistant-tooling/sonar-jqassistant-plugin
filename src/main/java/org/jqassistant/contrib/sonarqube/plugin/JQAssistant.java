@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonar.plugin;
+package org.jqassistant.contrib.sonarqube.plugin;
 
 /**
  * Defines constants for the jQAssistant plugin.

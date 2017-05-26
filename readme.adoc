@@ -1,15 +1,15 @@
-= jQAssistant SonarQ Plugin
+= jQAssistant SonarQube Plugin
 
-This is the SonarQ plugin for jQAssistant integration.
+This is the SonarQube plugin for jQAssistant integration.
 
 == Requirements
 * Java 7 or higher
-* SonarQ 5.1.2
+* SonarQube 5.1.2
 * Java project with jQAssistant setup
 
 == Installation
-* Copy the plugin (i.e. JAR file) to the `plugin/extensions` folder of the SonarQ installation
-* (Re-)Start the SonarQ server
+* Copy the plugin (i.e. JAR file) to the `plugin/extensions` folder of the SonarQube installation
+* (Re-)Start the SonarQube server
 
 == Configuration
 The plugin provides two rules that need to be activated for the quality profile of your project(s).
@@ -19,7 +19,7 @@ Invalid Concept::
 Constraint Violation::
   Constraints that reported violations (default severity: Major).
 
-Therefore the following steps need to be performed in the SonarQ UI (as administrator):
+Therefore the following steps need to be performed in the SonarQube UI (as administrator):
 
 * Navigate to `Quality Profiles`
 * Select your desired quality profile
@@ -38,7 +38,7 @@ In case of a Maven project with a jQAssistant setup the following steps need to 
 `mvn install`::
   Build the project and execute scan and analysis by jQAssistant
 `mvn sonar:sonar`::
-  Run the SonarQ analysis.
-  The sensor of the jQAssistant SonarQ plugin will evaluate the file `target/jqassistant/jqassistant-report.xml` and
+  Run the SonarQube analysis.
+  The sensor of the jQAssistant SonarQube plugin will evaluate the file `target/jqassistant/jqassistant-report.xml` and
   create issues for failed rules.
 

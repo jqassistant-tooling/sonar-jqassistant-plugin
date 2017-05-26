@@ -1,16 +1,17 @@
-package org.jqassistant.contrib.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import java.util.Map;
 
+import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.sonar.api.component.ResourcePerspectives;
 import org.sonar.api.issue.Issuable.IssueBuilder;
 
 import com.buschmais.jqassistant.core.report.schema.v1.ConceptType;
 import com.buschmais.jqassistant.core.report.schema.v1.RowType;
 
-class IssueConceptHandler extends AbstractIssueHandler<ConceptType> {
+class ConceptIssueHandler extends AbstractIssueHandler<ConceptType> {
 
-    IssueConceptHandler(ResourcePerspectives perspectives, Map<String, LanguageResourceResolver> languageResourceResolvers) {
+    ConceptIssueHandler(ResourcePerspectives perspectives, Map<String, ResourceResolver> languageResourceResolvers) {
         super(perspectives, languageResourceResolvers);
     }
 

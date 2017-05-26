@@ -1,19 +1,19 @@
-package org.jqassistant.contrib.sonar.plugin.test;
+package org.jqassistant.contrib.sonarqube.plugin;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import org.jqassistant.contrib.sonar.plugin.JQAssistantConfiguration;
-import org.jqassistant.contrib.sonar.plugin.JQAssistantPlugin;
-import org.jqassistant.contrib.sonar.plugin.language.JavaResourceResolver;
-import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantRulesRepository;
-import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantSensor;
-import org.jqassistant.contrib.sonar.plugin.sensor.RuleKeyResolver;
+import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
+import org.jqassistant.contrib.sonarqube.plugin.JQAssistantPlugin;
+import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
+import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantRulesRepository;
+import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
+import org.jqassistant.contrib.sonarqube.plugin.sensor.RuleKeyResolver;
 import org.junit.Test;
 
-public class PluginTest {
+public class JQAssistantPluginTest {
 
     @Test
     public void extensions() {

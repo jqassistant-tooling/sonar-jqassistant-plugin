@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.buschmais.jqassistant</groupId>
-		<artifactId>jqa-uber-parent</artifactId>
-		<version>1.3.0</version>
-	</parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.buschmais.jqassistant</groupId>
+        <artifactId>jqa-uber-parent</artifactId>
+        <version>1.3.0</version>
+    </parent>
 
-	<groupId>org.jqassistant.contrib</groupId>
-	<artifactId>jqassistant-sonar-plugin</artifactId>
+    <groupId>org.jqassistant.contrib</groupId>
+    <artifactId>jqassistant-sonar-plugin</artifactId>
     <version>1.3.0-SNAPSHOT</version>
-	<packaging>sonar-plugin</packaging>
+    <packaging>sonar-plugin</packaging>
 
     <name>jQAssistant SonarQube Plugin</name>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<sonar.buildVersion>4.5</sonar.buildVersion>
-	</properties>
+    <description>jQAssistant SonarQube integration providing rules for invalid concepts and violated constraints.
+    </description>
 
-	<build>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sonar.buildVersion>4.5</sonar.buildVersion>
+    </properties>
+
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.sonar</groupId>
@@ -29,7 +33,7 @@
                 <configuration>
                     <pluginKey>jqassistantbase</pluginKey>
                     <pluginName>jQAssistant</pluginName>
-                    <pluginClass>org.jqassistant.contrib.sonar.plugin.JQAssistantPlugin</pluginClass>
+                    <pluginClass>org.jqassistant.contrib.sonarqube.plugin.JQAssistantPlugin</pluginClass>
                     <addMavenDescriptor>false</addMavenDescriptor>
                 </configuration>
             </plugin>
@@ -48,58 +52,58 @@
                 </executions>
             </plugin>
         </plugins>
-	</build>
+    </build>
 
-	<dependencyManagement>
+    <dependencyManagement>
         <dependencies>
-        	<!-- jQAssistant -->
-			<dependency>
-				<groupId>com.buschmais.jqassistant</groupId>
-				<artifactId>jqa-distribution-specification</artifactId>
-				<version>${project.version}</version>
+            <!-- jQAssistant -->
+            <dependency>
+                <groupId>com.buschmais.jqassistant</groupId>
+                <artifactId>jqa-distribution-specification</artifactId>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-			</dependency>
+            </dependency>
             <!-- SonarQ -->
             <dependency>
-	            <groupId>org.codehaus.sonar</groupId>
-				<artifactId>sonar-plugin-api</artifactId>
-				<version>${sonar.buildVersion}</version>
+                <groupId>org.codehaus.sonar</groupId>
+                <artifactId>sonar-plugin-api</artifactId>
+                <version>${sonar.buildVersion}</version>
                 <scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.codehaus.sonar-plugins.java</groupId>
-				<artifactId>sonar-java-plugin</artifactId>
-				<version>3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.sonar-plugins.java</groupId>
+                <artifactId>sonar-java-plugin</artifactId>
+                <version>3.2</version>
                 <scope>provided</scope>
-			</dependency>
+            </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>1.7.12</version>
                 <scope>provided</scope>
             </dependency>
-			<!-- unit tests -->
-			<dependency>
-				<groupId>org.codehaus.sonar</groupId>
-				<artifactId>sonar-testing-harness</artifactId>
-				<version>${sonar.buildVersion}</version>
+            <!-- unit tests -->
+            <dependency>
+                <groupId>org.codehaus.sonar</groupId>
+                <artifactId>sonar-testing-harness</artifactId>
+                <version>${sonar.buildVersion}</version>
                 <scope>test</scope>
             </dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.12</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-core</artifactId>
-				<version>1.10.19</version>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
                 <scope>test</scope>
-			</dependency>
- 		</dependencies>
-	</dependencyManagement>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>1.10.19</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -156,7 +160,7 @@
                                             </goals>
                                         </pluginExecutionFilter>
                                         <action>
-                                            <ignore />
+                                            <ignore/>
                                         </action>
                                     </pluginExecution>
                                     <pluginExecution>
@@ -169,7 +173,7 @@
                                             </goals>
                                         </pluginExecutionFilter>
                                         <action>
-                                            <ignore />
+                                            <ignore/>
                                         </action>
                                     </pluginExecution>
                                 </pluginExecutions>
