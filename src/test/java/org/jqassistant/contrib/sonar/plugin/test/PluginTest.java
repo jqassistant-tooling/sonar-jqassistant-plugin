@@ -1,18 +1,17 @@
-package com.buschmais.jqassistant.sonar.plugin.test;
+package org.jqassistant.contrib.sonar.plugin.test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
+import org.jqassistant.contrib.sonar.plugin.JQAssistantConfiguration;
+import org.jqassistant.contrib.sonar.plugin.JQAssistantPlugin;
+import org.jqassistant.contrib.sonar.plugin.language.JavaResourceResolver;
+import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantRulesRepository;
+import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantSensor;
+import org.jqassistant.contrib.sonar.plugin.sensor.RuleKeyResolver;
 import org.junit.Test;
-
-import com.buschmais.jqassistant.sonar.plugin.JQAssistantConfiguration;
-import com.buschmais.jqassistant.sonar.plugin.JQAssistantPlugin;
-import com.buschmais.jqassistant.sonar.plugin.language.JavaResourceResolver;
-import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantRulesRepository;
-import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantSensor;
-import com.buschmais.jqassistant.sonar.plugin.sensor.RuleKeyResolver;
 
 public class PluginTest {
 

@@ -1,4 +1,4 @@
-package com.buschmais.jqassistant.sonar.plugin.language;
+package org.jqassistant.contrib.sonar.plugin.language;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantSensor;
+import org.jqassistant.contrib.sonar.plugin.sensor.LanguageResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.BatchExtension;
@@ -17,12 +19,9 @@ import org.sonar.api.resources.ProjectFileSystem;
 import org.sonar.api.resources.Resource;
 import org.sonar.plugins.java.Java;
 
-import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantSensor;
-import com.buschmais.jqassistant.sonar.plugin.sensor.LanguageResourceResolver;
-
 /**
  * Implementation of a
- * {@link com.buschmais.jqassistant.sonar.plugin.sensor.LanguageResourceResolver}
+ * {@link LanguageResourceResolver}
  * for java elements.
  */
 public class JavaResourceResolver implements LanguageResourceResolver, BatchExtension {

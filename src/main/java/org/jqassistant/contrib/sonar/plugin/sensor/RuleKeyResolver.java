@@ -1,5 +1,6 @@
-package com.buschmais.jqassistant.sonar.plugin.sensor;
+package org.jqassistant.contrib.sonar.plugin.sensor;
 
+import org.jqassistant.contrib.sonar.plugin.JQAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.BatchExtension;
@@ -7,8 +8,6 @@ import org.sonar.api.profiles.RulesProfile;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.rules.Rule;
 import org.sonar.api.rules.RuleFinder;
-
-import com.buschmais.jqassistant.sonar.plugin.JQAssistant;
 
 /**
  *

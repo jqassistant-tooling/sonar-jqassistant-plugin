@@ -1,4 +1,4 @@
-package com.buschmais.jqassistant.sonar.plugin.test;
+package org.jqassistant.contrib.sonar.plugin.test;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -12,6 +12,12 @@ import java.util.Collections;
 
 import javax.xml.bind.JAXBException;
 
+import org.jqassistant.contrib.sonar.plugin.JQAssistant;
+import org.jqassistant.contrib.sonar.plugin.JQAssistantConfiguration;
+import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantRuleType;
+import org.jqassistant.contrib.sonar.plugin.sensor.JQAssistantSensor;
+import org.jqassistant.contrib.sonar.plugin.sensor.LanguageResourceResolver;
+import org.jqassistant.contrib.sonar.plugin.sensor.RuleKeyResolver;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -31,16 +37,9 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.rules.ActiveRule;
 import org.sonar.api.rules.Rule;
 
-import com.buschmais.jqassistant.sonar.plugin.JQAssistant;
-import com.buschmais.jqassistant.sonar.plugin.JQAssistantConfiguration;
-import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantRuleType;
-import com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantSensor;
-import com.buschmais.jqassistant.sonar.plugin.sensor.LanguageResourceResolver;
-import com.buschmais.jqassistant.sonar.plugin.sensor.RuleKeyResolver;
-
 /**
  * Verifies the functionality of the
- * {@link com.buschmais.jqassistant.sonar.plugin.sensor.JQAssistantSensor}.
+ * {@link JQAssistantSensor}.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class SensorTest {
