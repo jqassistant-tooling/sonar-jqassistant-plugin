@@ -3,24 +3,38 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.buschmais.jqassistant</groupId>
-        <artifactId>jqa-uber-parent</artifactId>
-        <version>1.3.0</version>
+        <groupId>org.jqassistant.contrib.common</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.jqassistant.contrib</groupId>
-    <artifactId>jqassistant-sonar-plugin</artifactId>
+    <groupId>org.jqassistant.contrib.sonarqube</groupId>
+    <artifactId>sonar-jqassistant-plugin</artifactId>
     <version>1.3.0-SNAPSHOT</version>
     <packaging>sonar-plugin</packaging>
 
-    <name>jQAssistant SonarQube Plugin</name>
+    <name>Sonar jQAssistant Plugin</name>
+    <description>SonarQube plugin for jQAssistant providing rules for invalid concepts and constraint violations.</description>
 
-    <description>jQAssistant SonarQube integration providing rules for invalid concepts and violated constraints.
-    </description>
+    <developers>
+        <developer>
+            <id>dirk-mahler</id>
+            <name>Dirk Mahler</name>
+            <email>dirk.mahler@buschmais.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git</developerConnection>
+        <url>https://github.com/jqassistant-contrib/sonar-jqassistant-plugin</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonar.buildVersion>4.5</sonar.buildVersion>
+        <org.slf4j.version>1.7.12</org.slf4j.version>
     </properties>
 
     <build>
@@ -31,7 +45,7 @@
                 <version>1.13</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <pluginKey>jqassistantbase</pluginKey>
+                    <pluginKey>jqassistant</pluginKey>
                     <pluginName>jQAssistant</pluginName>
                     <pluginClass>org.jqassistant.contrib.sonarqube.plugin.JQAssistantPlugin</pluginClass>
                     <addMavenDescriptor>false</addMavenDescriptor>
@@ -60,7 +74,7 @@
             <dependency>
                 <groupId>com.buschmais.jqassistant</groupId>
                 <artifactId>jqa-distribution-specification</artifactId>
-                <version>${project.version}</version>
+                <version>${com.buschmais.jqassistant.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -80,8 +94,14 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.12</version>
+                <version>${org.slf4j.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${org.slf4j.version}</version>
+                <scope>test</scope>
             </dependency>
             <!-- unit tests -->
             <dependency>
