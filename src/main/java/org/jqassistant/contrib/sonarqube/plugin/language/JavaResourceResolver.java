@@ -86,7 +86,7 @@ public class JavaResourceResolver implements ResourceResolver, BatchExtension {
     private Resource findMatchingResourceDirectory(Project project, String javaPackageDirPath) {
         // for packages (directories) exists no pattern matching api, so we have
         // to check all available source directories for the package
-        final ProjectFileSystem fs = project.getFileSystem();
+        final ProjectFileSystem fs = null;
         List<java.io.File> dirs = new ArrayList<>(2);
         dirs.addAll(fs.getSourceDirs());
         dirs.addAll(fs.getTestDirs());

@@ -33,16 +33,16 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sonar.buildVersion>4.5</sonar.buildVersion>
+        <sonar.buildVersion>5.6</sonar.buildVersion>
         <org.slf4j.version>1.7.12</org.slf4j.version>
     </properties>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.sonar</groupId>
+                <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
                 <artifactId>sonar-packaging-maven-plugin</artifactId>
-                <version>1.13</version>
+                <version>1.17</version>
                 <extensions>true</extensions>
                 <configuration>
                     <pluginKey>jqassistant</pluginKey>
@@ -80,7 +80,7 @@
             </dependency>
             <!-- SonarQ -->
             <dependency>
-                <groupId>org.codehaus.sonar</groupId>
+                <groupId>org.sonarsource.sonarqube</groupId>
                 <artifactId>sonar-plugin-api</artifactId>
                 <version>${sonar.buildVersion}</version>
                 <scope>provided</scope>
@@ -103,9 +103,14 @@
                 <version>${org.slf4j.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.google.collections</groupId>
+                <artifactId>google-collections</artifactId>
+                <version>1.0</version>
+            </dependency>
             <!-- unit tests -->
             <dependency>
-                <groupId>org.codehaus.sonar</groupId>
+                <groupId>org.sonarsource.sonarqube</groupId>
                 <artifactId>sonar-testing-harness</artifactId>
                 <version>${sonar.buildVersion}</version>
                 <scope>test</scope>
@@ -132,16 +137,20 @@
         </dependency>
         <!-- SonarQube -->
         <dependency>
-            <groupId>org.codehaus.sonar</groupId>
+            <groupId>org.sonarsource.sonarqube</groupId>
             <artifactId>sonar-plugin-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.codehaus.sonar-plugins.java</groupId>
             <artifactId>sonar-java-plugin</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.collections</groupId>
+            <artifactId>google-collections</artifactId>
+        </dependency>
         <!-- unit tests -->
         <dependency>
-            <groupId>org.codehaus.sonar</groupId>
+            <groupId>org.sonarsource.sonarqube</groupId>
             <artifactId>sonar-testing-harness</artifactId>
         </dependency>
         <dependency>
@@ -172,7 +181,7 @@
                                 <pluginExecutions>
                                     <pluginExecution>
                                         <pluginExecutionFilter>
-                                            <groupId>org.codehaus.sonar</groupId>
+                                            <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
                                             <artifactId>sonar-packaging-maven-plugin</artifactId>
                                             <versionRange>[1.9,)</versionRange>
                                             <goals>

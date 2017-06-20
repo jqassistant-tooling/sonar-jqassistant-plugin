@@ -1,5 +1,6 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,23 +9,27 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.xml.bind.JAXBException;
-
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
-import org.sonar.api.batch.Sensor;
 import org.sonar.api.batch.SensorContext;
 import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.sensor.Sensor;
+import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.component.ResourcePerspectives;
 import org.sonar.api.platform.ComponentContainer;
 import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
-
-import com.buschmais.jqassistant.core.report.schema.v1.*;
+import com.buschmais.jqassistant.core.report.schema.v1.ConceptType;
+import com.buschmais.jqassistant.core.report.schema.v1.ConstraintType;
+import com.buschmais.jqassistant.core.report.schema.v1.ExecutableRuleType;
+import com.buschmais.jqassistant.core.report.schema.v1.GroupType;
+import com.buschmais.jqassistant.core.report.schema.v1.JqassistantReport;
+import com.buschmais.jqassistant.core.report.schema.v1.ReferencableRuleType;
+import com.buschmais.jqassistant.core.report.schema.v1.StatusEnumType;
 import com.buschmais.jqassistant.core.shared.xml.JAXBUnmarshaller;
 
 /**
@@ -67,7 +72,6 @@ public class JQAssistantSensor implements Sensor {
         this.constraintHandler = new ConstraintIssueHandler(perspectives, languageResourceResolvers);
     }
 
-    @Override
     public boolean shouldExecuteOnProject(Project project) {
         boolean disabled = configuration.isSensorDisabled();
         if (disabled) {
@@ -78,7 +82,6 @@ public class JQAssistantSensor implements Sensor {
         return !disabled;
     }
 
-    @Override
     public void analyse(Project project, SensorContext sensorContext) {
         File reportFile = findReportFile(project);
         if (reportFile != null) {
@@ -135,6 +138,7 @@ public class JQAssistantSensor implements Sensor {
         } else {
             switch (jQAssistantRuleType) {
             case Concept:
+                sensorContext.newIssue().forRule(ruleKey).save();
                 conceptHandler.process(project, sensorContext, (ConceptType) ruleType, ruleKey);
                 break;
             case Constraint:
@@ -183,5 +187,15 @@ public class JQAssistantSensor implements Sensor {
             configReportPath = JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH;
         }
         return configReportPath;
+    }
+
+    @Override
+    public void describe(SensorDescriptor descriptor) {
+
+    }
+
+    @Override
+    public void execute(org.sonar.api.batch.sensor.SensorContext context) {
+
     }
 }

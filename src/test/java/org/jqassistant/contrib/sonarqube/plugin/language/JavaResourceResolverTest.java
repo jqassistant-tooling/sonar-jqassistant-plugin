@@ -1,8 +1,5 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-
 import java.io.File;
 import java.util.Collections;
 
@@ -18,6 +15,8 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.resources.Project;
 import org.sonar.api.resources.Resource;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JavaResourceResolverTest {
@@ -34,7 +33,7 @@ public class JavaResourceResolverTest {
     @Test
     public void type() {
         java.io.File javaFile = new File(JavaResourceResolverTest.class.getName().replace('.', '/').concat(".java"));
-        Iterable<InputFile> it = Collections.singletonList((InputFile) new DefaultInputFile(javaFile.getPath()));
+        Iterable<InputFile> it = Collections.singletonList((InputFile) new DefaultInputFile("", javaFile.getPath()));
         when(fileSystem.predicates()).thenReturn(predicates);
         when(fileSystem.inputFiles(Matchers.any(FilePredicate.class))).thenReturn(it);
         JavaResourceResolver resourceResolver = new JavaResourceResolver(fileSystem);
