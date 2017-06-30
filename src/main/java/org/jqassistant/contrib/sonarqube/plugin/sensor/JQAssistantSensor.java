@@ -60,7 +60,7 @@ public class JQAssistantSensor implements Sensor {
         }
         ruleResolver = componentContainerc.getComponentByType(RuleKeyResolver.class);
         Map<String, String> namespaceMappings = new HashMap<>();
-        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.2", "http://www.buschmais.com/jqassistant/core/report/schema/v1.3");
+        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.2", REPORT_NAMESPACE);
         namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.0", REPORT_NAMESPACE);
         this.jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class, namespaceMappings);
         this.conceptHandler = new ConceptIssueHandler(perspectives, languageResourceResolvers);
