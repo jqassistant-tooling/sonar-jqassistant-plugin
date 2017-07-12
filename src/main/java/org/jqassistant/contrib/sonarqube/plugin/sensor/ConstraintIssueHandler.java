@@ -3,31 +3,28 @@ package org.jqassistant.contrib.sonarqube.plugin.sensor;
 import java.util.Map;
 
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
-import org.sonar.api.component.ResourcePerspectives;
-import org.sonar.api.issue.Issuable.IssueBuilder;
-
+import org.sonar.api.batch.fs.InputDir;
 import com.buschmais.jqassistant.core.report.schema.v1.ColumnType;
 import com.buschmais.jqassistant.core.report.schema.v1.ConstraintType;
 import com.buschmais.jqassistant.core.report.schema.v1.RowType;
 
 class ConstraintIssueHandler extends AbstractIssueHandler<ConstraintType> {
 
-    ConstraintIssueHandler(ResourcePerspectives perspectives, Map<String, ResourceResolver> languageResourceResolvers) {
-        super(perspectives, languageResourceResolvers);
+    ConstraintIssueHandler(InputDir baseDir, Map<String, ResourceResolver> languageResourceResolvers) {
+        super(baseDir, languageResourceResolvers);
     }
 
     @Override
-    protected boolean fillIssue(IssueBuilder issueBuilder, String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry) {
+    protected String getMessage(String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry) {
         if (rowEntry == null) {
-            return false;
+            return null;
         }
         String message = ruleId + ": " + ruleDescription;
         String addMessage = buildMessage(rowEntry, primaryColumn);
         if (addMessage.length() > 1) {
-            message = message.concat(" [" + addMessage.toString() + "]");
+            message = message.concat(" [" + addMessage + "]");
         }
-        issueBuilder.message(message);
-        return true;
+        return message;
     }
 
     private String buildMessage(RowType rowType, String primaryColumn) {

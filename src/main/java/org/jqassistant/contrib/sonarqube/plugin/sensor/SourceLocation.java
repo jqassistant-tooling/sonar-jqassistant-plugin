@@ -1,6 +1,6 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import org.sonar.api.resources.Resource;
+import org.sonar.api.batch.fs.InputPath;
 
 /**
  * Helper class to hold resource + line number of source together.
@@ -9,10 +9,10 @@ import org.sonar.api.resources.Resource;
  *
  */
 final class SourceLocation {
-	final Resource resource;
+	final InputPath resource;
 	final Integer lineNumber;
 
-	SourceLocation(Resource resource, Integer lineNumber) {
+	SourceLocation(InputPath resource, Integer lineNumber) {
 		this.resource = resource;
 		this.lineNumber = lineNumber;
 	}

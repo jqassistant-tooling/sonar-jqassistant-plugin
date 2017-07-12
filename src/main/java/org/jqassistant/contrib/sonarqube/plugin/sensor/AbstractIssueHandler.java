@@ -6,16 +6,24 @@ import java.util.Map;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.SensorContext;
-import org.sonar.api.component.ResourcePerspectives;
-import org.sonar.api.issue.Issuable;
-import org.sonar.api.issue.Issue;
-import org.sonar.api.resources.Project;
-import org.sonar.api.resources.Resource;
+import org.sonar.api.batch.fs.InputDir;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.InputPath;
+import org.sonar.api.batch.fs.TextRange;
+import org.sonar.api.batch.rule.Severity;
+import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.batch.sensor.issue.NewIssue;
+import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.api.rule.Severity;
-
-import com.buschmais.jqassistant.core.report.schema.v1.*;
+import com.buschmais.jqassistant.core.report.schema.v1.ColumnHeaderType;
+import com.buschmais.jqassistant.core.report.schema.v1.ColumnType;
+import com.buschmais.jqassistant.core.report.schema.v1.ColumnsHeaderType;
+import com.buschmais.jqassistant.core.report.schema.v1.ElementType;
+import com.buschmais.jqassistant.core.report.schema.v1.ExecutableRuleType;
+import com.buschmais.jqassistant.core.report.schema.v1.ResultType;
+import com.buschmais.jqassistant.core.report.schema.v1.RowType;
+import com.buschmais.jqassistant.core.report.schema.v1.SeverityType;
+import com.buschmais.jqassistant.core.report.schema.v1.SourceType;
 
 /**
  * Base class to produce a number of violations defined by instance of {@link T}.
@@ -26,31 +34,21 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
 
-	private final ResourcePerspectives perspectives;
 	private final Map<String, ResourceResolver> languageResourceResolvers;
-	private SensorContext sensorContext = null;
-	private Project project = null;
+	private SensorContext context = null;
+	private final InputDir baseDir;
 
-	protected AbstractIssueHandler(ResourcePerspectives perspectives, Map<String, ResourceResolver> languageResourceResolvers) {
-		this.perspectives = perspectives;
+	protected AbstractIssueHandler(InputDir baseDir, Map<String, ResourceResolver> languageResourceResolvers) {
 		this.languageResourceResolvers = languageResourceResolvers;
-	}
-
-	/**
-	 *
-	 * @return The current project, valid inside {@link #process(Project, SensorContext, ExecutableRuleType, RuleKey)}.
-	 */
-	protected Project getProject() {
-		return project;
+		this.baseDir = baseDir;
 	}
 
 	/**
 	 * Create 0..n violations, based on content and type of <i>ruleType</i>.
 	 */
-	public final void process(Project project,SensorContext sensorContext, T ruleType, RuleKey ruleKey)
+	public final void process(SensorContext sensorContext, T ruleType, RuleKey ruleKey)
 	{
-		this.project = project;
-		this.sensorContext = sensorContext;
+		this.context = sensorContext;
 		ResultType result = ruleType.getResult();
 		//'result' may be null for a) not applied (failed) concepts and b) successful constraints
 		if(result == null)
@@ -75,46 +73,35 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 		}
 	}
 
-	private void handleIssueBuilding(Resource resourceResolved, Integer lineNumber, T ruleType, RuleKey ruleKey, String primaryColumn, RowType rowType)
+	private void handleIssueBuilding(InputPath resourceResolved, Integer lineNumber, T ruleType, RuleKey ruleKey, String primaryColumn, RowType rowType)
 	{
-		Resource resourceIndex = sensorContext.getResource(resourceResolved);
-		if (resourceIndex == null)
-		{
-			LOGGER.warn("Resource '{}' not found, issue not created.", resourceResolved.getPath());
+		NewIssue newIssue = context.newIssue();
+
+		String message = getMessage(ruleType.getId(), ruleType.getDescription(), primaryColumn, rowType);
+		if(message == null) {
+			LOGGER.trace("Issue creation suppressed for {} on row {}", ruleType.getId(), rowType);
 			return;
 		}
-		final Issuable issuable = perspectives.as(Issuable.class, resourceIndex);
-		if(issuable == null)
-		{
-			LOGGER.warn("Ressource {} isn't issueable; create no violation!",resourceIndex.getPath());
-			return;
+		NewIssueLocation newIssueLocation = newIssue.newLocation().message(message).on(resourceResolved);
+		if(lineNumber != null){
+			TextRange textRange = toTextRange((InputFile) resourceResolved, lineNumber);
+			newIssueLocation.at(textRange);
 		}
-		Issuable.IssueBuilder issueBuilder = issuable.newIssueBuilder().ruleKey(ruleKey);
-		if (lineNumber != null) {
-			issueBuilder.line(lineNumber);
+		if (ruleType.getSeverity() != null) {
+			newIssue.overrideSeverity(mapSeverity2SonarQ(ruleType.getSeverity()));
 		}
-		try
-		{
-			String severity = mapSeverity2SonarQ(ruleType.getSeverity());
-			if(severity != null) {
-				issueBuilder.severity(severity);
-			}
-			String ruleId = ruleType.getId();
-			boolean doIt = fillIssue(issueBuilder, ruleId, ruleType.getDescription(), primaryColumn, rowType);
-			if(!doIt) {
-				LOGGER.trace("Issue creation suppressed for {} on row {}", ruleId, rowType);
-				return;
-			}
-			issuable.addIssue(issueBuilder.build());
-			LOGGER.info("Issue '{}' added for resource '{}'.", ruleId, (resourceIndex.getPath() != null ? resourceIndex.getPath() : resourceIndex.getName()));
-		}
-		catch(Exception ex)
-		{
-			LOGGER.error("Problem creating violation", ex);
-		}
+
+		newIssue.forRule(ruleKey).at(newIssueLocation);
+
+		newIssue.save();
 	}
 
-	private String mapSeverity2SonarQ(SeverityType severity)
+	private TextRange toTextRange(InputFile resourceResolved, Integer lineNumber) {
+
+		return resourceResolved.newRange(lineNumber, 0, lineNumber, 0);
+	}
+
+	private Severity mapSeverity2SonarQ(SeverityType severity)
 	{
 		if(severity == null) {
 			return null;
@@ -180,13 +167,19 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 				return determineAlternativeResource(rowType);
 			}
 			String element = languageElement.getValue();
-			Resource resource = resourceResolver.resolve(project, element, source.getName(), column.getValue());
+			InputPath resource = resourceResolver.resolve(element, source.getName(), column.getValue());
 			if(resource == null) {
 				return determineAlternativeResource(rowType);
 			}
 			return new SourceLocation(resource, source.getLine());
 		}
 		return determineAlternativeResource(rowType);
+	}
+
+	@SuppressWarnings("javadoc")
+	public InputDir getBaseDir() {
+
+		return baseDir;
 	}
 
 	/**
@@ -203,12 +196,12 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 
 	/**
 	 * Resource, line number and rule key are already set.
-	 * @param issueBuilder The builder used to create the final {@link Issue issue}.
 	 * @param ruleId The jQAssistant rule id.
+	 * @param ruleDescription The jQAssistant rule description.
 	 * @param primaryColumn The name of the primary colum, maybe <code>null</code>.
 	 * @param rowEntry Maybe <code>null</code> for not applied concepts.
-	 * @return TRUE if issue should be created, FALSE to suppress issue creation.
+	 * @return Message String.
 	 */
-	protected abstract boolean fillIssue(Issuable.IssueBuilder issueBuilder, String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry);
+	protected abstract String getMessage(String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry);
 
 }

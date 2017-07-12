@@ -1,6 +1,5 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,17 +10,14 @@ import java.util.Map;
 
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
+import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.Phase;
-import org.sonar.api.batch.SensorContext;
-import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.InputDir;
 import org.sonar.api.batch.sensor.Sensor;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.component.ResourcePerspectives;
-import org.sonar.api.platform.ComponentContainer;
-import org.sonar.api.resources.Project;
 import org.sonar.api.rule.RuleKey;
 import com.buschmais.jqassistant.core.report.schema.v1.ConceptType;
 import com.buschmais.jqassistant.core.report.schema.v1.ConstraintType;
@@ -35,119 +31,106 @@ import com.buschmais.jqassistant.core.shared.xml.JAXBUnmarshaller;
 /**
  * {@link Sensor} implementation scanning for jqassistant-report.xml files.
  */
-@Phase(name = Phase.Name.DEFAULT)
 public class JQAssistantSensor implements Sensor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
-    private static final String REPORT_NAMESPACE = "http://www.buschmais.com/jqassistant/core/report/schema/v1.3";
 
-    // avoid multiple loading of report file (maybe a huge file!) while creation
-    // of new instance of sensor for a project
-    // TODO: This works only if we have a single report, also in multi project
-    // environment
-    private static String reportFilePath = null;
-
-    private final FileSystem fileSystem;
-    private final JAXBUnmarshaller<JqassistantReport> jaxbUnmarshaller;
-    private final JQAssistantConfiguration configuration;
+    private JQAssistantConfiguration configuration;
     private final RuleKeyResolver ruleResolver;
+    private Map<String, ResourceResolver> languageResourceResolvers;
 
-    private final ConceptIssueHandler conceptHandler;
-    private final ConstraintIssueHandler constraintHandler;
-
-    public JQAssistantSensor(JQAssistantConfiguration configuration, ResourcePerspectives perspectives, ComponentContainer componentContainerc,
-            FileSystem moduleFileSystem) throws JAXBException {
+    public JQAssistantSensor(JQAssistantConfiguration configuration, JavaResourceResolver resourceResolver, RuleKeyResolver ruleKeyResolver) {
         this.configuration = configuration;
-        this.fileSystem = moduleFileSystem;
-        Map<String, ResourceResolver> languageResourceResolvers = new HashMap<>();
-        for (ResourceResolver resolver : componentContainerc.getComponentsByType(ResourceResolver.class)) {
-            languageResourceResolvers.put(resolver.getLanguage().toLowerCase(Locale.ENGLISH), resolver);
-        }
-        ruleResolver = componentContainerc.getComponentByType(RuleKeyResolver.class);
-        Map<String, String> namespaceMappings = new HashMap<>();
-        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.2", "http://www.buschmais.com/jqassistant/core/report/schema/v1.3");
-        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.0", REPORT_NAMESPACE);
-        this.jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class, namespaceMappings);
-        this.conceptHandler = new ConceptIssueHandler(perspectives, languageResourceResolvers);
-        this.constraintHandler = new ConstraintIssueHandler(perspectives, languageResourceResolvers);
+        this.ruleResolver = ruleKeyResolver;
+        this.languageResourceResolvers = new HashMap<>();
+        this.languageResourceResolvers.put(resourceResolver.getLanguage().toLowerCase(Locale.ENGLISH), resourceResolver);
+
     }
 
-    public boolean shouldExecuteOnProject(Project project) {
-        boolean disabled = configuration.isSensorDisabled();
-        if (disabled) {
-            LOGGER.info("{} is disabled on project {}", JQAssistant.NAME, project.getName());
-        } else if (ruleResolver == null) {
-            disabled = true;
-        }
-        return !disabled;
+    @Override
+    public void describe(SensorDescriptor descriptor) {
+        descriptor
+            .name("JQA");
     }
 
-    public void analyse(Project project, SensorContext sensorContext) {
-        File reportFile = findReportFile(project);
+    @Override
+    public void execute(SensorContext context) {
+
+        if (!configuration.isSensorDisabled()) {
+            startScan(context);
+        } else {
+            LOGGER.info("{} is disabled", JQAssistant.NAME);
+        }
+    }
+
+    private void startScan(SensorContext context) {
+
+        File reportFile = findReportFile(context);
         if (reportFile != null) {
             LOGGER.debug("Using report found at '{}'.", reportFile.getAbsolutePath());
             JqassistantReport report = readReport(reportFile);
             if (report != null) {
-                evaluate(project, sensorContext, report.getGroupOrConceptOrConstraint());
+                evaluate(context, report.getGroupOrConceptOrConstraint());
             }
         } else {
-            LOGGER.info("No report found at {} for project {}, skipping.", determineConfiguredReportPath(), project.getName());
+            LOGGER.info("No report found at {}, skipping.", determineConfiguredReportPath());
         }
     }
 
-    @Override
-    public String toString() {
-        return JQAssistant.NAME;
-    }
-
-    private JqassistantReport readReport(File reportFile) {
-        if (reportFile.getAbsolutePath().equals(reportFilePath)) {
-            return null;
-        }
-        try {
-            JqassistantReport report = jaxbUnmarshaller.unmarshal(new FileInputStream(reportFile));
-            reportFilePath = reportFile.getAbsolutePath();
-            return report;
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
-        }
-    }
-
-    private void evaluate(Project project, SensorContext sensorContext, List<ReferencableRuleType> rules) {
+    private void evaluate(SensorContext context, List<ReferencableRuleType> rules) {
         for (ReferencableRuleType rule : rules) {
             if (rule instanceof GroupType) {
                 GroupType groupType = (GroupType) rule;
                 LOGGER.info("Processing group '{}'", groupType.getId());
-                evaluate(project, sensorContext, groupType.getGroupOrConceptOrConstraint());
+                evaluate(context, groupType.getGroupOrConceptOrConstraint());
             }
             if (rule instanceof ExecutableRuleType) {
                 ExecutableRuleType ruleType = (ExecutableRuleType) rule;
                 if (StatusEnumType.FAILURE.equals(ruleType.getStatus())) {
-                    createIssue(project, sensorContext, ruleType);
+                    createIssue(context, ruleType);
                 }
             }
         }
     }
 
-    private void createIssue(Project project, SensorContext sensorContext, ExecutableRuleType ruleType) {
-        final String id = ruleType.getId();
+    private void createIssue(SensorContext context, ExecutableRuleType ruleType) {
         JQAssistantRuleType jQAssistantRuleType = (ruleType instanceof ConceptType) ? JQAssistantRuleType.Concept : JQAssistantRuleType.Constraint;
         final RuleKey ruleKey = ruleResolver.resolve(jQAssistantRuleType);
         if (ruleKey == null) {
-            LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", id);
+            LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", ruleType.getId());
         } else {
+            InputDir baseDir = context.fileSystem().inputDir(context.fileSystem().baseDir());
             switch (jQAssistantRuleType) {
-            case Concept:
-                sensorContext.newIssue().forRule(ruleKey).save();
-                conceptHandler.process(project, sensorContext, (ConceptType) ruleType, ruleKey);
-                break;
-            case Constraint:
-                constraintHandler.process(project, sensorContext, (ConstraintType) ruleType, ruleKey);
-                break;
-            default:
-                LOGGER.warn("Unsupported rule type {}", jQAssistantRuleType);
+                case Concept:
+                    ConceptIssueHandler conceptHandler =
+                        new ConceptIssueHandler(baseDir, languageResourceResolvers);
+                    context.newIssue().forRule(ruleKey).save();
+                    conceptHandler.process(context, (ConceptType) ruleType, ruleKey);
+                    break;
+                case Constraint:
+                    ConstraintIssueHandler constraintHandler = new ConstraintIssueHandler(baseDir, languageResourceResolvers);
+                    constraintHandler.process(context, (ConstraintType) ruleType, ruleKey);
+                    break;
+                default:
+                    LOGGER.warn("Unsupported rule type {}", jQAssistantRuleType);
             }
         }
+    }
+
+    private JqassistantReport readReport(File reportFile) {
+        try {
+            JAXBUnmarshaller<JqassistantReport> jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class, getNamespaceMapping());
+            return jaxbUnmarshaller.unmarshal(new FileInputStream(reportFile));
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
+        }
+    }
+
+    private Map<String, String> getNamespaceMapping(){
+        Map<String, String> namespaceMappings = new HashMap<>();
+        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.2", "http://www.buschmais.com/jqassistant/core/report/schema/v1.3");
+        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.0", "http://www.buschmais.com/jqassistant/core/report/schema/v1.3");
+        return namespaceMappings;
     }
 
     /**
@@ -162,18 +145,12 @@ public class JQAssistantSensor implements Sensor {
      *
      * @return reportFile File object of report xml or null if not found.
      */
-    private File findReportFile(Project project) {
-        if (project == null) {
-            return null;
-        }
+    private File findReportFile(SensorContext context) {
         String configReportPath = determineConfiguredReportPath();
-        File baseDir = fileSystem.baseDir();
+        File baseDir = context.fileSystem().baseDir();
         File reportFile = new File(baseDir, configReportPath);
         if (reportFile.exists()) {
             return reportFile;
-        }
-        if (project.isModule()) {
-            return findReportFile(project.getParent());
         }
         return null;
     }
@@ -187,15 +164,5 @@ public class JQAssistantSensor implements Sensor {
             configReportPath = JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH;
         }
         return configReportPath;
-    }
-
-    @Override
-    public void describe(SensorDescriptor descriptor) {
-
-    }
-
-    @Override
-    public void execute(org.sonar.api.batch.sensor.SensorContext context) {
-
     }
 }

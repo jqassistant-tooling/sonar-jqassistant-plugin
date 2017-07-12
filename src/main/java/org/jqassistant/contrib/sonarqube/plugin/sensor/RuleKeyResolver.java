@@ -3,34 +3,31 @@ package org.jqassistant.contrib.sonarqube.plugin.sensor;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.BatchExtension;
-import org.sonar.api.profiles.RulesProfile;
+import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.rule.ActiveRule;
+import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.api.rules.Rule;
-import org.sonar.api.rules.RuleFinder;
 
 /**
  *
  * @author rzozmann
  *
  */
-public class RuleKeyResolver implements BatchExtension {
+@BatchSide
+public class RuleKeyResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
 
-    private RulesProfile rulesProfile;
+    private ActiveRules ruleFinder;
 
-    private RuleFinder ruleFinder;
-
-    public RuleKeyResolver(RulesProfile profile, RuleFinder ruleFinder) {
-        this.rulesProfile = profile;
+    public RuleKeyResolver(ActiveRules ruleFinder) {
         this.ruleFinder = ruleFinder;
     }
 
     public RuleKey resolve(JQAssistantRuleType type) {
-        final Rule rule = ruleFinder.findByKey(JQAssistant.KEY, type.getKey());
+        final ActiveRule rule = ruleFinder.findByInternalKey(JQAssistant.KEY, type.getKey());
         RuleKey ruleKey;
-        if (rule != null && rulesProfile.getActiveRule(rule) != null) {
+        if (rule != null) {
             ruleKey = rule.ruleKey();
         } else {
             ruleKey = null;

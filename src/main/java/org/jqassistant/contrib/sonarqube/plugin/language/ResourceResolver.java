@@ -1,14 +1,14 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
-import org.sonar.api.BatchExtension;
-import org.sonar.api.resources.Project;
-import org.sonar.api.resources.Resource;
+import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.fs.InputPath;
 
 /**
  * Defines an interface for resolving resources representing language specific
  * elements, e.g. java classes.
  */
-public interface ResourceResolver extends BatchExtension {
+@BatchSide
+public interface ResourceResolver {
 
 	/**
 	 * Return the language this resolver represents.
@@ -28,5 +28,5 @@ public interface ResourceResolver extends BatchExtension {
 	 *
 	 * @return The resource or <code>null</code> if not resolved.
 	 */
-	Resource resolve(Project project, String nodeType, String nodeSource, String nodeValue);
+	InputPath resolve(String nodeType, String nodeSource, String nodeValue);
 }

@@ -9,21 +9,20 @@ import java.util.Locale;
 import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.BatchExtension;
+import org.sonar.api.batch.BatchSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputDir;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.resources.Project;
-import org.sonar.api.resources.ProjectFileSystem;
-import org.sonar.api.resources.Resource;
-import org.sonar.plugins.java.Java;
+import org.sonar.api.batch.fs.InputPath;
+import com.google.common.collect.Lists;
 
 /**
  * Implementation of a
  * {@link ResourceResolver}
  * for java elements.
  */
-public class JavaResourceResolver implements ResourceResolver, BatchExtension {
+@BatchSide
+public class JavaResourceResolver implements ResourceResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
 
@@ -35,11 +34,11 @@ public class JavaResourceResolver implements ResourceResolver, BatchExtension {
 
     @Override
     public String getLanguage() {
-        return Java.KEY;
+        return "java";
     }
 
     @Override
-    public Resource resolve(Project project, String nodeType, String nodeSource, String nodeValue) {
+    public InputPath resolve(String nodeType, String nodeSource, String nodeValue) {
         switch (nodeType) {
         case "Type":
         case "Field":
@@ -52,7 +51,7 @@ public class JavaResourceResolver implements ResourceResolver, BatchExtension {
             final String javaFilePath = determineRelativeQualifiedJavaSourceFileName(nodeSource);
             return findMatchingResourceFile(javaFilePath);
         case "Package":
-            return findMatchingResourceDirectory(project, nodeValue.replace('.', '/'));
+            return findMatchingResourceDirectory(nodeValue.replace('.', '/'));
         default:
             return null;
         }
@@ -65,7 +64,7 @@ public class JavaResourceResolver implements ResourceResolver, BatchExtension {
      * @return The matching resource or <code>null</code> if nothing was found
      *         and in case of multiple matches.
      */
-    private Resource findMatchingResourceFile(String javaFilePath) {
+    private InputFile findMatchingResourceFile(String javaFilePath) {
         // in SonarQ Java files have the prefix 'src/main/java' for Maven
         // projects
         // we have to handle such nested project structures without specific
@@ -78,28 +77,27 @@ public class JavaResourceResolver implements ResourceResolver, BatchExtension {
                 LOGGER.error("Multiple matches for Java file {}, cannot handle source file for violations", javaFilePath);
                 return null;
             }
-            return org.sonar.api.resources.File.create(file.relativePath());
+            return file;
         }
         return null;
     }
 
-    private Resource findMatchingResourceDirectory(Project project, String javaPackageDirPath) {
+    private InputDir findMatchingResourceDirectory(String javaPackageDirPath) {
         // for packages (directories) exists no pattern matching api, so we have
         // to check all available source directories for the package
-        final ProjectFileSystem fs = null;
         List<java.io.File> dirs = new ArrayList<>(2);
-        dirs.addAll(fs.getSourceDirs());
-        dirs.addAll(fs.getTestDirs());
+        dirs.addAll(Lists.newArrayList(fileSystem.files(fileSystem.predicates().hasType(InputFile.Type.MAIN))));
+        dirs.addAll(Lists.newArrayList(fileSystem.files(fileSystem.predicates().hasType(InputFile.Type.TEST))));
 
         java.io.File packageDir;
         for (File dir : dirs) {
-            packageDir = new java.io.File(dir, javaPackageDirPath);
+            packageDir = new File(dir, javaPackageDirPath);
             if (!packageDir.exists()) {
                 continue;
             }
             final InputDir id = fileSystem.inputDir(packageDir);
             if (id != null) {
-                return org.sonar.api.resources.Directory.fromIOFile(id.file(), project);
+                return id;
             }
         }
         return null;

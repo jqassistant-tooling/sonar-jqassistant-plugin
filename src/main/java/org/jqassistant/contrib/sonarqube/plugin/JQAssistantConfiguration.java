@@ -21,13 +21,12 @@ package org.jqassistant.contrib.sonarqube.plugin;
 
 import java.util.List;
 
-import org.sonar.api.BatchExtension;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.PropertyType;
+import org.sonar.api.batch.BatchSide;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.config.Settings;
 import org.sonar.api.resources.Qualifiers;
-
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -36,7 +35,8 @@ import com.google.common.collect.ImmutableList;
  * @author rzozmann
  *
  */
-public class JQAssistantConfiguration implements BatchExtension {
+@BatchSide
+public class JQAssistantConfiguration {
 
     public static final String DISABLED = "sonar.jqassistant.disabled";
 
