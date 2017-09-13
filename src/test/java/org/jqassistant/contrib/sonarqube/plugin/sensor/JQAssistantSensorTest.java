@@ -18,6 +18,7 @@ import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputPath;
 import org.sonar.api.batch.fs.internal.DefaultInputDir;
+import org.sonar.api.batch.fs.internal.DefaultInputModule;
 import org.sonar.api.batch.fs.internal.DefaultTextPointer;
 import org.sonar.api.batch.fs.internal.DefaultTextRange;
 import org.sonar.api.batch.rule.ActiveRules;
@@ -110,12 +111,13 @@ public class JQAssistantSensorTest {
 		when(newIssue.forRule(rule.ruleKey())).thenReturn(newIssue);
 		when(newIssueLocation.message(any(String.class))).thenReturn(newIssueLocation);
 		when(sensorContext.fileSystem()).thenReturn(moduleFileSystem);
+		when(sensorContext.module()).thenReturn(new DefaultInputModule("Test Modul"));
 
 		sensor.execute(sensorContext);
 
-		verify(sensorContext, times(2)).newIssue();
+		verify(sensorContext, times(1)).newIssue();
 		verify(newIssueLocation).message(contains("The concept"));
-		verify(newIssue, times(2)).forRule(rule.ruleKey());
+		verify(newIssue, times(1)).forRule(rule.ruleKey());
 	}
 
 	@Test

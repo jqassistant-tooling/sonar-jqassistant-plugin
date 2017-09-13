@@ -3,13 +3,13 @@ package org.jqassistant.contrib.sonarqube.plugin.sensor;
 import java.util.Map;
 
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
-import org.sonar.api.batch.fs.InputDir;
+import org.sonar.api.batch.fs.InputComponent;
 import com.buschmais.jqassistant.core.report.schema.v1.ConceptType;
 import com.buschmais.jqassistant.core.report.schema.v1.RowType;
 
 class ConceptIssueHandler extends AbstractIssueHandler<ConceptType> {
 
-    ConceptIssueHandler(InputDir baseDir, Map<String, ResourceResolver> languageResourceResolvers) {
+    ConceptIssueHandler(InputComponent baseDir, Map<String, ResourceResolver> languageResourceResolvers) {
         super(baseDir, languageResourceResolvers);
     }
 

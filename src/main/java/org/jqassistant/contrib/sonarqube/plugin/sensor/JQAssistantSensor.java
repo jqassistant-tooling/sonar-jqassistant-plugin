@@ -14,7 +14,7 @@ import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.fs.InputDir;
+import org.sonar.api.batch.fs.InputModule;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
@@ -99,12 +99,11 @@ public class JQAssistantSensor implements Sensor {
         if (ruleKey == null) {
             LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", ruleType.getId());
         } else {
-            InputDir baseDir = context.fileSystem().inputDir(context.fileSystem().baseDir());
+            InputModule baseDir = context.module();
             switch (jQAssistantRuleType) {
                 case Concept:
                     ConceptIssueHandler conceptHandler =
                         new ConceptIssueHandler(baseDir, languageResourceResolvers);
-                    context.newIssue().forRule(ruleKey).save();
                     conceptHandler.process(context, (ConceptType) ruleType, ruleKey);
                     break;
                 case Constraint:

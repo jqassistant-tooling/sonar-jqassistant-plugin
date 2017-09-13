@@ -6,7 +6,7 @@ import java.util.Map;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.fs.InputDir;
+import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputPath;
 import org.sonar.api.batch.fs.TextRange;
@@ -36,9 +36,9 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 
 	private final Map<String, ResourceResolver> languageResourceResolvers;
 	private SensorContext context = null;
-	private final InputDir baseDir;
+	private final InputComponent baseDir;
 
-	protected AbstractIssueHandler(InputDir baseDir, Map<String, ResourceResolver> languageResourceResolvers) {
+	protected AbstractIssueHandler(InputComponent baseDir, Map<String, ResourceResolver> languageResourceResolvers) {
 		this.languageResourceResolvers = languageResourceResolvers;
 		this.baseDir = baseDir;
 	}
@@ -73,7 +73,7 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 		}
 	}
 
-	private void handleIssueBuilding(InputPath resourceResolved, Integer lineNumber, T ruleType, RuleKey ruleKey, String primaryColumn, RowType rowType)
+	private void handleIssueBuilding(InputComponent resourceResolved, Integer lineNumber, T ruleType, RuleKey ruleKey, String primaryColumn, RowType rowType)
 	{
 		NewIssue newIssue = context.newIssue();
 
@@ -92,6 +92,7 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 		}
 
 		newIssue.forRule(ruleKey).at(newIssueLocation);
+
 
 		newIssue.save();
 	}
@@ -177,7 +178,7 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 	}
 
 	@SuppressWarnings("javadoc")
-	public InputDir getBaseDir() {
+	public InputComponent getBaseDir() {
 
 		return baseDir;
 	}
@@ -191,7 +192,7 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 	 */
 	protected SourceLocation determineAlternativeResource(RowType rowType)
 	{
-		return null;
+        return new SourceLocation(getBaseDir(), null);
 	}
 
 	/**
