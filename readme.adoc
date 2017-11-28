@@ -1,10 +1,11 @@
+:toc: left
 = jQAssistant SonarQube Plugin
 
 This is the SonarQube plugin for jQAssistant integration.
 
 == Requirements
 * Java 7 or higher
-* SonarQube 5.1.2
+* SonarQube 5.6
 * Java project with jQAssistant setup
 
 == Installation
@@ -33,14 +34,205 @@ Therefore the following steps need to be performed in the SonarQube UI (as admin
 ** Add your project
 
 == Execution
-In case of a Maven project with a jQAssistant setup the following steps need to be executed
+In case of a Maven project with a jQAssistant setup the following steps need to be executed:
 
 `mvn install`::
-  Build the project and execute scan and analysis by jQAssistant
+  Build the project including scan and analysis by jQAssistant.
+  A file `target/jqassistant/jqassistant-report.xml` will be created containing the report.
 `mvn sonar:sonar`::
   Run the SonarQube analysis.
-  The sensor of the jQAssistant SonarQube plugin will evaluate the file `target/jqassistant/jqassistant-report.xml` and
+  The sensor of the jQAssistant SonarQube plugin will evaluate the report and
   create issues for failed rules.
+
+== Example Setup
+
+This section describes an example setup for a Maven project with the following structure:
+
+.Example Maven Project
+[source,raw]
+----
+project/
+  pom.xml      <1>
+  jqassistant/ <2>
+    index.adoc
+  src/
+    main/
+      java/
+----
+<1> Maven build descriptor containing the jQAssistant setup.
+<2> The directory where jQAssistant searches for project specific rules (`.adoc` or `.xml` files)
+
+For executing jQAssistant during the build the jQAssistant Maven plugin must be configured in the file `pom.xml`:
+
+./pom.xml
+[source,xml]
+----
+<project>
+...
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.buschmais.jqassistant</groupId>
+        <artifactId>jqassistant-maven-plugin</artifactId>
+        <version>${jqassistant-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>scan</goal>
+              <goal>analyze</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <warnOnSeverity>MINOR</warnOnSeverity>
+          <failOnSeverity>CRITICAL</failOnSeverity>
+        </configuration>
+      </plugin>
+...
+</project>
+----
+
+Project specific rules are loaded from the directory `jqassistant`.
+
+The following example contains a group `default` which is automatically executed by jQAssistant.
+It includes the constraint `model:JpaEntityLocation` that is defined in the same document and verifies that all JPA entities are located in packages called `model`.
+Therefore the constraint relies on a pre-defined concept `jpa2:Entity` which adds a label `Entity` to all classes that are annotated with `javax.persistence.Entity`.
+
+./jqassistant/index.adoc
+[source,adoc]
+....
+:toc: left
+= Project Rules
+
+This document describes coding guide lines for the project.
+
+[[default]]                                      <1>
+[role=group,includesConstraints="model:JpaEntityLocation"]
+== Continuous Integration Rules
+
+The following rules are executed during a CI build:
+
+* <<model:JpaEntityLocation>>
+
+== JPA Model
+
+[[model:JpaEntityLocation]]                      <2>
+.All JPA entities must be located in a package with the name "model"
+[source,cypher,role=concept,requiresConcepts="jpa2:Entity",primaryReportColumn="EntityInWrongPackage"]
+----
+MATCH
+  (package:Package)-[:CONTAINS]->(entity:Entity:Class)
+WHERE
+  package.name <> "model"
+RETURN
+  package as Package, entity as EntityInWrongPackage
+----
+....
+<1> Defines the group `default` that includes the constraint
+<2> Defines the constraint `model:JpaEntityLocation` that relies on the concept `jpa2:Entity`
+
+NOTE: The constraint defines a property called `primaryReportColumn`.
+It specifies the column of the result containing the elements (e.g. classes, packages) which shall be used to create issues in SonarQube.
+The property is optional, if omitted the first column is used by default (recommended).
+
+== Known Limitations
+
+=== Maven Multi-Module Projects
+
+For the following project structure jQAssistant will report violations on the console during the build but they will not be visible in SonarQube:
+
+.Maven project with multiple modules
+[source,raw]
+----
+project/
+|- module1/
+|  |- src/
+|  |  |- main/
+|  |     |- java/
+|  |- pom.xml
+|
+|- module2/
+|  |- src/
+|  |  |- main/
+|  |     |- java/
+|  |- pom.xml
+|
+|- jqassistant
+|  |- index.adoc
+|
+|- pom.xml
+----
+
+jQAssistant creates its report file in the `target` folder of the module where the directory `jqassistant`containing the rule files is located,
+i.e. for the example above in the root module. This approach has been chosen to allow a project-wide view on code-structures.
+For found issues the report references the affected code elements (e.g. classes) no matter in which module they are located.
+Currently such elements from sub-modules (i.e. module1 and module2) cannot be resolved by the SonarQube plugin API while creating an issue.
+
+NOTE: This problem will probably be solved with future releases supporting newer versions of the SonarQube plugin API.
+
+As a workaround a directory `jqassistant` can be put into each sub-module.
+This forces jQAssistant to create an individual report for each of them.
+
+.Workaround for multi-module Maven projects
+[source,raw]
+----
+project/
+|- module1/
+|  |- jqassistant/
+|  |  |- module1-rules.adoc
+|  |- src/
+|  |  |- main/
+|  |     |- java/
+|  |- pom.xml
+|
+|- module2/
+|  |- jqassistant/
+|  |  |- module2-rules.adoc
+|  |- src/
+|  |  |- main/
+|  |     |- java/
+|  |- pom.xml
+|- pom.xml
+|
+|- jqassistant-shared
+   | shared-rules.adoc
+----
+
+If shared rules shall be available for these sub-modules they can be placed as files into a directory within the root module (i.e. `jqassistant-shared`).
+This directory must be referenced in the jQAssistant Maven plugin configuration as directory for additional rules:
+
+./pom.xml
+[source,xml]
+----
+<project>
+...
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.buschmais.jqassistant</groupId>
+        <artifactId>jqassistant-maven-plugin</artifactId>
+        <version>${jqassistant-maven-plugin.version}</version>
+        ...
+        <configuration>
+          <warnOnSeverity>MINOR</warnOnSeverity>
+          <failOnSeverity>CRITICAL</failOnSeverity>
+          <rulesDirectories>
+            <rulesDirectory>${session.executionRootDirectory}/jqassistant-shared</rulesDirectory>
+          </rulesDirectories>
+        </configuration>
+        ...
+      </plugin>
+...
+</project>
+----
+
+WARNING: The shared rules directory must not be named `jqassistant`.
+
+== Feedback & Issues
+
+For any questions don't hesitate to ask them on the https://groups.google.com/forum/#!forum/jqassistant[jQAssistant Google Group] or http://stackoverflow.com/questions/tagged/jqassistant[Stackoverflow].
+
+Feature requests or bugs can be reported on the https://github.com/jqassistant-contrib/sonar-jqassistant-plugin/issues[GitHub issue tracker].
 
 == Rules
 In the following we're describing some best practises of the usage of jQAssistant in combination
@@ -48,7 +240,6 @@ with the Sonar-jQA plugin.
 
 The following example describes a method invocation from a class of the persistence layer to a class
 of the core layer.
-
 
 [source]
 MATCH
@@ -109,7 +300,7 @@ In the following you can see three example of possible primary return values.
 
 3.) RETURN i
 
-[soruce,xml]
+[source,xml]
     <result>
         <columns count="1">
             <column primary="true">i</column>
