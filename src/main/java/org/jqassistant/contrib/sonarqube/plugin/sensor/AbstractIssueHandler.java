@@ -77,7 +77,7 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 	{
 		NewIssue newIssue = context.newIssue();
 
-		String message = getMessage(ruleType.getId(), ruleType.getDescription(), primaryColumn, rowType);
+        String message = getMessage(resourceResolved, ruleType.getId(), ruleType.getDescription(), primaryColumn, rowType);
 		if(message == null) {
 			LOGGER.trace("Issue creation suppressed for {} on row {}", ruleType.getId(), rowType);
 			return;
@@ -203,6 +203,6 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 	 * @param rowEntry Maybe <code>null</code> for not applied concepts.
 	 * @return Message String.
 	 */
-	protected abstract String getMessage(String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry);
+	protected abstract String getMessage(InputComponent resourceResolved, String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry);
 
 }

@@ -11,7 +11,6 @@ import org.sonar.api.Plugin;
  */
 public class JQAssistantPlugin implements Plugin {
 
-    @Override
     public void define(Context context) {
         context.addExtension(JQAssistantSensor.class);
         context.addExtension(JavaResourceResolver.class);

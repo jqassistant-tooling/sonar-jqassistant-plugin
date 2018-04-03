@@ -23,7 +23,7 @@ class ConceptIssueHandler extends AbstractIssueHandler<ConceptType> {
     }
 
     @Override
-    protected String getMessage(String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry) {
+    protected String getMessage(InputComponent resourceResolved, String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry) {
         return ruleId + ": The concept could not be applied.";
     }
 }

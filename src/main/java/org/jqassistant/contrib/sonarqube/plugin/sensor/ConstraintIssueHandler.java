@@ -15,7 +15,10 @@ class ConstraintIssueHandler extends AbstractIssueHandler<ConstraintType> {
     }
 
     @Override
-    protected String getMessage(String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry) {
+    protected String getMessage(InputComponent resourceResolved, String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry) {
+        if(resourceResolved.equals(getBaseDir())){
+            return "Configuration mismatch: There is a problem with the configuration of SonarQube and JQAssistant. The JQA-violation is within a file which wasn't scanned by SonarQube.";
+        }
         if (rowEntry == null) {
             return null;
         }
