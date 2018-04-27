@@ -24,6 +24,8 @@ import java.util.List;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.PropertyType;
 import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.ScannerSide;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.config.Settings;
 import org.sonar.api.resources.Qualifiers;
@@ -35,19 +37,19 @@ import com.google.common.collect.ImmutableList;
  * @author rzozmann
  *
  */
-@BatchSide
+@ScannerSide
 public class JQAssistantConfiguration {
 
     public static final String DISABLED = "sonar.jqassistant.disabled";
 
-    private final Settings settings;
+    private final Configuration settings;
 
-    public JQAssistantConfiguration(Settings settings) {
+    public JQAssistantConfiguration(Configuration settings) {
         this.settings = settings;
     }
 
     public String getReportPath() {
-        return settings.getString(JQAssistant.SETTINGS_KEY_REPORT_PATH);
+        return settings.get(JQAssistant.SETTINGS_KEY_REPORT_PATH).get();
     }
 
     /**
@@ -55,7 +57,7 @@ public class JQAssistantConfiguration {
      * @return FALSE if jQAssistant is enabled on project.
      */
     public boolean isSensorDisabled() {
-        return settings.getBoolean(DISABLED);
+        return settings.getBoolean(DISABLED).get();
     }
 
     public static List<PropertyDefinition> getPropertyDefinitions() {

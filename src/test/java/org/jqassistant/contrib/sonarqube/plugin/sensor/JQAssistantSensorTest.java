@@ -102,8 +102,8 @@ public class JQAssistantSensorTest {
 		String reportFile ="jqassistant-report-concept-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
         when(moduleFileSystem.baseDir()).thenReturn(new File(JQAssistantSensorTest.class.getResource("/").getFile()));
-		when(moduleFileSystem.inputDir(new File(JQAssistantSensorTest.class.getResource("/").getFile())))
-			.thenReturn(new DefaultInputDir("", JQAssistantSensorTest.class.getResource("/").getPath()));
+//		when(moduleFileSystem.inputDir(new File(JQAssistantSensorTest.class.getResource("/").getFile())))
+//			.thenReturn(new DefaultInputDir("", JQAssistantSensorTest.class.getResource("/").getPath()));
 		NewIssue newIssue = mock(NewIssue.class);
 		NewIssueLocation newIssueLocation = mock(NewIssueLocation.class);
 		when(sensorContext.newIssue()).thenReturn(newIssue);
@@ -111,7 +111,7 @@ public class JQAssistantSensorTest {
 		when(newIssue.forRule(rule.ruleKey())).thenReturn(newIssue);
 		when(newIssueLocation.message(any(String.class))).thenReturn(newIssueLocation);
 		when(sensorContext.fileSystem()).thenReturn(moduleFileSystem);
-		when(sensorContext.module()).thenReturn(new DefaultInputModule("Test Modul"));
+		when(sensorContext.module()).thenReturn(mock(DefaultInputModule.class));
 
 		sensor.execute(sensorContext);
 

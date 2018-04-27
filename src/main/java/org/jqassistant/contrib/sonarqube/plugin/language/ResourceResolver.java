@@ -1,13 +1,14 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
 import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.fs.InputPath;
 
 /**
  * Defines an interface for resolving resources representing language specific
  * elements, e.g. java classes.
  */
-@BatchSide
+@ScannerSide
 public interface ResourceResolver {
 
 	/**

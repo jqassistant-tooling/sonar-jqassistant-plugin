@@ -10,6 +10,7 @@ import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputDir;
 import org.sonar.api.batch.fs.InputFile;
@@ -21,7 +22,7 @@ import com.google.common.collect.Lists;
  * {@link ResourceResolver}
  * for java elements.
  */
-@BatchSide
+@ScannerSide
 public class JavaResourceResolver implements ResourceResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
@@ -51,7 +52,7 @@ public class JavaResourceResolver implements ResourceResolver {
             final String javaFilePath = determineRelativeQualifiedJavaSourceFileName(nodeSource);
             return findMatchingResourceFile(javaFilePath);
         case "Package":
-            return findMatchingResourceDirectory(nodeValue.replace('.', '/'));
+            // The ability to report issues or measures on directories will be dropped by SonarQ
         default:
             return null;
         }
@@ -78,27 +79,6 @@ public class JavaResourceResolver implements ResourceResolver {
                 return null;
             }
             return file;
-        }
-        return null;
-    }
-
-    private InputDir findMatchingResourceDirectory(String javaPackageDirPath) {
-        // for packages (directories) exists no pattern matching api, so we have
-        // to check all available source directories for the package
-        List<java.io.File> dirs = new ArrayList<>(2);
-        dirs.addAll(Lists.newArrayList(fileSystem.files(fileSystem.predicates().hasType(InputFile.Type.MAIN))));
-        dirs.addAll(Lists.newArrayList(fileSystem.files(fileSystem.predicates().hasType(InputFile.Type.TEST))));
-
-        java.io.File packageDir;
-        for (File dir : dirs) {
-            packageDir = new File(dir, javaPackageDirPath);
-            if (!packageDir.exists()) {
-                continue;
-            }
-            final InputDir id = fileSystem.inputDir(packageDir);
-            if (id != null) {
-                return id;
-            }
         }
         return null;
     }

@@ -4,6 +4,7 @@ import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.BatchSide;
+import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.rule.ActiveRule;
 import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.rule.RuleKey;
@@ -13,7 +14,7 @@ import org.sonar.api.rule.RuleKey;
  * @author rzozmann
  *
  */
-@BatchSide
+@ScannerSide
 public class RuleKeyResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);

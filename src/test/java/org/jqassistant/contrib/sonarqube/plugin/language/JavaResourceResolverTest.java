@@ -14,6 +14,7 @@ import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputPath;
+import org.sonar.api.batch.fs.internal.DefaultIndexedFile;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -25,21 +26,19 @@ public class JavaResourceResolverTest {
     private FileSystem fileSystem;
 
     @Mock
-    FilePredicates predicates;
+    private FilePredicates predicates;
 
     @Test
     public void type() {
         java.io.File javaFile = new File(JavaResourceResolverTest.class.getName().replace('.', '/').concat(".java"));
-        Iterable<InputFile> it = Collections.singletonList((InputFile) new DefaultInputFile("", javaFile.getPath()));
-        for (InputFile file : it) {
-            ((DefaultInputFile) file).setModuleBaseDir(Paths.get(""));
-        }
+        DefaultIndexedFile defaultIndexedFile = new DefaultIndexedFile("", Paths.get(javaFile.getPath()), "", null);
+        Iterable<InputFile> it = Collections.singletonList((InputFile) new DefaultInputFile(defaultIndexedFile, null));
         when(fileSystem.predicates()).thenReturn(predicates);
         when(fileSystem.inputFiles(Matchers.any(FilePredicate.class))).thenReturn(it);
         JavaResourceResolver resourceResolver = new JavaResourceResolver(fileSystem);
         InputPath result = resourceResolver.resolve("Type", JavaResourceResolverTest.class.getName().replace('.', '/').concat(".class"),
                 JavaResourceResolverTest.class.getName());
-        assertEquals(new File(result.absolutePath()), javaFile);
+        assertEquals(new File(result.uri()), javaFile.getAbsoluteFile());
     }
 
 }
