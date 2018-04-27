@@ -9,7 +9,7 @@
     </parent>
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
-    <artifactId>sonar-jqassistant-plugin-5</artifactId>
+    <artifactId>sonar-jqassistant-plugin-6</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>sonar-plugin</packaging>
 
