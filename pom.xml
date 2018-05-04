@@ -9,7 +9,7 @@
     </parent>
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
-    <artifactId>sonar-jqassistant-plugin-7</artifactId>
+    <artifactId>sonar7-jqassistant-plugin</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>sonar-plugin</packaging>
 
@@ -34,7 +34,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sonar.buildVersion>7.1</sonar.buildVersion>
+        <sonar.buildVersion>6.7</sonar.buildVersion>
         <org.slf4j.version>1.7.12</org.slf4j.version>
     </properties>
 
