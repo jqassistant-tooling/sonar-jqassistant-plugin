@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
@@ -10,7 +9,7 @@
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
     <artifactId>sonar6-jqassistant-plugin</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>6.7_1.0.0-RC1</version>
     <packaging>sonar-plugin</packaging>
 
     <name>Sonar jQAssistant Plugin</name>
@@ -29,7 +28,7 @@
         <connection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git</developerConnection>
         <url>https://github.com/jqassistant-contrib/sonar-jqassistant-plugin</url>
-        <tag>HEAD</tag>
+        <tag>6.7_1.0.0-RC1</tag>
     </scm>
 
     <properties>
@@ -207,7 +206,7 @@
                                             </goals>
                                         </pluginExecutionFilter>
                                         <action>
-                                            <ignore/>
+                                            <ignore />
                                         </action>
                                     </pluginExecution>
                                     <pluginExecution>
@@ -220,7 +219,7 @@
                                             </goals>
                                         </pluginExecutionFilter>
                                         <action>
-                                            <ignore/>
+                                            <ignore />
                                         </action>
                                     </pluginExecution>
                                 </pluginExecutions>
