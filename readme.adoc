@@ -5,10 +5,11 @@ This is the SonarQube plugin for jQAssistant integration.
 
 == Requirements
 * Java 7 or higher
-* SonarQube 5.6
+* SonarQube 5.6 or 6.7
 * Java project with jQAssistant setup
 
 == Installation
+* http://search.maven.org/#search%7Cga%7C1%7Corg.jqassistant.contrib.sonarqube[Download] the plugin JAR for you SonarQube release
 * Copy the plugin (i.e. JAR file) to the `plugin/extensions` folder of the SonarQube installation
 * (Re-)Start the SonarQube server
 
