@@ -5,10 +5,11 @@ This is the SonarQube plugin for jQAssistant integration.
 
 == Requirements
 * Java 7 or higher
-* SonarQube 5.6
+* SonarQube 5.6 or 6.7
 * Java project with jQAssistant setup
 
 == Installation
+* https://search.maven.org/#search%7Cga%7C1%7Corg.jqassistant.contrib.sonarqube[Download] the plugin JAR for your SonarQube release
 * Copy the plugin (i.e. JAR file) to the `plugin/extensions` folder of the SonarQube installation
 * (Re-)Start the SonarQube server
 
@@ -309,8 +310,8 @@ In the following you can see three example of possible primary return values.
             <row>
               <column name="i">
                 <element language="Java">MethodInvocation</element>
-                <source name="/org/jqassistant/example/persistence/AnyPersictenceClass.class" line="64"></source>
-                <value>org/jqassistant/example/persistence/AnyPersistcenceClass#java.util.List coreMethodInvocation(java.lang.Long), line 64</value>
+                <source name="/org/jqassistant/example/persistence/AnyPersistenceClass.class" line="64"></source>
+                <value>org/jqassistant/example/persistence/AnyPersistenceClass#java.util.List coreMethodInvocation(java.lang.Long), line 64</value>
               </column>
             </row>
         </rows>
