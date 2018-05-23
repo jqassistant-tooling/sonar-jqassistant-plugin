@@ -1,7 +1,11 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import javax.xml.bind.JAXBException;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.contains;
+import static org.mockito.Mockito.*;
+
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -9,6 +13,7 @@ import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -31,9 +36,6 @@ import org.sonar.api.platform.ComponentContainer;
 import org.sonar.api.profiles.RulesProfile;
 import org.sonar.api.rules.ActiveRule;
 import org.sonar.api.rules.Rule;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.contains;
-import static org.mockito.Mockito.*;
 
 /**
  * Verifies the functionality of the
@@ -57,8 +59,15 @@ public class JQAssistantSensorTest {
 	@Mock
 	private ActiveRules activeRules;
 
-	@Test
-	public void noIssue() throws JAXBException {
+    private File baseDir;
+
+    @Before
+    public void setUp() throws URISyntaxException {
+        baseDir = new File(JQAssistantSensorTest.class.getResource("/").toURI().getPath());
+    }
+
+    @Test
+	public void noIssue() {
 		String conceptId = "example:TestConcept";
 		String constraintId = "example:TestConstraint";
 		Rule concept = Rule.create(JQAssistant.KEY, conceptId, conceptId);
@@ -76,7 +85,7 @@ public class JQAssistantSensorTest {
 		sensor = new JQAssistantSensor(configuration, new JavaResourceResolver(moduleFileSystem), new RuleKeyResolver(activeRules));
 		String reportFile = "jqassistant-report-no-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
-        when(moduleFileSystem.baseDir()).thenReturn(new File(JQAssistantSensorTest.class.getResource("/").getFile()));
+        when(moduleFileSystem.baseDir()).thenReturn(baseDir);
 		Issuable issuable = mock(Issuable.class);
 		when(sensorContext.fileSystem()).thenReturn(moduleFileSystem);
 
@@ -88,7 +97,7 @@ public class JQAssistantSensorTest {
 
 
 	@Test
-	public void createConceptIssue() throws JAXBException {
+	public void createConceptIssue() {
 		String ruleId = "example:TestConcept";
 		Rule rule = Rule.create(JQAssistant.KEY, ruleId, ruleId);
 		ActiveRule activeRule = mock(ActiveRule.class);
@@ -101,8 +110,8 @@ public class JQAssistantSensorTest {
 		sensor = new JQAssistantSensor(configuration, new JavaResourceResolver(moduleFileSystem), keyResolver);
 		String reportFile ="jqassistant-report-concept-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
-        when(moduleFileSystem.baseDir()).thenReturn(new File(JQAssistantSensorTest.class.getResource("/").getFile()));
-		when(moduleFileSystem.inputDir(new File(JQAssistantSensorTest.class.getResource("/").getFile())))
+        when(moduleFileSystem.baseDir()).thenReturn(baseDir);
+		when(moduleFileSystem.inputDir(baseDir))
 			.thenReturn(new DefaultInputDir("", JQAssistantSensorTest.class.getResource("/").getPath()));
 		NewIssue newIssue = mock(NewIssue.class);
 		NewIssueLocation newIssueLocation = mock(NewIssueLocation.class);
@@ -121,7 +130,7 @@ public class JQAssistantSensorTest {
 	}
 
 	@Test
-	public void createConstraintIssue() throws JAXBException {
+	public void createConstraintIssue() {
 		String ruleId = "example:TestConstraint";
 		Rule rule = Rule.create(JQAssistant.KEY, ruleId, ruleId);
 		ActiveRule activeRule = mock(ActiveRule.class);
@@ -140,7 +149,7 @@ public class JQAssistantSensorTest {
 		sensor = new JQAssistantSensor(configuration, (JavaResourceResolver) resourceResolver, keyResolver);
 		String reportFile = "jqassistant-report-constraint-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
-        when(moduleFileSystem.baseDir()).thenReturn(new File(JQAssistantSensorTest.class.getResource("/").getFile()));
+        when(moduleFileSystem.baseDir()).thenReturn(baseDir);
 		NewIssue newIssue = mock(NewIssue.class);
 		NewIssueLocation newIssueLocation = mock(NewIssueLocation.class);
 		when(sensorContext.newIssue()).thenReturn(newIssue);
