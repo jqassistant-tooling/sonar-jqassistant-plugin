@@ -9,7 +9,7 @@ This is the SonarQube plugin for jQAssistant integration.
 * Java project with jQAssistant setup
 
 == Installation
-* https://search.maven.org/#search%7Cga%7C1%7Corg.jqassistant.contrib.sonarqube[Download] the plugin JAR for your SonarQube release
+* https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.jqassistant.contrib.sonarqube%22%20AND%20v%3A%221.0.0%22[Download] the plugin JAR for your SonarQube release
 * Copy the plugin (i.e. JAR file) to the `plugin/extensions` folder of the SonarQube installation
 * (Re-)Start the SonarQube server
 
