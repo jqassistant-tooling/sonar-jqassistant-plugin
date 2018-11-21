@@ -1,7 +1,11 @@
 :toc: left
 = jQAssistant SonarQube Plugin
 
-This is the SonarQube plugin for jQAssistant integration.
+This is the SonarQube plugin for jQAssistant integration
+
+== Maintainer
+
+The plugin is maintained by *http://msg.group[msg group]*.
 
 == Requirements
 * Java 7 or higher
