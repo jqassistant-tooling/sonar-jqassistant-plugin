@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.2.1-SNAPSHOT</version>
+        <version>1.5.0</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
