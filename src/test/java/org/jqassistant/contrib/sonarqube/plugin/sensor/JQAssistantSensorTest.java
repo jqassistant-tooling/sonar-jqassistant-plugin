@@ -22,8 +22,7 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputPath;
-import org.sonar.api.batch.fs.internal.DefaultInputDir;
-import org.sonar.api.batch.fs.internal.DefaultInputModule;
+import org.sonar.api.batch.fs.internal.DefaultInputProject;
 import org.sonar.api.batch.fs.internal.DefaultTextPointer;
 import org.sonar.api.batch.fs.internal.DefaultTextRange;
 import org.sonar.api.batch.rule.ActiveRules;
@@ -120,7 +119,7 @@ public class JQAssistantSensorTest {
 		when(newIssue.forRule(rule.ruleKey())).thenReturn(newIssue);
 		when(newIssueLocation.message(any(String.class))).thenReturn(newIssueLocation);
 		when(sensorContext.fileSystem()).thenReturn(moduleFileSystem);
-		when(sensorContext.module()).thenReturn(mock(DefaultInputModule.class));
+		when(sensorContext.project()).thenReturn(mock(DefaultInputProject.class));
 
 		sensor.execute(sensorContext);
 

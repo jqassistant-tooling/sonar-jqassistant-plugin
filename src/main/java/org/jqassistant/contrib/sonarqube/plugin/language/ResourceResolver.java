@@ -1,7 +1,6 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
-import org.sonar.api.batch.BatchSide;
-import org.sonar.api.batch.ScannerSide;
+import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.batch.fs.InputPath;
 
 /**

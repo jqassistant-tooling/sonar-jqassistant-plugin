@@ -23,11 +23,9 @@ import java.util.List;
 
 import org.sonar.api.CoreProperties;
 import org.sonar.api.PropertyType;
-import org.sonar.api.batch.BatchSide;
-import org.sonar.api.batch.ScannerSide;
+import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.config.Settings;
 import org.sonar.api.resources.Qualifiers;
 import com.google.common.collect.ImmutableList;
 
@@ -67,10 +65,10 @@ public class JQAssistantConfiguration {
                         .category(CoreProperties.CATEGORY_GENERAL).subCategory(subCategory).name("jQAssistant Report")
                         .description(
                                 "Path to the jQAssistant report file containing data by checks. The path may be absolute or relative to the project base directory.")
-                        .onQualifiers(Qualifiers.PROJECT, Qualifiers.MODULE).build(),
+                        .onQualifiers(Qualifiers.PROJECT).build(),
                 PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
                         .category(CoreProperties.CATEGORY_GENERAL).subCategory(subCategory).description("Do not execute jQAssistant.")
-                        .onQualifiers(Qualifiers.PROJECT, Qualifiers.MODULE).type(PropertyType.BOOLEAN).build());
+                        .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build());
     }
 
 }
