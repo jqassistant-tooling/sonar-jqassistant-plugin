@@ -1,21 +1,15 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 
 import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.batch.BatchSide;
-import org.sonar.api.batch.ScannerSide;
+import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.batch.fs.InputDir;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputPath;
-import com.google.common.collect.Lists;
 
 /**
  * Implementation of a

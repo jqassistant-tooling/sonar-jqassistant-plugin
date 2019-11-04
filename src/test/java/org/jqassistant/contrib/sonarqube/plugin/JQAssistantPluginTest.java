@@ -7,7 +7,6 @@ import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantRulesRepositor
 import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
 import org.jqassistant.contrib.sonarqube.plugin.sensor.RuleKeyResolver;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.sonar.api.Plugin;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.utils.Version;
