@@ -52,8 +52,7 @@ public class JavaResourceResolver implements ResourceResolver {
      * and in case of multiple matches.
      */
     private InputFile findMatchingInputFile(FileSystem fileSystem, String javaFilePath) {
-        // in SonarQ Java files have the prefix 'src/main/java' for Maven
-        // projects
+        // in SonarQ Java files have the prefix 'src/main/java' for Maven projects
         // we have to handle such nested project structures without specific
         // knowledge about project structures... so use pattern matcher :-)
         Iterator<InputFile> files = fileSystem.inputFiles(fileSystem.predicates().matchesPathPattern("**/" + javaFilePath)).iterator();

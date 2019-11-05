@@ -1,22 +1,22 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.sonar.api.batch.fs.*;
 import org.sonar.api.batch.fs.internal.DefaultIndexedFile;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Collections;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class JavaResourceResolverTest {
 
     @Mock
@@ -25,16 +25,22 @@ public class JavaResourceResolverTest {
     @Mock
     private FilePredicates predicates;
 
+    @Mock
+    private FilePredicate predicate;
+
     @Test
     public void type() {
         java.io.File javaFile = new File(JavaResourceResolverTest.class.getName().replace('.', '/').concat(".java"));
         DefaultIndexedFile defaultIndexedFile = new DefaultIndexedFile("", Paths.get(javaFile.getPath()), "", null);
-        Iterable<InputFile> it = Collections.singletonList((InputFile) new DefaultInputFile(defaultIndexedFile, null));
-        when(fileSystem.predicates()).thenReturn(predicates);
-        when(fileSystem.inputFiles(Matchers.any(FilePredicate.class))).thenReturn(it);
+        Iterable<InputFile> it = singletonList(new DefaultInputFile(defaultIndexedFile, null));
+        doReturn(predicates).when(fileSystem).predicates();
+        doReturn(predicate).when(predicates).matchesPathPattern(anyString());
+        doReturn(it).when(fileSystem).inputFiles(predicate);
         JavaResourceResolver resourceResolver = new JavaResourceResolver();
+
         InputPath result = resourceResolver.resolve(fileSystem, "Type", JavaResourceResolverTest.class.getName().replace('.', '/').concat(".class"),
             JavaResourceResolverTest.class.getName());
+
         assertEquals(new File(result.uri()), javaFile.getAbsoluteFile());
     }
 
