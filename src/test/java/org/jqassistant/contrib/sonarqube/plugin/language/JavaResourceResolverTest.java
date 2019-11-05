@@ -30,7 +30,7 @@ public class JavaResourceResolverTest {
 
     @Test
     public void type() {
-        java.io.File javaFile = new File(JavaResourceResolverTest.class.getName().replace('.', '/').concat(".java"));
+        File javaFile = new File(JavaResourceResolverTest.class.getName().replace('.', '/').concat(".java"));
         DefaultIndexedFile defaultIndexedFile = new DefaultIndexedFile("", Paths.get(javaFile.getPath()), "", null);
         Iterable<InputFile> it = singletonList(new DefaultInputFile(defaultIndexedFile, null));
         doReturn(predicates).when(fileSystem).predicates();
