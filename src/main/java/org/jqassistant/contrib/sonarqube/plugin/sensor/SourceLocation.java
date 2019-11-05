@@ -1,19 +1,24 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 import org.sonar.api.batch.fs.InputComponent;
+
+import java.util.Optional;
 
 /**
  * Helper class to hold resource + line number of source together.
  *
  * @author rzozmann
- *
  */
+@Builder
+@Getter
+@ToString
 final class SourceLocation {
-	final InputComponent resource;
-	final Integer lineNumber;
 
-	SourceLocation(InputComponent resource, Integer lineNumber) {
-		this.resource = resource;
-		this.lineNumber = lineNumber;
-	}
+    private Optional<InputComponent> resource;
+
+    private Optional<Integer> lineNumber;
+
 }

@@ -8,6 +8,7 @@ import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonar.api.batch.fs.internal.DefaultInputProject;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
@@ -90,7 +91,6 @@ public class JQAssistantSensor implements Sensor {
         if (ruleKey == null) {
             LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", ruleType.getId());
         } else {
-            InputProject baseDir = context.project();
             switch (jQAssistantRuleType) {
                 case Concept:
                     ConceptIssueHandler conceptHandler = new ConceptIssueHandler(context, languageResourceResolvers, projectPath);
@@ -125,14 +125,18 @@ public class JQAssistantSensor implements Sensor {
 
     private File getProjectPath(SensorContext context) {
         Optional<String> path = configuration.getProjectPath();
-        if (path == null || !path.isPresent()) {
-            return context.fileSystem().baseDir();
+        if (path != null && path.isPresent()) {
+            File file = new File(path.get());
+            if (!file.isAbsolute()) {
+                throw new IllegalArgumentException("The given project path '" + path + "' must be absolute.");
+            }
+            return file;
         }
-        File file = new File(path.get());
-        if (!file.isAbsolute()) {
-            throw new IllegalArgumentException("The given project path '" + path + "' must be absolute.");
+        InputProject project = context.project();
+        if (project instanceof DefaultInputProject) {
+            return ((DefaultInputProject) project).getBaseDir().toFile();
         }
-        return file;
+        return context.fileSystem().baseDir();
     }
 
     /**

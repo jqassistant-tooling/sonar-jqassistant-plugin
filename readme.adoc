@@ -8,8 +8,8 @@ This is the SonarQube plugin for jQAssistant integration
 The plugin is maintained by *http://msg.group[msg group]*.
 
 == Requirements
-* Java 7 or higher
-* SonarQube 5.6 or 6.7
+* Java 8 or higher
+* SonarQube 7.9 or higher
 * Java project with jQAssistant setup
 
 == Installation
@@ -140,99 +140,6 @@ NOTE: The constraint defines a property called `primaryReportColumn`.
 It specifies the column of the result containing the elements (e.g. classes, packages) which shall be used to create issues in SonarQube.
 The property is optional, if omitted the first column is used by default (recommended).
 
-== Known Limitations
-
-=== Maven Multi-Module Projects
-
-For the following project structure jQAssistant will report violations on the console during the build but they will not be visible in SonarQube:
-
-.Maven project with multiple modules
-[source,raw]
-----
-project/
-|- module1/
-|  |- src/
-|  |  |- main/
-|  |     |- java/
-|  |- pom.xml
-|
-|- module2/
-|  |- src/
-|  |  |- main/
-|  |     |- java/
-|  |- pom.xml
-|
-|- jqassistant
-|  |- index.adoc
-|
-|- pom.xml
-----
-
-jQAssistant creates its report file in the `target` folder of the module where the directory `jqassistant`containing the rule files is located,
-i.e. for the example above in the root module. This approach has been chosen to allow a project-wide view on code-structures.
-For found issues the report references the affected code elements (e.g. classes) no matter in which module they are located.
-Currently such elements from sub-modules (i.e. module1 and module2) cannot be resolved by the SonarQube plugin API while creating an issue.
-
-NOTE: This problem will probably be solved with future releases supporting newer versions of the SonarQube plugin API.
-
-As a workaround a directory `jqassistant` can be put into each sub-module.
-This forces jQAssistant to create an individual report for each of them.
-
-.Workaround for multi-module Maven projects
-[source,raw]
-----
-project/
-|- module1/
-|  |- jqassistant/
-|  |  |- module1-rules.adoc
-|  |- src/
-|  |  |- main/
-|  |     |- java/
-|  |- pom.xml
-|
-|- module2/
-|  |- jqassistant/
-|  |  |- module2-rules.adoc
-|  |- src/
-|  |  |- main/
-|  |     |- java/
-|  |- pom.xml
-|- pom.xml
-|
-|- jqassistant-shared
-   | shared-rules.adoc
-----
-
-If shared rules shall be available for these sub-modules they can be placed as files into a directory within the root module (i.e. `jqassistant-shared`).
-This directory must be referenced in the jQAssistant Maven plugin configuration as directory for additional rules:
-
-./pom.xml
-[source,xml]
-----
-<project>
-...
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>com.buschmais.jqassistant</groupId>
-        <artifactId>jqassistant-maven-plugin</artifactId>
-        <version>${jqassistant-maven-plugin.version}</version>
-        ...
-        <configuration>
-          <warnOnSeverity>MINOR</warnOnSeverity>
-          <failOnSeverity>CRITICAL</failOnSeverity>
-          <rulesDirectories>
-            <rulesDirectory>${session.executionRootDirectory}/jqassistant-shared</rulesDirectory>
-          </rulesDirectories>
-        </configuration>
-        ...
-      </plugin>
-...
-</project>
-----
-
-WARNING: The shared rules directory must not be named `jqassistant`.
-
 == Feedback & Issues
 
 For any questions don't hesitate to ask them on the https://groups.google.com/forum/#!forum/jqassistant[jQAssistant Google Group] or http://stackoverflow.com/questions/tagged/jqassistant[Stackoverflow].
@@ -240,8 +147,7 @@ For any questions don't hesitate to ask them on the https://groups.google.com/fo
 Feature requests or bugs can be reported on the https://github.com/jqassistant-contrib/sonar-jqassistant-plugin/issues[GitHub issue tracker].
 
 == Rules
-In the following we're describing some best practises of the usage of jQAssistant in combination
-with the Sonar-jQA plugin.
+In the following we're describing some best practises of the usage of jQAssistant in combination with the Sonar-jQA plugin.
 
 The following example describes a method invocation from a class of the persistence layer to a class
 of the core layer.
