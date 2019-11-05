@@ -19,21 +19,22 @@
  */
 package org.jqassistant.contrib.sonarqube.plugin;
 
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.PropertyType;
 import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
-import com.google.common.collect.ImmutableList;
+import org.sonar.api.scanner.ScannerSide;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Define settings for jQAssistant affecting the execution while SONAR run.
  *
  * @author rzozmann
- *
  */
 @ScannerSide
 public class JQAssistantConfiguration {
@@ -46,12 +47,15 @@ public class JQAssistantConfiguration {
         this.settings = settings;
     }
 
+    public Optional<String> getProjectPath() {
+        return settings.get(JQAssistant.SETTINGS_KEY_PROJECT_PATH);
+    }
+
     public String getReportPath() {
         return settings.get(JQAssistant.SETTINGS_KEY_REPORT_PATH).get();
     }
 
     /**
-     *
      * @return FALSE if jQAssistant is enabled on project.
      */
     public boolean isSensorDisabled() {
@@ -61,13 +65,17 @@ public class JQAssistantConfiguration {
     public static List<PropertyDefinition> getPropertyDefinitions() {
         String subCategory = "jQAssistant";
         return ImmutableList.of(
-                PropertyDefinition.builder(JQAssistant.SETTINGS_KEY_REPORT_PATH).defaultValue(JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH)
-                        .category(CoreProperties.CATEGORY_GENERAL).subCategory(subCategory).name("jQAssistant Report")
-                        .description(
-                                "Path to the jQAssistant report file containing data by checks. The path may be absolute or relative to the project base directory.")
-                        .onQualifiers(Qualifiers.PROJECT).build(),
-                PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
-                        .category(CoreProperties.CATEGORY_GENERAL).subCategory(subCategory).description("Do not execute jQAssistant.")
+            PropertyDefinition.builder(JQAssistant.SETTINGS_KEY_PROJECT_PATH).category(CoreProperties.CATEGORY_GENERAL).subCategory(subCategory).name("jQAssistant Project Path")
+                .description(
+                    "Absolute path to the project base directory (required for multi-module projects).")
+                .onQualifiers(Qualifiers.PROJECT).build(),
+            PropertyDefinition.builder(JQAssistant.SETTINGS_KEY_REPORT_PATH).defaultValue(JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_PATH)
+                .category(CoreProperties.CATEGORY_GENERAL).subCategory(subCategory).name("jQAssistant Report Path")
+                .description(
+                    "Relative path to the jQAssistant XML report file (default: '" + JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_PATH + "').")
+                .onQualifiers(Qualifiers.PROJECT).build(),
+            PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
+                .category(CoreProperties.CATEGORY_GENERAL).subCategory(subCategory).description("Do not execute jQAssistant.")
                         .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build());
     }
 

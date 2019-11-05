@@ -8,7 +8,7 @@ import org.sonar.plugins.java.Java;
 /**
  * Dummy repository to define one placeholder rule, used to assign all
  * violations coming from a
- * {@link JQAssistant#SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH
+ * {@link JQAssistant#SETTINGS_VALUE_DEFAULT_REPORT_PATH
  * jQAssistant report} in a local project.
  */
 public final class JQAssistantRulesRepository implements RulesDefinition {

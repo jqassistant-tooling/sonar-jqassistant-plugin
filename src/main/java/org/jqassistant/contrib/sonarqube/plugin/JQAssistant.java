@@ -21,15 +21,19 @@ public final class JQAssistant {
 	 */
 	public static final String NAME = "jQAssistant";
 
-	/**
-	 * Maven properties key to define a default lookup folder for the
-	 * jQAssistant report file.
-	 */
+    /**
+     * The absolute path to the project directory, may be empty for single-module projects.
+     */
+    public static final String SETTINGS_KEY_PROJECT_PATH = "sonar.jqassistant.projectPath";
+
+    /**
+     * Defines the path for the jQAssistant XML report relative to the root directory of the project.
+     */
 	public static final String SETTINGS_KEY_REPORT_PATH = "sonar.jqassistant.reportPath";
 
 	/**
-	 * Relative path + filename of jQAssistant report file.
+	 * The default value of the jQAssistant XML report.
 	 */
-	public static final String SETTINGS_VALUE_DEFAULT_REPORT_FILE_PATH = "target/jqassistant/jqassistant-report.xml";
+	public static final String SETTINGS_VALUE_DEFAULT_REPORT_PATH = "target/jqassistant/jqassistant-report.xml";
 
 }

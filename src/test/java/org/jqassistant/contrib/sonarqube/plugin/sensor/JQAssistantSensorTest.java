@@ -81,7 +81,7 @@ public class JQAssistantSensorTest {
 		RuleKeyResolver keyResolver = mock(RuleKeyResolver.class);
 		when(keyResolver.resolve(any(JQAssistantRuleType.class))).thenReturn(constraint.ruleKey());
 		when(componentContainer.getComponentsByType(RuleKeyResolver.class)).thenReturn(Arrays.asList(keyResolver));
-		sensor = new JQAssistantSensor(configuration, new JavaResourceResolver(moduleFileSystem), new RuleKeyResolver(activeRules));
+		sensor = new JQAssistantSensor(configuration, new JavaResourceResolver(), new RuleKeyResolver(activeRules));
 		String reportFile = "jqassistant-report-no-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
         when(moduleFileSystem.baseDir()).thenReturn(baseDir);
@@ -106,7 +106,7 @@ public class JQAssistantSensorTest {
 		RuleKeyResolver keyResolver = mock(RuleKeyResolver.class);
 		when(keyResolver.resolve(any(JQAssistantRuleType.class))).thenReturn(rule.ruleKey());
 		when(componentContainer.getComponentByType(RuleKeyResolver.class)).thenReturn(keyResolver);
-		sensor = new JQAssistantSensor(configuration, new JavaResourceResolver(moduleFileSystem), keyResolver);
+		sensor = new JQAssistantSensor(configuration, new JavaResourceResolver(), keyResolver);
 		String reportFile ="jqassistant-report-concept-issue.xml";
 		when(configuration.getReportPath()).thenReturn(reportFile);
         when(moduleFileSystem.baseDir()).thenReturn(baseDir);
@@ -138,7 +138,7 @@ public class JQAssistantSensorTest {
 		ResourceResolver resourceResolver = mock(JavaResourceResolver.class);
 		when(resourceResolver.getLanguage()).thenReturn("Java");
 		InputPath javaResource = mock(InputPath.class, withSettings().extraInterfaces(InputFile.class));
-		when(resourceResolver.resolve(any(String.class), any(String.class), any(String.class))).thenReturn(javaResource);
+		when(resourceResolver.resolve(any(FileSystem.class), any(String.class), any(String.class), any(String.class))).thenReturn(javaResource);
 		when(((InputFile) javaResource).newRange(16, 0, 16, 0))
 			.thenReturn(new DefaultTextRange(new DefaultTextPointer(16, 0), new DefaultTextPointer(16, 0)));
 		when(componentContainer.getComponentsByType(ResourceResolver.class)).thenReturn(Arrays.asList(resourceResolver));

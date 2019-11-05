@@ -1,15 +1,15 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
-import java.util.Iterator;
-import java.util.Locale;
-
 import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputPath;
+import org.sonar.api.scanner.ScannerSide;
+
+import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * Implementation of a
@@ -21,34 +21,26 @@ public class JavaResourceResolver implements ResourceResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
 
-    private final FileSystem fileSystem;
-
-    public JavaResourceResolver(FileSystem moduleFileSystem) {
-        this.fileSystem = moduleFileSystem;
-    }
-
     @Override
     public String getLanguage() {
         return "java";
     }
 
     @Override
-    public InputPath resolve(String nodeType, String nodeSource, String nodeValue) {
+    public InputPath resolve(FileSystem fileSystem, String nodeType, String nodeSource, String nodeValue) {
         switch (nodeType) {
-        case "Type":
-        case "Field":
-        case "Method":
-        case "MethodInvocation":
-        case "ReadField":
-        case "WriteField":
-            // TODO: Using 'nodeSource' is working only on file level, can we
-            // identify a method... as resource?
-            final String javaFilePath = determineRelativeQualifiedJavaSourceFileName(nodeSource);
-            return findMatchingResourceFile(javaFilePath);
-        case "Package":
-            // The ability to report issues or measures on directories will be dropped by SonarQ
-        default:
-            return null;
+            case "Type":
+            case "Field":
+            case "Method":
+            case "MethodInvocation":
+            case "ReadField":
+            case "WriteField":
+                // TODO: Using 'nodeSource' is working only on file level, can we
+                // identify a method... as resource?
+                final String javaFilePath = getJavaSourceFileName(nodeSource);
+                return findMatchingInputFile(fileSystem, javaFilePath);
+            default:
+                return null;
         }
     }
 
@@ -57,9 +49,9 @@ public class JavaResourceResolver implements ResourceResolver {
      * only such resources are part of the 'index cache'.
      *
      * @return The matching resource or <code>null</code> if nothing was found
-     *         and in case of multiple matches.
+     * and in case of multiple matches.
      */
-    private InputFile findMatchingResourceFile(String javaFilePath) {
+    private InputFile findMatchingInputFile(FileSystem fileSystem, String javaFilePath) {
         // in SonarQ Java files have the prefix 'src/main/java' for Maven
         // projects
         // we have to handle such nested project structures without specific
@@ -83,7 +75,7 @@ public class JavaResourceResolver implements ResourceResolver {
      * into a source file name like
      * <code>com/buschmais/jqassistant/examples/sonar/project/Bar.java</code>.
      */
-    private String determineRelativeQualifiedJavaSourceFileName(String classFileName) {
+    private String getJavaSourceFileName(String classFileName) {
         if (classFileName == null || classFileName.isEmpty()) {
             return null;
         }

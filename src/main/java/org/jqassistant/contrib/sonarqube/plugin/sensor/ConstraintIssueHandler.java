@@ -1,31 +1,28 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import java.util.Map;
-
-import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
-import org.sonar.api.batch.fs.InputComponent;
 import com.buschmais.jqassistant.core.report.schema.v1.ColumnType;
 import com.buschmais.jqassistant.core.report.schema.v1.ConstraintType;
 import com.buschmais.jqassistant.core.report.schema.v1.RowType;
+import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
+import org.sonar.api.batch.sensor.SensorContext;
+
+import java.io.File;
+import java.util.Map;
 
 class ConstraintIssueHandler extends AbstractIssueHandler<ConstraintType> {
 
-    ConstraintIssueHandler(InputComponent baseDir, Map<String, ResourceResolver> languageResourceResolvers) {
-        super(baseDir, languageResourceResolvers);
+    ConstraintIssueHandler(SensorContext sensorContext, Map<String, ResourceResolver> languageResourceResolvers, File projectPath) {
+        super(sensorContext, languageResourceResolvers, projectPath);
     }
 
     @Override
-    protected String getMessage(InputComponent resourceResolved, String ruleId, String ruleDescription, String primaryColumn, RowType rowEntry) {
-        if(resourceResolved.equals(getBaseDir())){
-            return "Configuration mismatch: There is a problem with the configuration of SonarQube and JQAssistant. The JQA-violation is within a file which wasn't scanned by SonarQube.";
-        }
-        if (rowEntry == null) {
-            return null;
-        }
-        String message = ruleId + ": " + ruleDescription;
-        String addMessage = buildMessage(rowEntry, primaryColumn);
-        if (addMessage.length() > 1) {
-            message = message.concat(" [" + addMessage + "]");
+    protected String getMessage(String ruleDescription, String primaryColumn, RowType rowEntry) {
+        String message = ruleDescription;
+        if (rowEntry != null) {
+            String addMessage = buildMessage(rowEntry, primaryColumn);
+            if (addMessage.length() > 1) {
+                message = message.concat(" [" + addMessage + "]");
+            }
         }
         return message;
     }
