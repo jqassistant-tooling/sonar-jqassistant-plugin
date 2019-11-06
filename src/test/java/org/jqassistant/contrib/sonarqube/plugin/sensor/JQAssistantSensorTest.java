@@ -20,8 +20,6 @@ import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.issue.Issuable;
 import org.sonar.api.issue.Issue;
-import org.sonar.api.platform.ComponentContainer;
-import org.sonar.api.profiles.RulesProfile;
 import org.sonar.api.rules.Rule;
 
 import java.io.File;
@@ -38,10 +36,6 @@ public class JQAssistantSensorTest {
 
     private JQAssistantSensor sensor;
 
-    @Mock
-    private RulesProfile rulesProfile;
-    @Mock
-    private ComponentContainer componentContainer;
     @Mock
     private JQAssistantConfiguration configuration;
     @Mock
@@ -65,11 +59,8 @@ public class JQAssistantSensorTest {
     @Test
     public void noIssue() {
         sensor = new JQAssistantSensor(configuration, new JavaResourceResolver(), new RuleKeyResolver(activeRules));
-        String reportFile = "jqassistant-report-no-issue.xml";
-        when(configuration.getReportPath()).thenReturn(Optional.of(reportFile));
-        when(fileSystem.baseDir()).thenReturn(baseDir);
+        stubFileSystem("jqassistant-report-no-issue.xml");
         Issuable issuable = mock(Issuable.class);
-        when(sensorContext.fileSystem()).thenReturn(fileSystem);
 
         sensor.execute(sensorContext);
 
@@ -121,9 +112,9 @@ public class JQAssistantSensorTest {
     }
 
     private void stubFileSystem(String reportFile) {
-        when(configuration.getReportPath()).thenReturn(Optional.of(reportFile));
-        when(fileSystem.baseDir()).thenReturn(baseDir);
-        when(sensorContext.fileSystem()).thenReturn(fileSystem);
+        doReturn(new File(baseDir, reportFile)).when(configuration).getReportFile(baseDir);
+        doReturn(baseDir).when(fileSystem).baseDir();
+        doReturn(fileSystem).when(sensorContext).fileSystem();
     }
 
     private void stubNewIssue(Rule rule) {

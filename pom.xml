@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
@@ -13,7 +14,8 @@
     <packaging>sonar-plugin</packaging>
 
     <name>Sonar jQAssistant Plugin</name>
-    <description>SonarQube plugin for jQAssistant providing rules for invalid concepts and constraint violations.</description>
+    <description>SonarQube plugin for jQAssistant providing rules for invalid concepts and constraint violations.
+    </description>
     <url>https://github.com/jqassistant-contrib/sonar-jqassistant-plugin</url>
 
     <developers>
@@ -26,7 +28,8 @@
 
     <scm>
         <connection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git
+        </developerConnection>
         <url>https://github.com/jqassistant-contrib/sonar-jqassistant-plugin</url>
         <tag>HEAD</tag>
     </scm>
@@ -52,8 +55,7 @@
                 </configuration>
             </plugin>
             <plugin>
-                <!-- UTF-8 bundles are not supported by Java, so they must be converted
-                    during build -->
+                <!-- UTF-8 bundles are not supported by Java, so they must be converted during build -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>native2ascii-maven-plugin</artifactId>
                 <version>1.0-beta-1</version>
@@ -66,12 +68,16 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -116,11 +122,6 @@
                 <artifactId>google-collections</artifactId>
                 <version>1.0</version>
             </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>22.0</version>
-            </dependency>
             <!-- unit tests -->
             <dependency>
                 <groupId>org.sonarsource.sonarqube</groupId>
@@ -152,10 +153,6 @@
         <dependency>
             <groupId>com.google.collections</groupId>
             <artifactId>google-collections</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
         </dependency>
         <!-- unit tests -->
         <dependency>
@@ -210,7 +207,7 @@
                                             </goals>
                                         </pluginExecutionFilter>
                                         <action>
-                                            <ignore />
+                                            <ignore/>
                                         </action>
                                     </pluginExecution>
                                     <pluginExecution>
@@ -223,7 +220,7 @@
                                             </goals>
                                         </pluginExecutionFilter>
                                         <action>
-                                            <ignore />
+                                            <ignore/>
                                         </action>
                                     </pluginExecution>
                                 </pluginExecutions>

@@ -57,7 +57,7 @@ public class JQAssistantSensor implements Sensor {
     private void startScan(SensorContext context) {
         File projectPath = getProjectPath(context);
         LOGGER.info("Using project path '{}'.", projectPath);
-        File reportFile = getReportFile(projectPath);
+        File reportFile = configuration.getReportFile(projectPath);
         if (reportFile.exists()) {
             LOGGER.info("Found jQAssistant report at '{}'.", reportFile.getAbsolutePath());
             JqassistantReport report = readReport(reportFile);
@@ -67,6 +67,14 @@ public class JQAssistantSensor implements Sensor {
         } else {
             LOGGER.info("No report found at '{}', skipping.", reportFile.getPath());
         }
+    }
+
+    private File getProjectPath(SensorContext context) {
+        InputProject project = context.project();
+        if (project instanceof DefaultInputProject) {
+            return ((DefaultInputProject) project).getBaseDir().toFile();
+        }
+        return context.fileSystem().baseDir();
     }
 
     private void evaluate(SensorContext context, File projectPath, List<ReferencableRuleType> rules) {
@@ -122,32 +130,5 @@ public class JQAssistantSensor implements Sensor {
         return namespaceMappings;
     }
 
-
-    private File getProjectPath(SensorContext context) {
-        Optional<String> path = configuration.getProjectPath();
-        if (path.isPresent()) {
-            File file = new File(path.get());
-            if (!file.isAbsolute()) {
-                throw new IllegalArgumentException("The project path '" + path + "' must be absolute.");
-            }
-            return file;
-        }
-        InputProject project = context.project();
-        if (project instanceof DefaultInputProject) {
-            return ((DefaultInputProject) project).getBaseDir().toFile();
-        }
-        return context.fileSystem().baseDir();
-    }
-
-    /**
-     * The path is relative or absolute.
-     */
-    private File getReportFile(File projectPath) {
-        Optional<String> reportPath = configuration.getReportPath();
-        if (reportPath.isPresent()) {
-            return new File(projectPath, reportPath.get());
-        }
-        return new File(projectPath, JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_PATH);
-    }
 
 }
