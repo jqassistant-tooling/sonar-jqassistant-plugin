@@ -86,23 +86,23 @@ public class JQAssistantSensor implements Sensor {
     }
 
     private void createIssue(SensorContext context, File projectPath, ExecutableRuleType ruleType) {
-        JQAssistantRuleType jQAssistantRuleType = (ruleType instanceof ConceptType) ? JQAssistantRuleType.Concept : JQAssistantRuleType.Constraint;
-        final RuleKey ruleKey = ruleResolver.resolve(jQAssistantRuleType);
-        if (ruleKey == null) {
-            LOGGER.warn("Cannot resolve rule key for id '{}'. No issue will be created! Rule not active?", ruleType.getId());
-        } else {
+        JQAssistantRuleType jQAssistantRuleType = (ruleType instanceof ConceptType) ? JQAssistantRuleType.CONCEPT : JQAssistantRuleType.CONSTRAINT;
+        Optional<RuleKey> ruleKey = ruleResolver.resolve(jQAssistantRuleType);
+        if (ruleKey.isPresent()) {
             switch (jQAssistantRuleType) {
-                case Concept:
+                case CONCEPT:
                     ConceptIssueHandler conceptHandler = new ConceptIssueHandler(context, languageResourceResolvers, projectPath);
-                    conceptHandler.process((ConceptType) ruleType, ruleKey);
+                    conceptHandler.process((ConceptType) ruleType, ruleKey.get());
                     break;
-                case Constraint:
+                case CONSTRAINT:
                     ConstraintIssueHandler constraintHandler = new ConstraintIssueHandler(context, languageResourceResolvers, projectPath);
-                    constraintHandler.process((ConstraintType) ruleType, ruleKey);
+                    constraintHandler.process((ConstraintType) ruleType, ruleKey.get());
                     break;
                 default:
-                    LOGGER.warn("Unsupported rule type {}", jQAssistantRuleType);
+                    LOGGER.warn("Rule type {} is not supported, skipping.", jQAssistantRuleType);
             }
+        } else {
+            LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", ruleType.getId());
         }
     }
 
@@ -125,10 +125,10 @@ public class JQAssistantSensor implements Sensor {
 
     private File getProjectPath(SensorContext context) {
         Optional<String> path = configuration.getProjectPath();
-        if (path != null && path.isPresent()) {
+        if (path.isPresent()) {
             File file = new File(path.get());
             if (!file.isAbsolute()) {
-                throw new IllegalArgumentException("The given project path '" + path + "' must be absolute.");
+                throw new IllegalArgumentException("The project path '" + path + "' must be absolute.");
             }
             return file;
         }
@@ -143,11 +143,11 @@ public class JQAssistantSensor implements Sensor {
      * The path is relative or absolute.
      */
     private File getReportFile(File projectPath) {
-        String configReportPath = configuration.getReportPath();
-        if (configReportPath == null || configReportPath.isEmpty()) {
-            configReportPath = JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_PATH;
+        Optional<String> reportPath = configuration.getReportPath();
+        if (reportPath.isPresent()) {
+            return new File(projectPath, reportPath.get());
         }
-        return new File(projectPath, configReportPath);
+        return new File(projectPath, JQAssistant.SETTINGS_VALUE_DEFAULT_REPORT_PATH);
     }
 
 }

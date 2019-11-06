@@ -26,9 +26,8 @@ import org.sonar.api.rules.Rule;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.*;
 
 /**
@@ -67,7 +66,7 @@ public class JQAssistantSensorTest {
     public void noIssue() {
         sensor = new JQAssistantSensor(configuration, new JavaResourceResolver(), new RuleKeyResolver(activeRules));
         String reportFile = "jqassistant-report-no-issue.xml";
-        when(configuration.getReportPath()).thenReturn(reportFile);
+        when(configuration.getReportPath()).thenReturn(Optional.of(reportFile));
         when(fileSystem.baseDir()).thenReturn(baseDir);
         Issuable issuable = mock(Issuable.class);
         when(sensorContext.fileSystem()).thenReturn(fileSystem);
@@ -117,12 +116,12 @@ public class JQAssistantSensorTest {
 
     private RuleKeyResolver stubRuleKeyResolver(Rule rule) {
         RuleKeyResolver keyResolver = mock(RuleKeyResolver.class);
-        when(keyResolver.resolve(any(JQAssistantRuleType.class))).thenReturn(rule.ruleKey());
+        when(keyResolver.resolve(any(JQAssistantRuleType.class))).thenReturn(Optional.of(rule.ruleKey()));
         return keyResolver;
     }
 
     private void stubFileSystem(String reportFile) {
-        when(configuration.getReportPath()).thenReturn(reportFile);
+        when(configuration.getReportPath()).thenReturn(Optional.of(reportFile));
         when(fileSystem.baseDir()).thenReturn(baseDir);
         when(sensorContext.fileSystem()).thenReturn(fileSystem);
     }

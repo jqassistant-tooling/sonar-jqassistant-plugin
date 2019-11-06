@@ -79,7 +79,7 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
     }
 
     private void createIssue(RuleKey ruleKey, String message, Optional<Severity> severity, InputComponent inputComponent,
-        Optional<Integer> lineNumber) {
+                             Optional<Integer> lineNumber) {
         NewIssue newIssue = sensorContext.newIssue();
         NewIssueLocation newIssueLocation = newIssue.newLocation()
             .message(message);
@@ -88,7 +88,7 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
             TextRange textRange = toTextRange((InputFile) inputComponent, lineNumber.get());
             newIssueLocation.at(textRange);
         }
-        severity.ifPresent(s -> newIssue.overrideSeverity(s));
+        severity.ifPresent(newIssue::overrideSeverity);
         newIssue.forRule(ruleKey)
             .at(newIssueLocation);
         newIssue.save();

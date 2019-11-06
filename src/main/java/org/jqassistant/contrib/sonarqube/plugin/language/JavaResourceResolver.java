@@ -1,6 +1,5 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
-import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
@@ -19,7 +18,7 @@ import java.util.Locale;
 @ScannerSide
 public class JavaResourceResolver implements ResourceResolver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JavaResourceResolver.class);
 
     @Override
     public String getLanguage() {
@@ -35,9 +34,7 @@ public class JavaResourceResolver implements ResourceResolver {
             case "MethodInvocation":
             case "ReadField":
             case "WriteField":
-                // TODO: Using 'nodeSource' is working only on file level, can we
-                // identify a method... as resource?
-                final String javaFilePath = getJavaSourceFileName(nodeSource);
+                String javaFilePath = getJavaSourceFileName(nodeSource);
                 return findMatchingInputFile(fileSystem, javaFilePath);
             default:
                 return null;

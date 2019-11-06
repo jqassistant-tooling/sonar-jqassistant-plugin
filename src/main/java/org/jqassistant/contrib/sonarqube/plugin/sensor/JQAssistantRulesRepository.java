@@ -13,11 +13,11 @@ import org.sonar.plugins.java.Java;
  */
 public final class JQAssistantRulesRepository implements RulesDefinition {
 
-    public final static String INVALID_CONCEPT_KEY = "invalid-concept";
-    static final String INVALID_CONCEPT_RULE_NAME = JQAssistant.NAME + " Invalid Concept";
+    public static final String INVALID_CONCEPT_KEY = "invalid-concept";
+    public static final String INVALID_CONCEPT_RULE_NAME = JQAssistant.NAME + " Invalid Concept";
 
-    public final static String CONSTRAINT_VIOLATION_KEY = "constraint-violation";
-    static final String CONSTRAINT_VIOLATION_RULE_NAME = JQAssistant.NAME + " Constraint Violation";
+    public static final String CONSTRAINT_VIOLATION_KEY = "constraint-violation";
+    public static final String CONSTRAINT_VIOLATION_RULE_NAME = JQAssistant.NAME + " Constraint Violation";
 
     @Override
     public void define(Context context) {

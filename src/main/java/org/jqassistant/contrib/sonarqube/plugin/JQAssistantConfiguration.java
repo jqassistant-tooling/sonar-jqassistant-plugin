@@ -22,7 +22,6 @@ package org.jqassistant.contrib.sonarqube.plugin;
 import com.google.common.collect.ImmutableList;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.PropertyType;
-import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
@@ -51,15 +50,16 @@ public class JQAssistantConfiguration {
         return settings.get(JQAssistant.SETTINGS_KEY_PROJECT_PATH);
     }
 
-    public String getReportPath() {
-        return settings.get(JQAssistant.SETTINGS_KEY_REPORT_PATH).get();
+    public Optional<String> getReportPath() {
+        return settings.get(JQAssistant.SETTINGS_KEY_REPORT_PATH);
     }
 
     /**
      * @return FALSE if jQAssistant is enabled on project.
      */
     public boolean isSensorDisabled() {
-        return settings.getBoolean(DISABLED).get();
+        Optional<Boolean> disabled = settings.getBoolean(DISABLED);
+        return disabled.isPresent() && disabled.get();
     }
 
     public static List<PropertyDefinition> getPropertyDefinitions() {
@@ -76,7 +76,7 @@ public class JQAssistantConfiguration {
                 .onQualifiers(Qualifiers.PROJECT).build(),
             PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
                 .category(CoreProperties.CATEGORY_GENERAL).subCategory(subCategory).description("Do not execute jQAssistant.")
-                        .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build());
+                .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build());
     }
 
 }

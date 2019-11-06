@@ -5,13 +5,13 @@ package org.jqassistant.contrib.sonarqube.plugin.sensor;
  */
 public enum JQAssistantRuleType {
 
-    Concept {
+    CONCEPT {
         @Override
         public String getKey() {
             return JQAssistantRulesRepository.INVALID_CONCEPT_KEY;
         }
     },
-    Constraint {
+    CONSTRAINT {
         @Override
         public String getKey() {
             return JQAssistantRulesRepository.CONSTRAINT_VIOLATION_KEY;
