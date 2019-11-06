@@ -5,12 +5,6 @@ import org.sonar.api.rule.Severity;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.plugins.java.Java;
 
-/**
- * Dummy repository to define one placeholder rule, used to assign all
- * violations coming from a
- * {@link JQAssistant#SETTINGS_VALUE_DEFAULT_REPORT_PATH
- * jQAssistant report} in a local project.
- */
 public final class JQAssistantRulesRepository implements RulesDefinition {
 
     public static final String INVALID_CONCEPT_KEY = "invalid-concept";

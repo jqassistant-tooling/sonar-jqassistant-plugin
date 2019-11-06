@@ -34,6 +34,18 @@ class JQAssistantConfigurationTest {
     }
 
     @Test
+    public void disabledNotSet() {
+        assertThat(configuration.isSensorDisabled()).isEqualTo(false);
+    }
+
+    @Test
+    public void disabledSet() {
+        doReturn(Optional.of(Boolean.TRUE)).when(sonarConfiguration).getBoolean(JQAssistantConfiguration.DISABLED);
+
+        assertThat(configuration.isSensorDisabled()).isEqualTo(true);
+    }
+
+    @Test
     public void getDefaultReportFile() {
         File projectPath = new File(".");
 
