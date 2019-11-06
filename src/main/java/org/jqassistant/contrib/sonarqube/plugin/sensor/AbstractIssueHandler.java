@@ -24,6 +24,7 @@ import java.util.Optional;
  */
 abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 
+    private static final String NEWLINE = "\n";
     private final SensorContext sensorContext;
 
     private final Map<String, ResourceResolver> languageResourceResolvers;
@@ -43,29 +44,30 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
         ResultType result = ruleType.getResult();
         if (result == null) {
             //'result' may be null for not applied (failed) concepts
-            createIssue(Optional.empty(), ruleType, ruleKey, null, null);
+            createIssue(Optional.empty(), ruleType, ruleKey, null);
         } else {
             String primaryColumn = getPrimaryColumn(result);
             for (RowType rowType : result.getRows().getRow()) {
                 Optional<SourceLocation> target = resolveRelatedResource(rowType, primaryColumn);
-                createIssue(target, ruleType, ruleKey, primaryColumn, rowType);
+                createIssue(target, ruleType, ruleKey, rowType);
             }
         }
     }
 
-    private void createIssue(Optional<SourceLocation> target, T ruleType, RuleKey ruleKey, String primaryColumn, RowType rowType) {
-        String message = "[" + ruleType.getId() + "] " + getMessage(ruleType.getDescription(), primaryColumn, rowType);
+    private void createIssue(Optional<SourceLocation> target, T ruleType, RuleKey ruleKey, RowType rowType) {
+        StringBuilder message = new StringBuilder().append('[').append(ruleType.getId()).append("]").append(getMessage(ruleType));
+        appendResult(rowType, message);
         Optional<Severity> severity = convertSeverity(ruleType.getSeverity());
         if (target.isPresent()) {
             SourceLocation sourceLocation = target.get();
             Optional<InputComponent> inputComponent = sourceLocation.getResource();
             if (inputComponent.isPresent()) {
                 // Create an issue if a SourceLocation exists and InputComponent could be resolved (e.g. a class in a module)
-                createIssue(ruleKey, message, severity, inputComponent.get(), sourceLocation.getLineNumber());
+                createIssue(ruleKey, message.toString(), severity, inputComponent.get(), sourceLocation.getLineNumber());
             }
         } else if (sensorContext.fileSystem().baseDir().equals(projectPath)) {
             // Create issue on project level for all items that cannot be mapped to a SourceLocation (e.g. packages or empty concepts)
-            createIssue(ruleKey, message, severity, sensorContext.project(), Optional.empty());
+            createIssue(ruleKey, message.toString(), severity, sensorContext.project(), Optional.empty());
         }
     }
 
@@ -156,14 +158,31 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
         return Optional.empty();
     }
 
+    private StringBuilder appendResult(RowType rowType, StringBuilder message) {
+        if (rowType != null) {
+            message.append(NEWLINE);
+            for (ColumnType column : rowType.getColumn()) {
+                String name = column.getName();
+                String value = column.getValue();
+                if (message.length() > 0) {
+                    message.append(", ");
+                }
+                message.append(name);
+                message.append('=');
+                message.append(value);
+                message.append("<br>");
+            }
+        }
+        return message;
+    }
+
+
     /**
      * Resource, line number and rule key are already set.
      *
      * @param ruleDescription The jQAssistant rule description.
-     * @param primaryColumn   The name of the primary colum, maybe <code>null</code>.
-     * @param rowEntry        Maybe <code>null</code> for not applied concepts.
      * @return Message String.
      */
-    protected abstract String getMessage(String ruleDescription, String primaryColumn, RowType rowEntry);
+    protected abstract String getMessage(T ruleDescription);
 
 }
