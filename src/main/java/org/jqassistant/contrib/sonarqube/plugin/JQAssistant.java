@@ -22,7 +22,7 @@ public final class JQAssistant {
 	public static final String NAME = "jQAssistant";
 
     /**
-     * The absolute path to the project directory, may be empty for single-module projects.
+     * The absolute path to the project directory (optional).
      */
     public static final String SETTINGS_KEY_PROJECT_PATH = "sonar.jqassistant.projectPath";
 

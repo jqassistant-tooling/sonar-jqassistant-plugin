@@ -47,7 +47,8 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
             createIssue(Optional.empty(), ruleType, ruleKey, null);
         } else {
             String primaryColumn = getPrimaryColumn(result);
-            for (RowType rowType : result.getRows().getRow()) {
+            for (RowType rowType : result.getRows()
+                .getRow()) {
                 Optional<SourceLocation> target = resolveRelatedResource(rowType, primaryColumn);
                 createIssue(target, ruleType, ruleKey, rowType);
             }
@@ -55,7 +56,11 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
     }
 
     private void createIssue(Optional<SourceLocation> target, T ruleType, RuleKey ruleKey, RowType rowType) {
-        StringBuilder message = new StringBuilder().append('[').append(ruleType.getId()).append("]").append(getMessage(ruleType));
+        StringBuilder message = new StringBuilder().append('[')
+            .append(ruleType.getId())
+            .append("]")
+            .append(" ")
+            .append(getMessage(ruleType));
         appendResult(rowType, message);
         Optional<Severity> severity = convertSeverity(ruleType.getSeverity());
         if (target.isPresent()) {
@@ -65,22 +70,27 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
                 // Create an issue if a SourceLocation exists and InputComponent could be resolved (e.g. a class in a module)
                 createIssue(ruleKey, message.toString(), severity, inputComponent.get(), sourceLocation.getLineNumber());
             }
-        } else if (sensorContext.fileSystem().baseDir().equals(projectPath)) {
+        } else if (sensorContext.fileSystem()
+            .baseDir()
+            .equals(projectPath)) {
             // Create issue on project level for all items that cannot be mapped to a SourceLocation (e.g. packages or empty concepts)
             createIssue(ruleKey, message.toString(), severity, sensorContext.project(), Optional.empty());
         }
     }
 
-    private void createIssue(RuleKey ruleKey, String message, Optional<Severity> severity, InputComponent inputComponent, Optional<Integer> lineNumber) {
+    private void createIssue(RuleKey ruleKey, String message, Optional<Severity> severity, InputComponent inputComponent,
+        Optional<Integer> lineNumber) {
         NewIssue newIssue = sensorContext.newIssue();
-        NewIssueLocation newIssueLocation = newIssue.newLocation().message(message);
+        NewIssueLocation newIssueLocation = newIssue.newLocation()
+            .message(message);
         newIssueLocation.on(inputComponent);
         if (lineNumber.isPresent()) {
             TextRange textRange = toTextRange((InputFile) inputComponent, lineNumber.get());
             newIssueLocation.at(textRange);
         }
         severity.ifPresent(s -> newIssue.overrideSeverity(s));
-        newIssue.forRule(ruleKey).at(newIssueLocation);
+        newIssue.forRule(ruleKey)
+            .at(newIssueLocation);
         newIssue.save();
     }
 
@@ -145,13 +155,17 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
                     return Optional.empty();
                 }
                 SourceType source = column.getSource();
-                ResourceResolver resourceResolver = languageResourceResolvers.get(languageElement.getLanguage().toLowerCase(Locale.ENGLISH));
+                ResourceResolver resourceResolver = languageResourceResolvers.get(languageElement.getLanguage()
+                    .toLowerCase(Locale.ENGLISH));
                 if (resourceResolver == null) {
                     return Optional.empty();
                 }
                 String element = languageElement.getValue();
                 InputPath resource = resourceResolver.resolve(sensorContext.fileSystem(), element, source.getName(), column.getValue());
-                SourceLocation sourceLocation = SourceLocation.builder().resource(Optional.ofNullable(resource)).lineNumber(Optional.ofNullable(source.getLine())).build();
+                SourceLocation sourceLocation = SourceLocation.builder()
+                    .resource(Optional.ofNullable(resource))
+                    .lineNumber(Optional.ofNullable(source.getLine()))
+                    .build();
                 return Optional.of(sourceLocation);
             }
         }
@@ -170,12 +184,11 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
                 message.append(name);
                 message.append('=');
                 message.append(value);
-                message.append("<br>");
+                message.append(NEWLINE);
             }
         }
         return message;
     }
-
 
     /**
      * Resource, line number and rule key are already set.

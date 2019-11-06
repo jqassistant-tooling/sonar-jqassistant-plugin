@@ -13,8 +13,8 @@ The plugin is maintained by *http://msg.group[msg group]*.
 * Java project with jQAssistant setup
 
 == Installation
-* https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.jqassistant.contrib.sonarqube%22%20AND%20v%3A%221.0.0%22[Download] the plugin JAR for your SonarQube release
-* Copy the plugin (i.e. JAR file) to the `plugin/extensions` folder of the SonarQube installation
+* https://search.maven.org/search?q=g:org.jqassistant.contrib.sonarqube[Download] the plugin JAR for your SonarQube release
+* Copy the plugin (i.e. JAR file) to the `extensions/plugins` folder of the SonarQube installation
 * (Re-)Start the SonarQube server
 
 == Configuration
@@ -46,8 +46,7 @@ In case of a Maven project with a jQAssistant setup the following steps need to 
   A file `target/jqassistant/jqassistant-report.xml` will be created containing the report.
 `mvn sonar:sonar`::
   Run the SonarQube analysis.
-  The sensor of the jQAssistant SonarQube plugin will evaluate the report and
-  create issues for failed rules.
+  The sensor of the jQAssistant SonarQube plugin will evaluate the report and create issues for failed rules.
 
 == Example Setup
 

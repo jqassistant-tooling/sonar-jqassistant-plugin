@@ -1,0 +1,8 @@
+:toc: left
+= Release Notes
+
+== 1.0.0
+
+* Migrated to SonarQube 7.9 API
+* Added support for multi-module projects
+* Changed name of published JAR artifact to `sonar-jqassistant-plugin-<version>.jar`
