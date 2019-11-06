@@ -175,16 +175,18 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
     private StringBuilder appendResult(RowType rowType, StringBuilder message) {
         if (rowType != null) {
             message.append(NEWLINE);
+            int count = 0;
             for (ColumnType column : rowType.getColumn()) {
+                if (count > 0) {
+                    message.append(", ").append(NEWLINE);
+                }
                 String name = column.getName();
                 String value = column.getValue();
-                if (message.length() > 0) {
-                    message.append(", ");
-                }
                 message.append(name);
                 message.append('=');
                 message.append(value);
                 message.append(NEWLINE);
+                count++;
             }
         }
         return message;
