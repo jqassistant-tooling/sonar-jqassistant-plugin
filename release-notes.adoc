@@ -1,7 +1,7 @@
 :toc: left
 = Release Notes
 
-== 1.0.0
+== 1.7.0
 
 * Migrated to SonarQube 7.9 API
 * Added support for multi-module projects
