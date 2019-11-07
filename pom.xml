@@ -9,7 +9,7 @@
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
     <artifactId>sonar-jqassistant-plugin</artifactId>
-    <version>1.7.0</version>
+    <version>1.7.1-SNAPSHOT</version>
     <packaging>sonar-plugin</packaging>
 
     <name>Sonar jQAssistant Plugin</name>
@@ -135,6 +135,32 @@
         <dependency>
             <groupId>com.buschmais.jqassistant.core</groupId>
             <artifactId>report</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.asciidoctor</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jruby</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sourceforge.plantuml</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.snakeyaml</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.buschmais.xo</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
