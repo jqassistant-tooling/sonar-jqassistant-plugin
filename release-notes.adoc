@@ -3,6 +3,7 @@
 
 == 1.7.1
 
+* Initial entry into the SonarQube Marketplace (pending)
 * Reduced size of plugin JAR file
 
 == 1.7.0
