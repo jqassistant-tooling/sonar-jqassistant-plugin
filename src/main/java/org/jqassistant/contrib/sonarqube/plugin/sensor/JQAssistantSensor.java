@@ -18,6 +18,7 @@ import org.sonar.api.scanner.fs.InputProject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -115,11 +116,15 @@ public class JQAssistantSensor implements Sensor {
     }
 
     private JqassistantReport readReport(File reportFile) {
-        try {
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        try(InputStream inputStream = new FileInputStream(reportFile)) {
+            Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
             JAXBUnmarshaller<JqassistantReport> jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class, getNamespaceMapping());
-            return jaxbUnmarshaller.unmarshal(new FileInputStream(reportFile));
+            return jaxbUnmarshaller.unmarshal(inputStream);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
     }
 
