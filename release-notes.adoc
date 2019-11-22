@@ -1,6 +1,11 @@
 :toc: left
 = Release Notes
 
+== 1.7.2
+
+* Initial entry into the SonarQube Marketplace (pending)
+* Fixed https://github.com/jqassistant-contrib/sonar-jqassistant-plugin/issues/8[JAXB related error] when running an analysis using Java version 11 or newer
+
 == 1.7.1
 
 * Initial entry into the SonarQube Marketplace (pending)
