@@ -60,13 +60,17 @@ public class JQAssistantConfiguration {
 
     /**
      * The path is relative or absolute.
+     *
+     * @param projectDir The project directory (i.e. root module directory).
+     * @param moduleDir  The module directory.
      */
-    public File getReportFile(File projectPath) {
+    public File getReportFile(File projectDir, File moduleDir) {
         Optional<String> reportPath = settings.get(REPORT_PATH);
         if (reportPath.isPresent()) {
-            return new File(projectPath, reportPath.get());
+            File reportFile = new File(reportPath.get());
+            return reportFile.isAbsolute() ? reportFile : new File(moduleDir, reportPath.get());
         }
-        return new File(projectPath, JQAssistantConfiguration.DEFAULT_REPORT_PATH);
+        return new File(projectDir, JQAssistantConfiguration.DEFAULT_REPORT_PATH).getAbsoluteFile();
     }
 
     /**
@@ -79,13 +83,13 @@ public class JQAssistantConfiguration {
 
     public static List<PropertyDefinition> getPropertyDefinitions() {
         return asList(
-            PropertyDefinition.builder(REPORT_PATH).defaultValue(DEFAULT_REPORT_PATH)
+            PropertyDefinition.builder(REPORT_PATH)
                 .category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).name("jQAssistant Report Path")
                 .description(
-                    "Relative path to the jQAssistant XML report file (default: '" + DEFAULT_REPORT_PATH + "').")
+                    "Absolute or relative path to the jQAssistant XML report file (default: '" + DEFAULT_REPORT_PATH + "').")
                 .onQualifiers(Qualifiers.PROJECT).build(),
             PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
-                .category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).description("Skip execution of jQAssistant sensor.")
+                .category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).description("Disable the jQAssistant sensor.")
                 .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build());
     }
 

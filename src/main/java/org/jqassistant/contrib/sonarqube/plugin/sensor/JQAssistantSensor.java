@@ -56,21 +56,21 @@ public class JQAssistantSensor implements Sensor {
     }
 
     private void startScan(SensorContext context) {
-        File projectPath = getProjectPath(context);
-        LOGGER.info("Using project path '{}'.", projectPath);
-        File reportFile = configuration.getReportFile(projectPath);
+        File projectDir = getProjectDirectory(context);
+        File baseDir = context.fileSystem().baseDir();
+        File reportFile = configuration.getReportFile(projectDir, baseDir);
         if (reportFile.exists()) {
             LOGGER.info("Found jQAssistant report at '{}'.", reportFile.getAbsolutePath());
             JqassistantReport report = readReport(reportFile);
             if (report != null) {
-                evaluate(context, projectPath, report.getGroupOrConceptOrConstraint());
+                evaluate(context, projectDir, report.getGroupOrConceptOrConstraint());
             }
         } else {
             LOGGER.info("No report found at '{}', skipping.", reportFile.getPath());
         }
     }
 
-    private File getProjectPath(SensorContext context) {
+    private File getProjectDirectory(SensorContext context) {
         InputProject project = context.project();
         if (project instanceof DefaultInputProject) {
             return ((DefaultInputProject) project).getBaseDir().toFile();
@@ -117,7 +117,7 @@ public class JQAssistantSensor implements Sensor {
 
     private JqassistantReport readReport(File reportFile) {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        try(InputStream inputStream = new FileInputStream(reportFile)) {
+        try (InputStream inputStream = new FileInputStream(reportFile)) {
             Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
             JAXBUnmarshaller<JqassistantReport> jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class, getNamespaceMapping());
             return jaxbUnmarshaller.unmarshal(inputStream);

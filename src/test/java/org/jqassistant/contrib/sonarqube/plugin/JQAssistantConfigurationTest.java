@@ -10,6 +10,7 @@ import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,9 @@ import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
 class JQAssistantConfigurationTest {
+
+    private static final File PROJECT_DIR = new File("/");
+    private static final File MODULE_DIR = new File("/module");
 
     @Mock
     private SensorContext context;
@@ -46,23 +50,31 @@ class JQAssistantConfigurationTest {
     }
 
     @Test
-    public void getDefaultReportFile() {
-        File projectPath = new File(".");
+    public void getDefaultReportFile() throws IOException {
+        File reportFile = configuration.getReportFile(PROJECT_DIR, MODULE_DIR);
 
-        File reportFile = configuration.getReportFile(projectPath);
-
-        assertThat(reportFile).isEqualTo(new File(projectPath, JQAssistantConfiguration.DEFAULT_REPORT_PATH));
+        assertThat(reportFile).isEqualTo(new File(PROJECT_DIR, JQAssistantConfiguration.DEFAULT_REPORT_PATH).getCanonicalFile());
     }
 
     @Test
-    public void getCustomReportFile() {
-        File projectPath = new File(".");
+    public void getRelativeReportFile() {
         doReturn(Optional.of("customReport.xml")).when(sonarConfiguration).get(JQAssistantConfiguration.REPORT_PATH);
 
-        File reportFile = configuration.getReportFile(projectPath);
+        File reportFile = configuration.getReportFile(PROJECT_DIR, MODULE_DIR);
 
-        assertThat(reportFile).isEqualTo(new File(projectPath, "customReport.xml"));
+        assertThat(reportFile).isEqualTo(new File(MODULE_DIR, "customReport.xml"));
     }
+
+    @Test
+    public void getAbsoluteReportFile() {
+        String absoluteReportPath = new File("/customReport.xml").getAbsolutePath();
+        doReturn(Optional.of(absoluteReportPath)).when(sonarConfiguration).get(JQAssistantConfiguration.REPORT_PATH);
+
+        File reportFile = configuration.getReportFile(PROJECT_DIR, MODULE_DIR);
+
+        assertThat(reportFile).isEqualTo(new File("/customReport.xml").getAbsoluteFile());
+    }
+
 
     @Test
     void getPropertyDefinitions() {
