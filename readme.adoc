@@ -38,6 +38,15 @@ Therefore the following steps need to be performed in the SonarQube UI (as admin
 ** Select `Projects`
 ** Add your project
 
+[options=header]
+.Supported properties
+|===
+| Property                     | Description                                                 | Default value
+| sonar.jqassistant.disabled   | Disable the jQAssistant sensor.                             | false
+| sonar.jqassistant.reportPath | The path to the jQAssistant XML report file,
+                                 either absolute or relative to the current module directory | <projectRoot>/target/jqassistant/jqassistant-report.xml
+|===
+
 == Execution
 In case of a Maven project with a jQAssistant setup the following steps need to be executed:
 
@@ -92,6 +101,8 @@ For executing jQAssistant during the build the jQAssistant Maven plugin must be 
           <failOnSeverity>CRITICAL</failOnSeverity>
         </configuration>
       </plugin>
+    </plugins>
+  </build>
 ...
 </project>
 ----

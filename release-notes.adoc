@@ -1,6 +1,11 @@
 :toc: left
 = Release Notes
 
+== 1.7.3
+* Clarified behavior of configuration property `sonar.jqassistant.reportPath`,
+  by adding support for absolute paths and resolving relative paths by using the current module directory
+  (https://github.com/jqassistant-contrib/sonar-jqassistant-plugin/issues/10[issue])
+
 == 1.7.2
 
 * Initial entry into the SonarQube Marketplace (pending)
