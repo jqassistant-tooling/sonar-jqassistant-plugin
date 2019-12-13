@@ -56,6 +56,23 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
     }
 
     private void createIssue(Optional<SourceLocation> target, T ruleType, RuleKey ruleKey, RowType rowType) {
+        if (target.isPresent()) {
+            SourceLocation sourceLocation = target.get();
+            Optional<InputComponent> inputComponent = sourceLocation.getResource();
+            if (inputComponent.isPresent()) {
+                // Create an issue if a SourceLocation exists and InputComponent could be resolved (e.g. a class in a module)
+                createIssue(ruleKey, ruleType, rowType, inputComponent.get(), sourceLocation.getLineNumber());
+            }
+        } else if (sensorContext.fileSystem()
+            .baseDir()
+            .equals(projectPath)) {
+            // Create issue on project level for all items that cannot be mapped to a SourceLocation (e.g. packages or empty concepts)
+            createIssue(ruleKey, ruleType, rowType, sensorContext.project(), Optional.empty());
+        }
+    }
+
+    private void createIssue(RuleKey ruleKey, T ruleType, RowType rowType, InputComponent inputComponent,
+                             Optional<Integer> lineNumber) {
         StringBuilder message = new StringBuilder().append('[')
             .append(ruleType.getId())
             .append("]")
@@ -63,26 +80,9 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
             .append(getMessage(ruleType));
         appendResult(rowType, message);
         Optional<Severity> severity = convertSeverity(ruleType.getSeverity());
-        if (target.isPresent()) {
-            SourceLocation sourceLocation = target.get();
-            Optional<InputComponent> inputComponent = sourceLocation.getResource();
-            if (inputComponent.isPresent()) {
-                // Create an issue if a SourceLocation exists and InputComponent could be resolved (e.g. a class in a module)
-                createIssue(ruleKey, message.toString(), severity, inputComponent.get(), sourceLocation.getLineNumber());
-            }
-        } else if (sensorContext.fileSystem()
-            .baseDir()
-            .equals(projectPath)) {
-            // Create issue on project level for all items that cannot be mapped to a SourceLocation (e.g. packages or empty concepts)
-            createIssue(ruleKey, message.toString(), severity, sensorContext.project(), Optional.empty());
-        }
-    }
-
-    private void createIssue(RuleKey ruleKey, String message, Optional<Severity> severity, InputComponent inputComponent,
-                             Optional<Integer> lineNumber) {
         NewIssue newIssue = sensorContext.newIssue();
         NewIssueLocation newIssueLocation = newIssue.newLocation()
-            .message(message);
+            .message(message.toString());
         newIssueLocation.on(inputComponent);
         if (lineNumber.isPresent()) {
             TextRange textRange = toTextRange((InputFile) inputComponent, lineNumber.get());
