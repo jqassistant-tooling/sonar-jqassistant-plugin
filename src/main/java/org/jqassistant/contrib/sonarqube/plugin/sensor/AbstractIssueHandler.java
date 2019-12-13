@@ -44,41 +44,41 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
         ResultType result = ruleType.getResult();
         if (result == null) {
             //'result' may be null for not applied (failed) concepts
-            createIssue(Optional.empty(), ruleType, ruleKey, null);
+            createIssue(Optional.empty(), ruleType, ruleKey, null, null);
         } else {
             String primaryColumn = getPrimaryColumn(result);
             for (RowType rowType : result.getRows()
                 .getRow()) {
                 Optional<SourceLocation> target = resolveRelatedResource(rowType, primaryColumn);
-                createIssue(target, ruleType, ruleKey, rowType);
+                createIssue(target, ruleType, ruleKey, rowType, primaryColumn);
             }
         }
     }
 
-    private void createIssue(Optional<SourceLocation> target, T ruleType, RuleKey ruleKey, RowType rowType) {
+    private void createIssue(Optional<SourceLocation> target, T ruleType, RuleKey ruleKey, RowType rowType, String primaryColumn) {
         if (target.isPresent()) {
             SourceLocation sourceLocation = target.get();
             Optional<InputComponent> inputComponent = sourceLocation.getResource();
             if (inputComponent.isPresent()) {
                 // Create an issue if a SourceLocation exists and InputComponent could be resolved (e.g. a class in a module)
-                createIssue(ruleKey, ruleType, rowType, inputComponent.get(), sourceLocation.getLineNumber());
+                createIssue(ruleKey, ruleType, rowType, inputComponent.get(), sourceLocation.getLineNumber(), Optional.of(primaryColumn));
             }
         } else if (sensorContext.fileSystem()
             .baseDir()
             .equals(projectPath)) {
             // Create issue on project level for all items that cannot be mapped to a SourceLocation (e.g. packages or empty concepts)
-            createIssue(ruleKey, ruleType, rowType, sensorContext.project(), Optional.empty());
+            createIssue(ruleKey, ruleType, rowType, sensorContext.project(), Optional.empty(), Optional.empty());
         }
     }
 
     private void createIssue(RuleKey ruleKey, T ruleType, RowType rowType, InputComponent inputComponent,
-                             Optional<Integer> lineNumber) {
+                             Optional<Integer> lineNumber, Optional<String> matchedColumn) {
         StringBuilder message = new StringBuilder().append('[')
             .append(ruleType.getId())
             .append("]")
             .append(" ")
             .append(getMessage(ruleType));
-        appendResult(rowType, message);
+        appendResult(rowType, matchedColumn, message);
         Optional<Severity> severity = convertSeverity(ruleType.getSeverity());
         NewIssue newIssue = sensorContext.newIssue();
         NewIssueLocation newIssueLocation = newIssue.newLocation()
@@ -172,7 +172,14 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
         return Optional.empty();
     }
 
-    private StringBuilder appendResult(RowType rowType, StringBuilder message) {
+    /**
+     * Appends the result to a message.
+     *
+     * @param rowType       The {@link RowType} containing values.
+     * @param matchedColumn The name of the column that could be matched to a source location.
+     * @param message       The message builder.
+     */
+    private void appendResult(RowType rowType, Optional<String> matchedColumn, StringBuilder message) {
         if (rowType != null) {
             message.append(NEWLINE);
             int count = 0;
@@ -181,15 +188,16 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
                     message.append(", ").append(NEWLINE);
                 }
                 String name = column.getName();
-                String value = column.getValue();
-                message.append(name);
-                message.append('=');
-                message.append(value);
-                message.append(NEWLINE);
-                count++;
+                if (!(matchedColumn.isPresent() && name.equals(matchedColumn.get()))) {
+                    String value = column.getValue();
+                    message.append(name);
+                    message.append(':');
+                    message.append(value);
+                    message.append(NEWLINE);
+                    count++;
+                }
             }
         }
-        return message;
     }
 
     /**
