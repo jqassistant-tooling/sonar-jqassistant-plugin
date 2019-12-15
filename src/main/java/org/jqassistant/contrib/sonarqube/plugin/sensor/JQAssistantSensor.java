@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantRuleType.CONCEPT;
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantRuleType.CONSTRAINT;
+
 /**
  * {@link Sensor} implementation scanning for jqassistant-report.xml files.
  */
@@ -94,26 +97,27 @@ public class JQAssistantSensor implements Sensor {
         }
     }
 
-    private void createIssue(SensorContext context, File projectPath, ExecutableRuleType ruleType) {
-        JQAssistantRuleType jQAssistantRuleType = (ruleType instanceof ConceptType) ? JQAssistantRuleType.CONCEPT : JQAssistantRuleType.CONSTRAINT;
-        Optional<RuleKey> ruleKey = ruleResolver.resolve(jQAssistantRuleType);
+    private void createIssue(SensorContext context, File projectPath, ExecutableRuleType executableRuleType) {
+        JQAssistantRuleType ruleType = getRuleType(executableRuleType);
+        Optional<RuleKey> ruleKey = ruleResolver.resolve(ruleType);
         if (ruleKey.isPresent()) {
-            switch (jQAssistantRuleType) {
-                case CONCEPT:
-                    ConceptIssueHandler conceptHandler = new ConceptIssueHandler(context, languageResourceResolvers, projectPath);
-                    conceptHandler.process((ConceptType) ruleType, ruleKey.get());
-                    break;
-                case CONSTRAINT:
-                    ConstraintIssueHandler constraintHandler = new ConstraintIssueHandler(context, languageResourceResolvers, projectPath);
-                    constraintHandler.process((ConstraintType) ruleType, ruleKey.get());
-                    break;
-                default:
-                    LOGGER.warn("Rule type {} is not supported, skipping.", jQAssistantRuleType);
-            }
+            IssueHandler issueHandler = new IssueHandler(context, languageResourceResolvers, projectPath);
+            issueHandler.process(ruleType, executableRuleType, ruleKey.get());
         } else {
-            LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", ruleType.getId());
+            LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", executableRuleType.getId());
         }
     }
+
+    private JQAssistantRuleType getRuleType(ExecutableRuleType executableRuleType) {
+        if (executableRuleType instanceof ConceptType) {
+            return CONCEPT;
+        } else if (executableRuleType instanceof ConstraintType) {
+            return CONSTRAINT;
+        } else {
+            throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
+        }
+    }
+
 
     private JqassistantReport readReport(File reportFile) {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();

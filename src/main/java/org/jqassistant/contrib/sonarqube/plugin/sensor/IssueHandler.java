@@ -1,6 +1,7 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import com.buschmais.jqassistant.core.report.schema.v1.*;
+import lombok.extern.slf4j.Slf4j;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
@@ -18,11 +19,12 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Base class to produce a number of violations defined by instance of {@link T}.
+ * Base class to create issues.
  *
  * @author rzozmann
  */
-abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
+@Slf4j
+class IssueHandler {
 
     private static final String NEWLINE = "\n";
     private final SensorContext sensorContext;
@@ -31,7 +33,7 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
 
     private final File projectPath;
 
-    protected AbstractIssueHandler(SensorContext sensorContext, Map<String, ResourceResolver> languageResourceResolvers, File projectPath) {
+    protected IssueHandler(SensorContext sensorContext, Map<String, ResourceResolver> languageResourceResolvers, File projectPath) {
         this.sensorContext = sensorContext;
         this.languageResourceResolvers = languageResourceResolvers;
         this.projectPath = projectPath;
@@ -40,46 +42,46 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
     /**
      * Create 0..n violations, based on content and type of <i>ruleType</i>.
      */
-    public final void process(T ruleType, RuleKey ruleKey) {
-        ResultType result = ruleType.getResult();
+    public final void process(JQAssistantRuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey) {
+        ResultType result = executableRuleType.getResult();
         if (result == null) {
             //'result' may be null for not applied (failed) concepts
-            createIssue(Optional.empty(), ruleType, ruleKey, null, null);
+            createIssue(Optional.empty(), ruleType, executableRuleType, ruleKey, null, null);
         } else {
             String primaryColumn = getPrimaryColumn(result);
             for (RowType rowType : result.getRows()
                 .getRow()) {
                 Optional<SourceLocation> target = resolveRelatedResource(rowType, primaryColumn);
-                createIssue(target, ruleType, ruleKey, rowType, primaryColumn);
+                createIssue(target, ruleType, executableRuleType, ruleKey, rowType, primaryColumn);
             }
         }
     }
 
-    private void createIssue(Optional<SourceLocation> target, T ruleType, RuleKey ruleKey, RowType rowType, String primaryColumn) {
+    private void createIssue(Optional<SourceLocation> target, JQAssistantRuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey, RowType rowType, String primaryColumn) {
         if (target.isPresent()) {
             SourceLocation sourceLocation = target.get();
             Optional<InputComponent> inputComponent = sourceLocation.getResource();
             if (inputComponent.isPresent()) {
                 // Create an issue if a SourceLocation exists and InputComponent could be resolved (e.g. a class in a module)
-                createIssue(ruleKey, ruleType, rowType, inputComponent.get(), sourceLocation.getLineNumber(), Optional.of(primaryColumn));
+                createIssue(ruleType, executableRuleType, ruleKey, rowType, inputComponent.get(), sourceLocation.getLineNumber(), Optional.of(primaryColumn));
             }
         } else if (sensorContext.fileSystem()
             .baseDir()
             .equals(projectPath)) {
             // Create issue on project level for all items that cannot be mapped to a SourceLocation (e.g. packages or empty concepts)
-            createIssue(ruleKey, ruleType, rowType, sensorContext.project(), Optional.empty(), Optional.empty());
+            createIssue(ruleType, executableRuleType, ruleKey, rowType, sensorContext.project(), Optional.empty(), Optional.empty());
         }
     }
 
-    private void createIssue(RuleKey ruleKey, T ruleType, RowType rowType, InputComponent inputComponent,
+    private void createIssue(JQAssistantRuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey, RowType rowType, InputComponent inputComponent,
                              Optional<Integer> lineNumber, Optional<String> matchedColumn) {
         StringBuilder message = new StringBuilder().append('[')
-            .append(ruleType.getId())
+            .append(executableRuleType.getId())
             .append("]")
             .append(" ")
-            .append(getMessage(ruleType));
+            .append(createMessage(ruleType, executableRuleType));
         appendResult(rowType, matchedColumn, message);
-        Optional<Severity> severity = convertSeverity(ruleType.getSeverity());
+        Optional<Severity> severity = convertSeverity(executableRuleType.getSeverity());
         NewIssue newIssue = sensorContext.newIssue();
         NewIssueLocation newIssueLocation = newIssue.newLocation()
             .message(message.toString());
@@ -200,12 +202,15 @@ abstract class AbstractIssueHandler<T extends ExecutableRuleType> {
         }
     }
 
-    /**
-     * Resource, line number and rule key are already set.
-     *
-     * @param ruleDescription The jQAssistant rule description.
-     * @return Message String.
-     */
-    protected abstract String getMessage(T ruleDescription);
+    private String createMessage(JQAssistantRuleType ruleType, ExecutableRuleType executableRuleType) {
+        switch (ruleType) {
+            case CONCEPT:
+                return "The concept could not be applied: " + executableRuleType.getDescription();
+            case CONSTRAINT:
+                return executableRuleType.getDescription();
+            default:
+                throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
+        }
+    }
 
 }
