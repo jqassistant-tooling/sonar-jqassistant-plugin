@@ -5,7 +5,7 @@ import org.sonar.api.rule.Severity;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.plugins.java.Java;
 
-public final class JQAssistantRulesRepository implements RulesDefinition {
+public final class RulesRepository implements RulesDefinition {
 
     public static final String INVALID_CONCEPT_KEY = "invalid-concept";
     public static final String INVALID_CONCEPT_RULE_NAME = JQAssistant.NAME + " Invalid Concept";

@@ -21,8 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantRuleType.CONCEPT;
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantRuleType.CONSTRAINT;
+import static com.buschmais.jqassistant.core.report.schema.v1.StatusEnumType.FAILURE;
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 
 /**
  * {@link Sensor} implementation scanning for jqassistant-report.xml files.
@@ -82,6 +83,7 @@ public class JQAssistantSensor implements Sensor {
     }
 
     private void evaluate(SensorContext context, File projectPath, List<ReferencableRuleType> rules) {
+        IssueHandler issueHandler = new IssueHandler(context, languageResourceResolvers, projectPath);
         for (ReferencableRuleType rule : rules) {
             if (rule instanceof GroupType) {
                 GroupType groupType = (GroupType) rule;
@@ -89,26 +91,21 @@ public class JQAssistantSensor implements Sensor {
                 evaluate(context, projectPath, groupType.getGroupOrConceptOrConstraint());
             }
             if (rule instanceof ExecutableRuleType) {
-                ExecutableRuleType ruleType = (ExecutableRuleType) rule;
-                if (StatusEnumType.FAILURE.equals(ruleType.getStatus())) {
-                    createIssue(context, projectPath, ruleType);
+                ExecutableRuleType executableRuleType = (ExecutableRuleType) rule;
+                if (FAILURE.equals(executableRuleType.getStatus())) {
+                    RuleType ruleType = getRuleType(executableRuleType);
+                    Optional<RuleKey> ruleKey = ruleResolver.resolve(ruleType);
+                    if (ruleKey.isPresent()) {
+                        issueHandler.process(ruleType, executableRuleType, ruleKey.get());
+                    } else {
+                        LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", executableRuleType.getId());
+                    }
                 }
             }
         }
     }
 
-    private void createIssue(SensorContext context, File projectPath, ExecutableRuleType executableRuleType) {
-        JQAssistantRuleType ruleType = getRuleType(executableRuleType);
-        Optional<RuleKey> ruleKey = ruleResolver.resolve(ruleType);
-        if (ruleKey.isPresent()) {
-            IssueHandler issueHandler = new IssueHandler(context, languageResourceResolvers, projectPath);
-            issueHandler.process(ruleType, executableRuleType, ruleKey.get());
-        } else {
-            LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", executableRuleType.getId());
-        }
-    }
-
-    private JQAssistantRuleType getRuleType(ExecutableRuleType executableRuleType) {
+    private RuleType getRuleType(ExecutableRuleType executableRuleType) {
         if (executableRuleType instanceof ConceptType) {
             return CONCEPT;
         } else if (executableRuleType instanceof ConstraintType) {

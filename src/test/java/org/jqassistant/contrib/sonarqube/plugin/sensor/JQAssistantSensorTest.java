@@ -107,7 +107,7 @@ public class JQAssistantSensorTest {
 
     private RuleKeyResolver stubRuleKeyResolver(Rule rule) {
         RuleKeyResolver keyResolver = mock(RuleKeyResolver.class);
-        when(keyResolver.resolve(any(JQAssistantRuleType.class))).thenReturn(Optional.of(rule.ruleKey()));
+        when(keyResolver.resolve(any(RuleType.class))).thenReturn(Optional.of(rule.ruleKey()));
         return keyResolver;
     }
 

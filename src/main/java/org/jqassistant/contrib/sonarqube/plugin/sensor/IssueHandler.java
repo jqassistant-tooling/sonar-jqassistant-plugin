@@ -33,7 +33,7 @@ class IssueHandler {
 
     private final File projectPath;
 
-    protected IssueHandler(SensorContext sensorContext, Map<String, ResourceResolver> languageResourceResolvers, File projectPath) {
+    IssueHandler(SensorContext sensorContext, Map<String, ResourceResolver> languageResourceResolvers, File projectPath) {
         this.sensorContext = sensorContext;
         this.languageResourceResolvers = languageResourceResolvers;
         this.projectPath = projectPath;
@@ -42,7 +42,7 @@ class IssueHandler {
     /**
      * Create 0..n violations, based on content and type of <i>ruleType</i>.
      */
-    public final void process(JQAssistantRuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey) {
+    void process(RuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey) {
         ResultType result = executableRuleType.getResult();
         if (result == null) {
             //'result' may be null for not applied (failed) concepts
@@ -51,13 +51,13 @@ class IssueHandler {
             String primaryColumn = getPrimaryColumn(result);
             for (RowType rowType : result.getRows()
                 .getRow()) {
-                Optional<SourceLocation> target = resolveRelatedResource(rowType, primaryColumn);
+                Optional<SourceLocation> target = resolveSourceLocation(rowType, primaryColumn);
                 createIssue(target, ruleType, executableRuleType, ruleKey, rowType, primaryColumn);
             }
         }
     }
 
-    private void createIssue(Optional<SourceLocation> target, JQAssistantRuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey, RowType rowType, String primaryColumn) {
+    private void createIssue(Optional<SourceLocation> target, RuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey, RowType rowType, String primaryColumn) {
         if (target.isPresent()) {
             SourceLocation sourceLocation = target.get();
             Optional<InputComponent> inputComponent = sourceLocation.getResource();
@@ -73,7 +73,7 @@ class IssueHandler {
         }
     }
 
-    private void createIssue(JQAssistantRuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey, RowType rowType, InputComponent inputComponent,
+    private void createIssue(RuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey, RowType rowType, InputComponent inputComponent,
                              Optional<Integer> lineNumber, Optional<String> matchedColumn) {
         StringBuilder message = new StringBuilder().append('[')
             .append(executableRuleType.getId())
@@ -145,7 +145,7 @@ class IssueHandler {
      *
      * @return The resource or <code>null</code> if not found.
      */
-    private Optional<SourceLocation> resolveRelatedResource(RowType rowType, String primaryColumn) {
+    private Optional<SourceLocation> resolveSourceLocation(RowType rowType, String primaryColumn) {
         if (rowType == null || primaryColumn == null) {
             return Optional.empty();
         }
@@ -202,7 +202,7 @@ class IssueHandler {
         }
     }
 
-    private String createMessage(JQAssistantRuleType ruleType, ExecutableRuleType executableRuleType) {
+    private String createMessage(RuleType ruleType, ExecutableRuleType executableRuleType) {
         switch (ruleType) {
             case CONCEPT:
                 return "The concept could not be applied: " + executableRuleType.getDescription();
