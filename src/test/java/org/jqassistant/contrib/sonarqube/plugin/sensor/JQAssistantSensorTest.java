@@ -1,7 +1,6 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import com.buschmais.jqassistant.core.report.schema.v1.ExecutableRuleType;
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,14 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.rule.RuleKey;
-import org.sonar.api.rules.Rule;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -25,8 +20,6 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 public class JQAssistantSensorTest {
-
-    private JQAssistantSensor sensor;
 
     @Mock
     private JQAssistantConfiguration configuration;
@@ -38,12 +31,11 @@ public class JQAssistantSensorTest {
     private SensorContext sensorContext;
 
     @Mock
-    private ActiveRules activeRules;
-
-    @Mock
     private IssueHandler issueHandler;
 
     private File baseDir;
+
+    private JQAssistantSensor sensor;
 
     @BeforeEach
     public void setUp() throws URISyntaxException {
@@ -52,42 +44,32 @@ public class JQAssistantSensorTest {
 
     @Test
     public void noIssue() {
-        sensor = new JQAssistantSensor(configuration, new RuleKeyResolver(activeRules), issueHandler);
+        sensor = new JQAssistantSensor(configuration, issueHandler);
         stubFileSystem("jqassistant-report-no-issue.xml");
 
         sensor.execute(sensorContext);
 
-        verify(issueHandler, never()).process(eq(sensorContext), any(File.class), any(RuleType.class), any(ExecutableRuleType.class), any(RuleKey.class));
+        verify(issueHandler, never()).process(eq(sensorContext), any(File.class), any(ExecutableRuleType.class));
     }
 
     @Test
     public void createConceptIssue() {
-        Rule rule = Rule.create(JQAssistant.KEY, "example:TestConcept", "example:TestConcept");
-        RuleKeyResolver keyResolver = stubRuleKeyResolver(rule);
-        sensor = new JQAssistantSensor(configuration, keyResolver, issueHandler);
+        sensor = new JQAssistantSensor(configuration, issueHandler);
         stubFileSystem("jqassistant-report-concept-issue.xml");
 
         sensor.execute(sensorContext);
 
-        verify(issueHandler).process(eq(sensorContext), any(File.class), eq(RuleType.CONCEPT), any(ExecutableRuleType.class), any(RuleKey.class));
+        verify(issueHandler).process(eq(sensorContext), any(File.class), any(ExecutableRuleType.class));
     }
 
     @Test
     public void createConstraintIssue() {
-        Rule rule = Rule.create(JQAssistant.KEY, "example:TestConstraint", "example:TestConstraint");
-        RuleKeyResolver keyResolver = stubRuleKeyResolver(rule);
-        sensor = new JQAssistantSensor(configuration, keyResolver, issueHandler);
+        sensor = new JQAssistantSensor(configuration, issueHandler);
         stubFileSystem("jqassistant-report-constraint-issue.xml");
 
         sensor.execute(sensorContext);
 
-        verify(issueHandler).process(eq(sensorContext), any(File.class), eq(RuleType.CONSTRAINT), any(ExecutableRuleType.class), any(RuleKey.class));
-    }
-
-    private RuleKeyResolver stubRuleKeyResolver(Rule rule) {
-        RuleKeyResolver keyResolver = mock(RuleKeyResolver.class);
-        when(keyResolver.resolve(any(RuleType.class))).thenReturn(Optional.of(rule.ruleKey()));
-        return keyResolver;
+        verify(issueHandler).process(eq(sensorContext), any(File.class), any(ExecutableRuleType.class));
     }
 
     private void stubFileSystem(String reportFile) {

@@ -1,6 +1,9 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import com.buschmais.jqassistant.core.report.schema.v1.*;
+import com.buschmais.jqassistant.core.report.schema.v1.ExecutableRuleType;
+import com.buschmais.jqassistant.core.report.schema.v1.GroupType;
+import com.buschmais.jqassistant.core.report.schema.v1.JqassistantReport;
+import com.buschmais.jqassistant.core.report.schema.v1.ReferencableRuleType;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.slf4j.Logger;
@@ -9,16 +12,12 @@ import org.sonar.api.batch.fs.internal.DefaultInputProject;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.rule.RuleKey;
 import org.sonar.api.scanner.fs.InputProject;
 
 import java.io.File;
 import java.util.List;
-import java.util.Optional;
 
 import static com.buschmais.jqassistant.core.report.schema.v1.StatusEnumType.FAILURE;
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 
 /**
  * {@link Sensor} implementation scanning for jqassistant-report.xml files.
@@ -27,13 +26,11 @@ public class JQAssistantSensor implements Sensor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
 
-    private JQAssistantConfiguration configuration;
-    private final RuleKeyResolver ruleResolver;
+    private final JQAssistantConfiguration configuration;
     private final IssueHandler issueHandler;
 
-    public JQAssistantSensor(JQAssistantConfiguration configuration, RuleKeyResolver ruleKeyResolver, IssueHandler issueHandler) {
+    public JQAssistantSensor(JQAssistantConfiguration configuration, IssueHandler issueHandler) {
         this.configuration = configuration;
-        this.ruleResolver = ruleKeyResolver;
         this.issueHandler = issueHandler;
 
     }
@@ -86,26 +83,9 @@ public class JQAssistantSensor implements Sensor {
             if (rule instanceof ExecutableRuleType) {
                 ExecutableRuleType executableRuleType = (ExecutableRuleType) rule;
                 if (FAILURE.equals(executableRuleType.getStatus())) {
-                    RuleType ruleType = getRuleType(executableRuleType);
-                    Optional<RuleKey> ruleKey = ruleResolver.resolve(ruleType);
-                    if (ruleKey.isPresent()) {
-                        issueHandler.process(context, projectPath, ruleType, executableRuleType, ruleKey.get());
-                    } else {
-                        LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", executableRuleType.getId());
-                    }
+                    issueHandler.process(context, projectPath, executableRuleType);
                 }
             }
         }
     }
-
-    private RuleType getRuleType(ExecutableRuleType executableRuleType) {
-        if (executableRuleType instanceof ConceptType) {
-            return CONCEPT;
-        } else if (executableRuleType instanceof ConstraintType) {
-            return CONSTRAINT;
-        } else {
-            throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
-        }
-    }
-
 }
