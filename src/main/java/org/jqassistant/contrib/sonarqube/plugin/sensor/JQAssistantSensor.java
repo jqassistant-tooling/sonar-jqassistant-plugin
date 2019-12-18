@@ -3,8 +3,6 @@ package org.jqassistant.contrib.sonarqube.plugin.sensor;
 import com.buschmais.jqassistant.core.report.schema.v1.*;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
-import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
-import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.internal.DefaultInputProject;
@@ -15,7 +13,8 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.scanner.fs.InputProject;
 
 import java.io.File;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static com.buschmais.jqassistant.core.report.schema.v1.StatusEnumType.FAILURE;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
@@ -30,13 +29,12 @@ public class JQAssistantSensor implements Sensor {
 
     private JQAssistantConfiguration configuration;
     private final RuleKeyResolver ruleResolver;
-    private Map<String, ResourceResolver> languageResourceResolvers;
+    private final IssueHandler issueHandler;
 
-    public JQAssistantSensor(JQAssistantConfiguration configuration, JavaResourceResolver resourceResolver, RuleKeyResolver ruleKeyResolver) {
+    public JQAssistantSensor(JQAssistantConfiguration configuration, RuleKeyResolver ruleKeyResolver, IssueHandler issueHandler) {
         this.configuration = configuration;
         this.ruleResolver = ruleKeyResolver;
-        this.languageResourceResolvers = new HashMap<>();
-        this.languageResourceResolvers.put(resourceResolver.getLanguage().toLowerCase(Locale.ENGLISH), resourceResolver);
+        this.issueHandler = issueHandler;
 
     }
 
@@ -79,7 +77,6 @@ public class JQAssistantSensor implements Sensor {
     }
 
     private void evaluate(SensorContext context, File projectPath, List<ReferencableRuleType> rules) {
-        IssueHandler issueHandler = new IssueHandler(context, languageResourceResolvers, projectPath);
         for (ReferencableRuleType rule : rules) {
             if (rule instanceof GroupType) {
                 GroupType groupType = (GroupType) rule;
@@ -92,7 +89,7 @@ public class JQAssistantSensor implements Sensor {
                     RuleType ruleType = getRuleType(executableRuleType);
                     Optional<RuleKey> ruleKey = ruleResolver.resolve(ruleType);
                     if (ruleKey.isPresent()) {
-                        issueHandler.process(ruleType, executableRuleType, ruleKey.get());
+                        issueHandler.process(context, projectPath, ruleType, executableRuleType, ruleKey.get());
                     } else {
                         LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", executableRuleType.getId());
                     }
