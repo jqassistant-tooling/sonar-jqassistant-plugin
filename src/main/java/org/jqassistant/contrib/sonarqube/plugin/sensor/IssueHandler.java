@@ -33,7 +33,7 @@ import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAIN
 @ScannerSide
 public class IssueHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IssueHandler.class);
 
     private static final String NEWLINE = "\n";
 
