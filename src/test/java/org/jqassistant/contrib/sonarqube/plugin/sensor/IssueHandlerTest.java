@@ -2,7 +2,7 @@ package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import com.buschmais.jqassistant.core.report.schema.v1.*;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
-import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
+import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,10 +20,10 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.rules.Rule;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.Optional;
 
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -49,17 +49,17 @@ class IssueHandlerTest {
     private NewIssueLocation newIssueLocation;
 
     @Mock
-    private ResourceResolver resourceResolver;
+    private JavaResourceResolver resourceResolver;
 
+    @Mock
+    private RuleKeyResolver ruleResolver;
 
     private IssueHandler issueHandler;
 
     @BeforeEach
     public void setUp() {
         doReturn("Java").when(resourceResolver).getLanguage();
-        Map<String, ResourceResolver> resourceResolvers = new HashMap<>();
-        resourceResolvers.put(resourceResolver.getLanguage().toLowerCase(Locale.ENGLISH), resourceResolver);
-        issueHandler = new IssueHandler(sensorContext, resourceResolvers, PROJECT_PATH);
+        issueHandler = new IssueHandler(resourceResolver, ruleResolver);
         doReturn(fileSystem).when(sensorContext).fileSystem();
     }
 
@@ -73,9 +73,10 @@ class IssueHandlerTest {
         conceptType.setDescription("TestConcept");
         conceptType.setId("test:Concept");
         doReturn(PROJECT_PATH).when(fileSystem).baseDir();
+        doReturn(Optional.of(CONCEPT_RULE.ruleKey())).when(ruleResolver).resolve(CONCEPT);
         stubNewIssue();
 
-        issueHandler.process(RuleType.CONCEPT, conceptType, CONCEPT_RULE.ruleKey());
+        issueHandler.process(sensorContext, PROJECT_PATH, conceptType);
 
         verify(sensorContext).newIssue();
         verify(newIssue).forRule(CONCEPT_RULE.ruleKey());
@@ -93,7 +94,7 @@ class IssueHandlerTest {
         conceptType.setId("test:Concept");
         doReturn(new File(PROJECT_PATH, "module")).when(fileSystem).baseDir();
 
-        issueHandler.process(RuleType.CONCEPT, conceptType, CONCEPT_RULE.ruleKey());
+        issueHandler.process(sensorContext, PROJECT_PATH, conceptType);
 
         verify(sensorContext, never()).newIssue();
     }
@@ -108,9 +109,10 @@ class IssueHandlerTest {
         constraintType.setId("test:Constraint");
         constraintType.setResult(createResultType(false));
         doReturn(PROJECT_PATH).when(fileSystem).baseDir();
+        doReturn(Optional.of(CONSTRAINT_RULE.ruleKey())).when(ruleResolver).resolve(CONSTRAINT);
         stubNewIssue();
 
-        issueHandler.process(RuleType.CONSTRAINT, constraintType, CONSTRAINT_RULE.ruleKey());
+        issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
 
         verify(sensorContext).newIssue();
         verify(newIssue).forRule(CONSTRAINT_RULE.ruleKey());
@@ -127,10 +129,11 @@ class IssueHandlerTest {
         constraintType.setDescription("TestConstraint");
         constraintType.setId("test:Constraint");
         constraintType.setResult(createResultType(true));
+        doReturn(Optional.of(CONSTRAINT_RULE.ruleKey())).when(ruleResolver).resolve(CONSTRAINT);
         stubNewIssue();
         stubSourceLocation();
 
-        issueHandler.process(RuleType.CONSTRAINT, constraintType, CONSTRAINT_RULE.ruleKey());
+        issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
 
         verify(sensorContext).newIssue();
         verify(newIssue).forRule(CONSTRAINT_RULE.ruleKey());
@@ -148,7 +151,7 @@ class IssueHandlerTest {
         constraintType.setId("test:Constraint");
         constraintType.setResult(createResultType(true));
 
-        issueHandler.process(RuleType.CONSTRAINT, constraintType, CONSTRAINT_RULE.ruleKey());
+        issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
 
         verify(sensorContext, never()).newIssue();
     }

@@ -1,8 +1,10 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import com.buschmais.jqassistant.core.report.schema.v1.*;
-import lombok.extern.slf4j.Slf4j;
+import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputPath;
@@ -12,88 +14,110 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.scanner.ScannerSide;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 
 /**
  * Base class to create issues.
  *
  * @author rzozmann
  */
-@Slf4j
-class IssueHandler {
+@ScannerSide
+public class IssueHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IssueHandler.class);
 
     private static final String NEWLINE = "\n";
-    private final SensorContext sensorContext;
 
     private final Map<String, ResourceResolver> languageResourceResolvers;
 
-    private final File projectPath;
+    private final RuleKeyResolver ruleResolver;
 
-    IssueHandler(SensorContext sensorContext, Map<String, ResourceResolver> languageResourceResolvers, File projectPath) {
-        this.sensorContext = sensorContext;
-        this.languageResourceResolvers = languageResourceResolvers;
-        this.projectPath = projectPath;
+    public IssueHandler(JavaResourceResolver resourceResolver, RuleKeyResolver ruleResolver) {
+        this.ruleResolver = ruleResolver;
+        this.languageResourceResolvers = new HashMap<>();
+        this.languageResourceResolvers.put(resourceResolver.getLanguage().toLowerCase(Locale.ENGLISH), resourceResolver);
     }
 
     /**
-     * Create 0..n violations, based on content and type of <i>ruleType</i>.
+     * Create issues, based on content.
      */
-    void process(RuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey) {
+    void process(SensorContext sensorContext, File projectPath, ExecutableRuleType executableRuleType) {
         ResultType result = executableRuleType.getResult();
         if (result == null) {
             //'result' may be null for not applied (failed) concepts
-            createIssue(Optional.empty(), ruleType, executableRuleType, ruleKey, null, null);
+            createIssue(sensorContext, projectPath, Optional.empty(), executableRuleType, null, null);
         } else {
             String primaryColumn = getPrimaryColumn(result);
             for (RowType rowType : result.getRows()
                 .getRow()) {
-                Optional<SourceLocation> target = resolveSourceLocation(rowType, primaryColumn);
-                createIssue(target, ruleType, executableRuleType, ruleKey, rowType, primaryColumn);
+                Optional<SourceLocation> target = resolveSourceLocation(sensorContext, rowType, primaryColumn);
+                createIssue(sensorContext, projectPath, target, executableRuleType, rowType, primaryColumn);
             }
         }
     }
 
-    private void createIssue(Optional<SourceLocation> target, RuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey, RowType rowType, String primaryColumn) {
+    private RuleType getRuleType(ExecutableRuleType executableRuleType) {
+        if (executableRuleType instanceof ConceptType) {
+            return CONCEPT;
+        } else if (executableRuleType instanceof ConstraintType) {
+            return CONSTRAINT;
+        } else {
+            throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
+        }
+    }
+
+    private void createIssue(SensorContext sensorContext, File projectPath, Optional<SourceLocation> target, ExecutableRuleType executableRuleType, RowType rowType, String primaryColumn) {
         if (target.isPresent()) {
             SourceLocation sourceLocation = target.get();
             Optional<InputComponent> inputComponent = sourceLocation.getResource();
             if (inputComponent.isPresent()) {
                 // Create an issue if a SourceLocation exists and InputComponent could be resolved (e.g. a class in a module)
-                createIssue(ruleType, executableRuleType, ruleKey, rowType, inputComponent.get(), sourceLocation.getLineNumber(), Optional.of(primaryColumn));
+                createIssue(sensorContext, executableRuleType, rowType, inputComponent.get(), sourceLocation.getLineNumber(), Optional.of(primaryColumn));
             }
         } else if (sensorContext.fileSystem()
             .baseDir()
             .equals(projectPath)) {
             // Create issue on project level for all items that cannot be mapped to a SourceLocation (e.g. packages or empty concepts)
-            createIssue(ruleType, executableRuleType, ruleKey, rowType, sensorContext.project(), Optional.empty(), Optional.empty());
+            createIssue(sensorContext, executableRuleType, rowType, sensorContext.project(), Optional.empty(), Optional.empty());
         }
     }
 
-    private void createIssue(RuleType ruleType, ExecutableRuleType executableRuleType, RuleKey ruleKey, RowType rowType, InputComponent inputComponent,
+    private void createIssue(SensorContext sensorContext, ExecutableRuleType executableRuleType, RowType rowType, InputComponent inputComponent,
                              Optional<Integer> lineNumber, Optional<String> matchedColumn) {
-        StringBuilder message = new StringBuilder().append('[')
-            .append(executableRuleType.getId())
-            .append("]")
-            .append(" ")
-            .append(createMessage(ruleType, executableRuleType));
-        appendResult(rowType, matchedColumn, message);
-        Optional<Severity> severity = convertSeverity(executableRuleType.getSeverity());
-        NewIssue newIssue = sensorContext.newIssue();
-        NewIssueLocation newIssueLocation = newIssue.newLocation()
-            .message(message.toString());
-        newIssueLocation.on(inputComponent);
-        if (lineNumber.isPresent()) {
-            TextRange textRange = toTextRange((InputFile) inputComponent, lineNumber.get());
-            newIssueLocation.at(textRange);
+        RuleType ruleType = getRuleType(executableRuleType);
+        Optional<RuleKey> ruleKey = ruleResolver.resolve(ruleType);
+        if (ruleKey.isPresent()) {
+            StringBuilder message = new StringBuilder().append('[')
+                .append(executableRuleType.getId())
+                .append("]")
+                .append(" ")
+                .append(createMessage(ruleType, executableRuleType));
+            appendResult(rowType, matchedColumn, message);
+            Optional<Severity> severity = convertSeverity(executableRuleType.getSeverity());
+            NewIssue newIssue = sensorContext.newIssue();
+            NewIssueLocation newIssueLocation = newIssue.newLocation()
+                .message(message.toString());
+            newIssueLocation.on(inputComponent);
+            if (lineNumber.isPresent()) {
+                TextRange textRange = toTextRange((InputFile) inputComponent, lineNumber.get());
+                newIssueLocation.at(textRange);
+            }
+            severity.ifPresent(newIssue::overrideSeverity);
+            newIssue.forRule(ruleKey.get())
+                .at(newIssueLocation);
+            newIssue.save();
+        } else {
+            LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", executableRuleType.getId());
         }
-        severity.ifPresent(newIssue::overrideSeverity);
-        newIssue.forRule(ruleKey)
-            .at(newIssueLocation);
-        newIssue.save();
     }
 
     private TextRange toTextRange(InputFile inputFile, Integer lineNumber) {
@@ -145,7 +169,7 @@ class IssueHandler {
      *
      * @return The resource or <code>null</code> if not found.
      */
-    private Optional<SourceLocation> resolveSourceLocation(RowType rowType, String primaryColumn) {
+    private Optional<SourceLocation> resolveSourceLocation(SensorContext sensorContext, RowType rowType, String primaryColumn) {
         if (rowType == null || primaryColumn == null) {
             return Optional.empty();
         }
