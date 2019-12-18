@@ -13,11 +13,20 @@ The plugin is maintained by *http://msg.group[msg group]*.
 * Java project with jQAssistant setup
 
 == Installation
+
+=== SonarQube Marketplace
+
+* Login into SonarQube as administrator and navigate to `Administration`/`MarketPlace`
+* Enter `jQAssistant` in the filter panel, click `Install` and restart the SonarQube server
+
+=== Manual
+
 * https://search.maven.org/search?q=g:org.jqassistant.contrib.sonarqube[Download] the plugin JAR for your SonarQube release
 * Copy the plugin (i.e. JAR file) to the `extensions/plugins` folder of the SonarQube installation
 * (Re-)Start the SonarQube server
 
 == Configuration
+
 The plugin provides two rules that need to be activated for the quality profile of your project(s).
 
 Invalid Concept::
