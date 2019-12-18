@@ -20,7 +20,7 @@ public class RuleKeyResolver {
         this.ruleFinder = ruleFinder;
     }
 
-    public Optional<RuleKey> resolve(JQAssistantRuleType type) {
+    public Optional<RuleKey> resolve(RuleType type) {
         ActiveRule rule = ruleFinder.findByInternalKey(JQAssistant.KEY, type.getKey());
         if (rule != null) {
             return Optional.of(rule.ruleKey());

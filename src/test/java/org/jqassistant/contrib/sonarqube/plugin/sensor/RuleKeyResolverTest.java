@@ -39,11 +39,11 @@ class RuleKeyResolverTest {
 
     @Test
     void resolve() {
-        doReturn(constraintRule).when(activeRules).findByInternalKey(JQAssistant.KEY, JQAssistantRulesRepository.CONSTRAINT_VIOLATION_KEY);
-        doReturn(conceptRule).when(activeRules).findByInternalKey(JQAssistant.KEY, JQAssistantRulesRepository.INVALID_CONCEPT_KEY);
+        doReturn(constraintRule).when(activeRules).findByInternalKey(JQAssistant.KEY, RulesRepository.CONSTRAINT_VIOLATION_KEY);
+        doReturn(conceptRule).when(activeRules).findByInternalKey(JQAssistant.KEY, RulesRepository.INVALID_CONCEPT_KEY);
 
-        Optional<RuleKey> constraintKey = ruleKeyResolver.resolve(JQAssistantRuleType.CONSTRAINT);
-        Optional<RuleKey> conceptKey = ruleKeyResolver.resolve(JQAssistantRuleType.CONCEPT);
+        Optional<RuleKey> constraintKey = ruleKeyResolver.resolve(RuleType.CONSTRAINT);
+        Optional<RuleKey> conceptKey = ruleKeyResolver.resolve(RuleType.CONCEPT);
 
         assertThat(constraintKey.isPresent()).isEqualTo(true);
         assertThat(conceptKey.isPresent()).isEqualTo(true);
