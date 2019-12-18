@@ -1,7 +1,6 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import com.buschmais.jqassistant.core.report.schema.v1.*;
-import com.buschmais.jqassistant.core.shared.xml.JAXBUnmarshaller;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
@@ -16,9 +15,6 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.scanner.fs.InputProject;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 import static com.buschmais.jqassistant.core.report.schema.v1.StatusEnumType.FAILURE;
@@ -65,7 +61,7 @@ public class JQAssistantSensor implements Sensor {
         File reportFile = configuration.getReportFile(projectDir, baseDir);
         if (reportFile.exists()) {
             LOGGER.info("Found jQAssistant report at '{}'.", reportFile.getAbsolutePath());
-            JqassistantReport report = readReport(reportFile);
+            JqassistantReport report = ReportReader.getInstance().read(reportFile);
             if (report != null) {
                 evaluate(context, projectDir, report.getGroupOrConceptOrConstraint());
             }
@@ -114,27 +110,5 @@ public class JQAssistantSensor implements Sensor {
             throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
         }
     }
-
-
-    private JqassistantReport readReport(File reportFile) {
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        try (InputStream inputStream = new FileInputStream(reportFile)) {
-            Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-            JAXBUnmarshaller<JqassistantReport> jaxbUnmarshaller = new JAXBUnmarshaller<>(JqassistantReport.class, getNamespaceMapping());
-            return jaxbUnmarshaller.unmarshal(inputStream);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
-        } finally {
-            Thread.currentThread().setContextClassLoader(contextClassLoader);
-        }
-    }
-
-    private Map<String, String> getNamespaceMapping() {
-        Map<String, String> namespaceMappings = new HashMap<>();
-        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.2", "http://www.buschmais.com/jqassistant/core/report/schema/v1.3");
-        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.0", "http://www.buschmais.com/jqassistant/core/report/schema/v1.3");
-        return namespaceMappings;
-    }
-
 
 }
