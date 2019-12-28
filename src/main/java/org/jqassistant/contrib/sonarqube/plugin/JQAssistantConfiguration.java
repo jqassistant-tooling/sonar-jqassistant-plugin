@@ -86,7 +86,7 @@ public class JQAssistantConfiguration {
             PropertyDefinition.builder(REPORT_PATH)
                 .category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).name("jQAssistant Report Path")
                 .description(
-                    "Absolute or relative path to the jQAssistant XML report file (default: '" + DEFAULT_REPORT_PATH + "').")
+                    "Absolute or relative path to the jQAssistant XML report file (default: '<projectRoot>/" + DEFAULT_REPORT_PATH + "').")
                 .onQualifiers(Qualifiers.PROJECT).build(),
             PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
                 .category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).description("Disable the jQAssistant sensor.")
