@@ -1,6 +1,9 @@
 :toc: left
 = Release Notes
 
+== 1.7.4
+* Fixed an error when creating an issue referencing a line number
+
 == 1.7.3
 * Clarified behavior of configuration property `sonar.jqassistant.reportPath`:
   Added support for absolute paths and resolving relative paths by using the current module directory

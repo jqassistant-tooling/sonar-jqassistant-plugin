@@ -108,7 +108,7 @@ public class IssueHandler {
                 .message(message.toString());
             newIssueLocation.on(inputComponent);
             if (lineNumber.isPresent()) {
-                TextRange textRange = toTextRange((InputFile) inputComponent, lineNumber.get());
+                TextRange textRange = ((InputFile) inputComponent).selectLine(lineNumber.get());
                 newIssueLocation.at(textRange);
             }
             severity.ifPresent(newIssue::overrideSeverity);
@@ -118,10 +118,6 @@ public class IssueHandler {
         } else {
             LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", executableRuleType.getId());
         }
-    }
-
-    private TextRange toTextRange(InputFile inputFile, Integer lineNumber) {
-        return inputFile.newRange(lineNumber, 0, lineNumber, 0);
     }
 
     private Optional<Severity> convertSeverity(SeverityType severity) {

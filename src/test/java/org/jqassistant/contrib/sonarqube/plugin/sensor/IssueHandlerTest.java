@@ -199,7 +199,7 @@ class IssueHandlerTest {
     private void stubSourceLocation() {
         InputPath javaResource = mock(InputPath.class, withSettings().extraInterfaces(InputFile.class));
         when(resourceResolver.resolve(any(FileSystem.class), any(String.class), any(String.class), any(String.class))).thenReturn(javaResource);
-        when(((InputFile) javaResource).newRange(16, 0, 16, 0))
-            .thenReturn(new DefaultTextRange(new DefaultTextPointer(16, 0), new DefaultTextPointer(16, 0)));
+        when(((InputFile) javaResource).selectLine(16))
+            .thenReturn(new DefaultTextRange(new DefaultTextPointer(16, 0), new DefaultTextPointer(16, 1)));
     }
 }
