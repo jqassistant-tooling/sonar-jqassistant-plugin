@@ -12,14 +12,17 @@ import java.util.Map;
 
 public final class ReportReader {
 
+    public static final String REPORT_NAMSESPACE_1_8 = "http://schema.jqassistant.org/report/v1.8";
+
     private static final ReportReader INSTANCE = new ReportReader();
 
     private final Map<String, String> namespaceMappings;
 
     private ReportReader() {
         namespaceMappings = new HashMap<>();
-        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.2", "http://www.buschmais.com/jqassistant/core/report/schema/v1.3");
-        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.0", "http://www.buschmais.com/jqassistant/core/report/schema/v1.3");
+        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.0", REPORT_NAMSESPACE_1_8);
+        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.2", REPORT_NAMSESPACE_1_8);
+        namespaceMappings.put("http://www.buschmais.com/jqassistant/core/report/schema/v1.3", REPORT_NAMSESPACE_1_8);
     }
 
     public static ReportReader getInstance() {
