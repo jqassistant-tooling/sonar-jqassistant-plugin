@@ -1,8 +1,8 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import com.buschmais.jqassistant.core.report.schema.v1.*;
 import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
+import org.jqassistant.schema.report.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputComponent;

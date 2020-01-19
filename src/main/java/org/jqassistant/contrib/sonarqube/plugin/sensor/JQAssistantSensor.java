@@ -1,11 +1,11 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import com.buschmais.jqassistant.core.report.schema.v1.ExecutableRuleType;
-import com.buschmais.jqassistant.core.report.schema.v1.GroupType;
-import com.buschmais.jqassistant.core.report.schema.v1.JqassistantReport;
-import com.buschmais.jqassistant.core.report.schema.v1.ReferencableRuleType;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
+import org.jqassistant.schema.report.v1.ExecutableRuleType;
+import org.jqassistant.schema.report.v1.GroupType;
+import org.jqassistant.schema.report.v1.JqassistantReport;
+import org.jqassistant.schema.report.v1.ReferencableRuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.internal.DefaultInputProject;
@@ -17,7 +17,7 @@ import org.sonar.api.scanner.fs.InputProject;
 import java.io.File;
 import java.util.List;
 
-import static com.buschmais.jqassistant.core.report.schema.v1.StatusEnumType.FAILURE;
+import static org.jqassistant.schema.report.v1.StatusEnumType.FAILURE;
 
 /**
  * {@link Sensor} implementation scanning for jqassistant-report.xml files.

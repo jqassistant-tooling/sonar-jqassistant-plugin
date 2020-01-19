@@ -1,7 +1,7 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import com.buschmais.jqassistant.core.report.schema.v1.ExecutableRuleType;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
+import org.jqassistant.schema.report.v1.ExecutableRuleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +56,16 @@ public class JQAssistantSensorTest {
     public void createConceptIssue() {
         sensor = new JQAssistantSensor(configuration, issueHandler);
         stubFileSystem("jqassistant-report-concept-issue.xml");
+
+        sensor.execute(sensorContext);
+
+        verify(issueHandler).process(eq(sensorContext), any(File.class), any(ExecutableRuleType.class));
+    }
+
+    @Test
+    public void createConceptIssue_1_8() {
+        sensor = new JQAssistantSensor(configuration, issueHandler);
+        stubFileSystem("jqassistant-report-1_8.xml");
 
         sensor.execute(sensorContext);
 
