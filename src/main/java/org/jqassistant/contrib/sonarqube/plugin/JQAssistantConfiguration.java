@@ -59,10 +59,11 @@ public class JQAssistantConfiguration {
     }
 
     /**
-     * The path is relative or absolute.
+     * Return the configured report {@link File}.
      *
      * @param projectDir The project directory (i.e. root module directory).
      * @param moduleDir  The module directory.
+     * @return The configured {@link File} representing the jQAssistant XML report.
      */
     public File getReportFile(File projectDir, File moduleDir) {
         Optional<String> reportPath = settings.get(REPORT_PATH);

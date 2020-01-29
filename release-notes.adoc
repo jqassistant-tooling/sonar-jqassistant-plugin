@@ -1,6 +1,9 @@
 :toc: left
 = Release Notes
 
+== 1.8.0
+* Upgraded to jQAssistant 1.8.0
+
 == 1.7.4
 * Fixed an error when creating an issue referencing a line number
 
