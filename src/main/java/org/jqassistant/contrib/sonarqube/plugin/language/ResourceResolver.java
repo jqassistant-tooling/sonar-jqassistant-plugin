@@ -22,10 +22,10 @@ public interface ResourceResolver {
      * Resolve the resource for an element of a given type.
      *
      * @param fileSystem The {@link FileSystem}.
-     * @param nodeType   The type declaration in report.
-     * @param nodeSource The source name producing the node element in report (e.g. the class file name for java classes).
-     * @param nodeValue  The value of the node element in report (e.g. the class name).
+     * @param type       The type declaration in report.
+     * @param source     The source name producing the node element in report (e.g. the class file name for java classes).
+     * @param value      The value of the node element in report (e.g. the class name).
      * @return The resource or <code>null</code> if not resolved.
      */
-    InputPath resolve(FileSystem fileSystem, String nodeType, String nodeSource, String nodeValue);
+    InputPath resolve(FileSystem fileSystem, String type, String source, String value);
 }

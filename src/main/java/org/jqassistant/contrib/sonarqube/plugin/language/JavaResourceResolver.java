@@ -26,15 +26,15 @@ public class JavaResourceResolver implements ResourceResolver {
     }
 
     @Override
-    public InputPath resolve(FileSystem fileSystem, String nodeType, String nodeSource, String nodeValue) {
-        switch (nodeType) {
+    public InputPath resolve(FileSystem fileSystem, String type, String source, String value) {
+        switch (type) {
             case "Type":
             case "Field":
             case "Method":
             case "MethodInvocation":
             case "ReadField":
             case "WriteField":
-                String javaFilePath = getJavaSourceFileName(nodeSource);
+                String javaFilePath = getJavaSourceFileName(source);
                 return findMatchingInputFile(fileSystem, javaFilePath);
             default:
                 return null;
@@ -55,12 +55,11 @@ public class JavaResourceResolver implements ResourceResolver {
         Iterator<InputFile> files = fileSystem.inputFiles(fileSystem.predicates().matchesPathPattern("**/" + javaFilePath)).iterator();
         while (files.hasNext()) {
             InputFile file = files.next();
-            if (files.hasNext()) {
-                // ups, more entries?!
-                LOGGER.error("Multiple matches for Java file {}, cannot handle source file for violations", javaFilePath);
-                return null;
+            if (!files.hasNext()) {
+                return file;
             }
-            return file;
+            LOGGER.warn("Multiple matches for Java file {}, cannot safely determine source file.", javaFilePath);
+            return null;
         }
         return null;
     }
