@@ -4,12 +4,12 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.8.0</version>
+        <version>1.8.1-SNAPSHOT</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
     <artifactId>sonar-jqassistant-plugin</artifactId>
-    <version>1.8.0</version>
+    <version>1.8.1-SNAPSHOT</version>
     <packaging>sonar-plugin</packaging>
 
     <name>Sonar jQAssistant Plugin</name>
