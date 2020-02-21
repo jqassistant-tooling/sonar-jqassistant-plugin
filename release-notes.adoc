@@ -1,6 +1,9 @@
 :toc: left
 = Release Notes
 
+== 1.8.2
+* Fixed https://github.com/jqassistant-contrib/sonar-jqassistant-plugin/issues/8[JAXB related regression] when running an analysis using Java version 11 or newer
+
 == 1.8.1
 * Upgraded to jQAssistant 1.8.0
 
