@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.8.1</version>
+        <version>1.8.2-SNAPSHOT</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
@@ -16,6 +16,13 @@
     <description>SonarQube plugin for jQAssistant providing rules for invalid concepts and constraint violations.
     </description>
     <url>https://github.com/jqassistant-contrib/sonar-jqassistant-plugin</url>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License, v3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+        </license>
+    </licenses>
 
     <developers>
         <developer>
