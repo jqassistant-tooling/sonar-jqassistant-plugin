@@ -29,8 +29,6 @@ public final class ReportReader {
 
     private static final ReportReader INSTANCE = new ReportReader();
 
-    private String targetNamespace;
-
     private XMLInputFactory inputFactory;
 
     private JAXBContext jaxbContext;
@@ -45,7 +43,6 @@ public final class ReportReader {
                 throw new IllegalStateException("Cannot create JAXB context for " + JqassistantReport.class.getName(), e);
             }
         });
-        this.targetNamespace = getTargetNamespace(jaxbContext);
     }
 
     /**
@@ -58,7 +55,7 @@ public final class ReportReader {
         return withPluginClassLoader(() -> {
             try (InputStream inputStream = new FileInputStream(reportFile)) {
                 return unmarshal(inputStream);
-            } catch (IOException e) {
+            } catch (IOException | XMLStreamException | JAXBException e) {
                 throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
             }
         });
@@ -76,31 +73,23 @@ public final class ReportReader {
         }
     }
 
+    private JqassistantReport unmarshal(InputStream stream) throws JAXBException, XMLStreamException {
+        XMLStreamReader xmlStreamReader = new NamespaceMappingStreamReader(inputFactory.createXMLStreamReader(stream), getTargetNamespace());
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        return unmarshaller.unmarshal(xmlStreamReader, JqassistantReport.class).getValue();
+    }
+
     /**
      * Determines the target namespace from the root element registered in the {@link JAXBContext}.
      *
-     * @param jaxbContext The {@link JAXBContext}.
      * @return The target namespace.
+     * @throws JAXBException If the root element cannot be determined.
      */
-    private String getTargetNamespace(JAXBContext jaxbContext) {
+    private String getTargetNamespace() throws JAXBException {
         if (jaxbContext instanceof JAXBRIContext) {
-            try {
-                return ((JAXBRIContext) this.jaxbContext).getElementName(JqassistantReport.class).getNamespaceURI();
-            } catch (JAXBException e) {
-                throw new IllegalStateException("Cannot determine XML element name for " + JqassistantReport.class.getName());
-            }
+            return ((JAXBRIContext) this.jaxbContext).getElementName(JqassistantReport.class).getNamespaceURI();
         }
         throw new IllegalStateException("Expecting JAXBContext to be of type " + JAXBRIContext.class.getName() + " but got " + jaxbContext.getClass().getName());
-    }
-
-    private JqassistantReport unmarshal(InputStream stream) {
-        try {
-            XMLStreamReader xmlStreamReader = new NamespaceMappingStreamReader(inputFactory.createXMLStreamReader(stream), targetNamespace);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            return unmarshaller.unmarshal(xmlStreamReader, JqassistantReport.class).getValue();
-        } catch (XMLStreamException | JAXBException e) {
-            throw new IllegalStateException("Cannot read XML document.", e);
-        }
     }
 
     /**
