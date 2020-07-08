@@ -1,6 +1,9 @@
 :toc: left
 = Release Notes
 
+== 1.9.0
+* If possible adhoc rules and external issues are created to allow filtering for specific rules
+
 == 1.8.2
 * Fixed https://github.com/jqassistant-contrib/sonar-jqassistant-plugin/issues/8[JAXB related regression] when running an analysis using Java version 11 or newer
 

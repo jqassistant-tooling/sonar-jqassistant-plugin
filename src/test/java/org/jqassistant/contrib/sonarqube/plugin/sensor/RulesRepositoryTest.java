@@ -11,7 +11,8 @@ import org.sonar.api.server.rule.RulesDefinition.Context;
 import org.sonar.api.server.rule.RulesDefinition.NewRepository;
 import org.sonar.plugins.java.Java;
 
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.RulesRepository.*;
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
+import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.sonar.api.rule.Severity.MAJOR;
@@ -37,22 +38,22 @@ class RulesRepositoryTest {
     @BeforeEach
     public void setUp() {
         doReturn(newRepository).when(context).createRepository(JQAssistant.KEY, Java.KEY);
-        doReturn(conceptRule).when(newRepository).createRule(INVALID_CONCEPT_KEY);
-        doReturn(constraintRule).when(newRepository).createRule(CONSTRAINT_VIOLATION_KEY);
+        doReturn(conceptRule).when(newRepository).createRule(CONCEPT.getKey());
+        doReturn(constraintRule).when(newRepository).createRule(CONSTRAINT.getKey());
     }
 
     @Test
     public void defineRules() {
         rulesRepository.define(context);
 
-        verify(newRepository).createRule(INVALID_CONCEPT_KEY);
-        verify(conceptRule).setName(INVALID_CONCEPT_RULE_NAME);
-        verify(conceptRule).setInternalKey(INVALID_CONCEPT_KEY);
+        verify(newRepository).createRule(CONCEPT.getKey());
+        verify(conceptRule).setName(CONCEPT.getName());
+        verify(conceptRule).setInternalKey(CONCEPT.getKey());
         verify(conceptRule).setSeverity(MINOR);
 
-        verify(newRepository).createRule(CONSTRAINT_VIOLATION_KEY);
-        verify(constraintRule).setName(CONSTRAINT_VIOLATION_RULE_NAME);
-        verify(constraintRule).setInternalKey(CONSTRAINT_VIOLATION_KEY);
+        verify(newRepository).createRule(CONSTRAINT.getKey());
+        verify(constraintRule).setName(CONSTRAINT.getName());
+        verify(constraintRule).setInternalKey(CONSTRAINT.getKey());
         verify(constraintRule).setSeverity(MAJOR);
 
         verify(newRepository).done();
