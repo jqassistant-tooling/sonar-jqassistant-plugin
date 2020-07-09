@@ -2,7 +2,8 @@
 = Release Notes
 
 == 1.9.0
-* If possible adhoc rules and external issues are created to allow filtering for specific rules
+* To allow filtering ad-hoc rules and external issues are created instead of generic concept/constraint issues where possible.
+  This is currently limited to issues that can be resolved to files (e.g. Java classes).
 
 == 1.8.2
 * Fixed https://github.com/jqassistant-contrib/sonar-jqassistant-plugin/issues/8[JAXB related regression] when running an analysis using Java version 11 or newer
