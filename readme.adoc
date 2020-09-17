@@ -50,11 +50,14 @@ Therefore the following steps need to be performed in the SonarQube UI (as admin
 [options=header]
 .Supported properties
 |===
-| Property                     | Description                                                 | Default value
-| sonar.jqassistant.disabled   | Disable the jQAssistant sensor.                             | false
+| Property                     | Description                                         | Default value
+| sonar.jqassistant.disabled   | Disable the jQAssistant sensor.                     | false
 | sonar.jqassistant.reportPath | The path to the jQAssistant XML report file,
-                                 either absolute or relative to the current module directory | <projectRoot>/target/jqassistant/jqassistant-report.xml
+                                 either absolute or relative to the module directory | <projectRoot>/target/jqassistant/jqassistant-report.xml
 |===
+
+NOTE: By specifying a relative `reportPath` the first jQAssistant XML report file will be used for a module in a multi-module structure
+which can be found by traversing the module hierarchy upwards until the project's root directory is reached.
 
 == Execution
 
