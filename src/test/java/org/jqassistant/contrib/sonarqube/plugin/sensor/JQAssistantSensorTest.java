@@ -83,7 +83,7 @@ public class JQAssistantSensorTest {
     }
 
     private void stubFileSystem(String reportFile) {
-        doReturn(new File(baseDir, reportFile)).when(configuration).getReportFile(baseDir, baseDir);
+        doReturn(reportFile).when(configuration).getReportFile();
         doReturn(baseDir).when(fileSystem).baseDir();
         doReturn(fileSystem).when(sensorContext).fileSystem();
     }

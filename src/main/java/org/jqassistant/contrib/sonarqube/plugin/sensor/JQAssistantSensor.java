@@ -16,6 +16,7 @@ import org.sonar.api.scanner.fs.InputProject;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 import static org.jqassistant.schema.report.v1.StatusEnumType.FAILURE;
 
@@ -51,17 +52,19 @@ public class JQAssistantSensor implements Sensor {
     }
 
     private void startScan(SensorContext context) {
+        String reportPath = configuration.getReportFile();
         File projectDir = getProjectDirectory(context);
         File baseDir = context.fileSystem().baseDir();
-        File reportFile = configuration.getReportFile(projectDir, baseDir);
-        if (reportFile.exists()) {
-            LOGGER.info("Found jQAssistant report at '{}'.", reportFile.getAbsolutePath());
-            JqassistantReport report = ReportReader.getInstance().read(reportFile);
+        Optional<File> reportFile = ReportLocator.resolveReportFile(projectDir, baseDir, reportPath);
+        if (reportFile.isPresent()) {
+            File file = reportFile.get();
+            LOGGER.info("Found jQAssistant report at '{}'.", file.getAbsolutePath());
+            JqassistantReport report = ReportReader.getInstance().read(file);
             if (report != null) {
                 evaluate(context, projectDir, report.getGroupOrConceptOrConstraint());
             }
         } else {
-            LOGGER.info("No report found at '{}', skipping.", reportFile.getPath());
+            LOGGER.info("No jQAssistant report found, skipping.");
         }
     }
 

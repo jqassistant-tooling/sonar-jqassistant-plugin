@@ -26,7 +26,6 @@ import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
 import org.sonar.api.scanner.ScannerSide;
 
-import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,19 +58,12 @@ public class JQAssistantConfiguration {
     }
 
     /**
-     * Return the configured report {@link File}.
+     * Return the configured report path as {@link String}.
      *
-     * @param projectDir The project directory (i.e. root module directory).
-     * @param moduleDir  The module directory.
-     * @return The configured {@link File} representing the jQAssistant XML report.
+     * @return The configured report path representing the jQAssistant XML report.
      */
-    public File getReportFile(File projectDir, File moduleDir) {
-        Optional<String> reportPath = settings.get(REPORT_PATH);
-        if (reportPath.isPresent()) {
-            File reportFile = new File(reportPath.get());
-            return reportFile.isAbsolute() ? reportFile : new File(moduleDir, reportPath.get());
-        }
-        return new File(projectDir, JQAssistantConfiguration.DEFAULT_REPORT_PATH).getAbsoluteFile();
+    public String getReportFile() {
+        return settings.get(REPORT_PATH).orElse(DEFAULT_REPORT_PATH);
     }
 
     /**
