@@ -1,7 +1,9 @@
 :toc: left
 = Release Notes
 
-== 1.8.3
+== 1.9.0
+* To allow filtering issues by rule type the plugin now creates ad-hoc rules/external issues instead of generic concept/constraint issues where possible.
+  This is currently limited to issues that can be resolved to files (e.g. Java classes).
 * Added detection of jQAssistant XML reports from parent modules
 
 == 1.8.2

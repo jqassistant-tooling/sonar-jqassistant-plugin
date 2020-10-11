@@ -2,37 +2,59 @@ package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
-import org.jqassistant.schema.report.v1.*;
+import org.jqassistant.schema.report.v1.ColumnHeaderType;
+import org.jqassistant.schema.report.v1.ColumnType;
+import org.jqassistant.schema.report.v1.ColumnsHeaderType;
+import org.jqassistant.schema.report.v1.ConceptType;
+import org.jqassistant.schema.report.v1.ConstraintType;
+import org.jqassistant.schema.report.v1.ElementType;
+import org.jqassistant.schema.report.v1.ResultType;
+import org.jqassistant.schema.report.v1.RowType;
+import org.jqassistant.schema.report.v1.RowsType;
+import org.jqassistant.schema.report.v1.SeverityType;
+import org.jqassistant.schema.report.v1.SourceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputPath;
 import org.sonar.api.batch.fs.internal.DefaultTextPointer;
 import org.sonar.api.batch.fs.internal.DefaultTextRange;
+import org.sonar.api.batch.rule.Severity;
 import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.batch.sensor.issue.NewExternalIssue;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
+import org.sonar.api.batch.sensor.rule.NewAdHocRule;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.rules.Rule;
+import org.sonar.api.scanner.fs.InputProject;
 
 import java.io.File;
 import java.util.Optional;
 
+import static com.buschmais.jqassistant.core.rule.api.model.Severity.CRITICAL;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 @ExtendWith(MockitoExtension.class)
 class IssueHandlerTest {
 
-    private static final Rule CONCEPT_RULE = Rule.create(JQAssistant.KEY, RulesRepository.INVALID_CONCEPT_KEY, RulesRepository.INVALID_CONCEPT_RULE_NAME);
+    private static final Rule CONCEPT_RULE = Rule.create(JQAssistant.KEY, CONCEPT.getKey(), CONCEPT.getDescription());
 
-    private static final Rule CONSTRAINT_RULE = Rule.create(JQAssistant.KEY, RulesRepository.CONSTRAINT_VIOLATION_KEY, RulesRepository.CONSTRAINT_VIOLATION_RULE_NAME);
+    private static final Rule CONSTRAINT_RULE = Rule.create(JQAssistant.KEY, CONSTRAINT.getKey(), CONSTRAINT.getDescription());
 
     private static final File PROJECT_PATH = new File(".");
 
@@ -43,7 +65,16 @@ class IssueHandlerTest {
     private FileSystem fileSystem;
 
     @Mock
+    private InputProject inputProject;
+
+    @Mock
     private NewIssue newIssue;
+
+    @Mock
+    private NewAdHocRule newAdHocRule;
+
+    @Mock
+    private NewExternalIssue newExternalIssue;
 
     @Mock
     private NewIssueLocation newIssueLocation;
@@ -74,6 +105,7 @@ class IssueHandlerTest {
         conceptType.setId("test:Concept");
         doReturn(PROJECT_PATH).when(fileSystem).baseDir();
         doReturn(Optional.of(CONCEPT_RULE.ruleKey())).when(ruleResolver).resolve(CONCEPT);
+        doReturn(inputProject).when(sensorContext).project();
         stubNewIssue();
 
         issueHandler.process(sensorContext, PROJECT_PATH, conceptType);
@@ -110,6 +142,7 @@ class IssueHandlerTest {
         constraintType.setResult(createResultType(false));
         doReturn(PROJECT_PATH).when(fileSystem).baseDir();
         doReturn(Optional.of(CONSTRAINT_RULE.ruleKey())).when(ruleResolver).resolve(CONSTRAINT);
+        doReturn(inputProject).when(sensorContext).project();
         stubNewIssue();
 
         issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
@@ -117,6 +150,7 @@ class IssueHandlerTest {
         verify(sensorContext).newIssue();
         verify(newIssue).forRule(CONSTRAINT_RULE.ruleKey());
         verify(newIssue).newLocation();
+        verify(newIssueLocation).on(inputProject);
         verify(newIssueLocation).message("[test:Constraint] TestConstraint\nValue:Test\n");
     }
 
@@ -128,17 +162,24 @@ class IssueHandlerTest {
         ConstraintType constraintType = new ConstraintType();
         constraintType.setDescription("TestConstraint");
         constraintType.setId("test:Constraint");
+        constraintType.setSeverity(getSeverityType(CRITICAL));
         constraintType.setResult(createResultType(true));
-        doReturn(Optional.of(CONSTRAINT_RULE.ruleKey())).when(ruleResolver).resolve(CONSTRAINT);
-        stubNewIssue();
+        stubExternalNewIssue();
         stubSourceLocation();
 
         issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
 
-        verify(sensorContext).newIssue();
-        verify(newIssue).forRule(CONSTRAINT_RULE.ruleKey());
-        verify(newIssue).newLocation();
-        verify(newIssueLocation).message("[test:Constraint] TestConstraint\n");
+        verify(sensorContext).newAdHocRule();
+        verify(newAdHocRule).engineId(JQAssistant.NAME);
+        verify(newAdHocRule).ruleId("test:Constraint");
+        verify(newAdHocRule).description("TestConstraint");
+        verify(newAdHocRule).severity(Severity.MAJOR);
+
+        verify(sensorContext).newExternalIssue();
+        verify(newExternalIssue).engineId(JQAssistant.NAME);
+        verify(newExternalIssue).ruleId("test:Constraint");
+        verify(newExternalIssue).severity(Severity.CRITICAL);
+        verify(newExternalIssue).newLocation();
     }
 
     /**
@@ -154,6 +195,13 @@ class IssueHandlerTest {
         issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
 
         verify(sensorContext, never()).newIssue();
+    }
+
+    private SeverityType getSeverityType(com.buschmais.jqassistant.core.rule.api.model.Severity severity) {
+        SeverityType severityType = new SeverityType();
+        severityType.setValue(CRITICAL.getValue());
+        severityType.setLevel(severity.getLevel());
+        return severityType;
     }
 
     private ResultType createResultType(boolean includeSourceLocation) {
@@ -193,7 +241,32 @@ class IssueHandlerTest {
         doReturn(newIssue).when(sensorContext).newIssue();
         doReturn(newIssueLocation).when(newIssue).newLocation();
         doReturn(newIssue).when(newIssue).forRule(any(RuleKey.class));
+        doReturn(newIssue).when(newIssue).at(newIssueLocation);
+        stubNewIssueLocation();
+    }
+
+    private void stubExternalNewIssue() {
+        doReturn(newAdHocRule).when(sensorContext).newAdHocRule();
+        doReturn(newAdHocRule).when(newAdHocRule).engineId(anyString());
+        doReturn(newAdHocRule).when(newAdHocRule).ruleId(anyString());
+        doReturn(newAdHocRule).when(newAdHocRule).name(anyString());
+        doReturn(newAdHocRule).when(newAdHocRule).description(anyString());
+        doReturn(newAdHocRule).when(newAdHocRule).type(any(org.sonar.api.rules.RuleType.class));
+        doReturn(newAdHocRule).when(newAdHocRule).severity(any(Severity.class));
+
+        doReturn(newExternalIssue).when(sensorContext).newExternalIssue();
+        doReturn(newExternalIssue).when(newExternalIssue).type(any(org.sonar.api.rules.RuleType.class));
+        doReturn(newIssueLocation).when(newExternalIssue).newLocation();
+        doReturn(newExternalIssue).when(newExternalIssue).engineId(anyString());
+        doReturn(newExternalIssue).when(newExternalIssue).ruleId(anyString());
+        doReturn(newExternalIssue).when(newExternalIssue).severity(any(Severity.class));
+        doReturn(newExternalIssue).when(newExternalIssue).at(newIssueLocation);
+        stubNewIssueLocation();
+    }
+
+    private void stubNewIssueLocation() {
         doReturn(newIssueLocation).when(newIssueLocation).message(any(String.class));
+        doReturn(newIssueLocation).when(newIssueLocation).on(any(InputComponent.class));
     }
 
     private void stubSourceLocation() {
