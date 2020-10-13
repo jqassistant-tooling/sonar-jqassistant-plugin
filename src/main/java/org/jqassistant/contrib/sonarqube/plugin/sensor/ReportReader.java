@@ -89,11 +89,7 @@ public final class ReportReader {
      *             If the root element cannot be determined.
      */
     private String getTargetNamespace() throws JAXBException {
-        if (jaxbContext instanceof JAXBRIContext) {
-            return ((JAXBRIContext) this.jaxbContext).getElementName(JqassistantReport.class).getNamespaceURI();
-        }
-        throw new IllegalStateException(
-                "Expecting JAXBContext to be of type " + JAXBRIContext.class.getName() + " but got " + jaxbContext.getClass().getName());
+        return ((JAXBRIContext) this.jaxbContext).getElementName(JqassistantReport.class).getNamespaceURI();
     }
 
     /**

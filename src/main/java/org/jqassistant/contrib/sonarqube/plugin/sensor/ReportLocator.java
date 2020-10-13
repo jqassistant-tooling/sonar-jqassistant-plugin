@@ -18,15 +18,23 @@ import static lombok.AccessLevel.PRIVATE;
  */
 public final class ReportLocator {
 
+    /**
+     * Represents the location of a jQAssistant XML report file.
+     */
     @Builder
     @Getter
     @RequiredArgsConstructor(access = PRIVATE)
     @EqualsAndHashCode
-    @ToString
     public static class ReportLocation {
 
+        /**
+         * The module directory containing the XML report.
+         */
         private final File moduleDirectory;
 
+        /**
+         * The report file.
+         */
         private final File reportFile;
 
     }
