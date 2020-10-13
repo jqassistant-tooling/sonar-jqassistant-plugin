@@ -1,6 +1,7 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.Optional;
 
 import lombok.Builder;
@@ -24,7 +25,6 @@ public final class ReportLocator {
     @Builder
     @Getter
     @RequiredArgsConstructor(access = PRIVATE)
-    @EqualsAndHashCode
     public static class ReportLocation {
 
         /**
@@ -37,6 +37,20 @@ public final class ReportLocator {
          */
         private final File reportFile;
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            ReportLocation that = (ReportLocation) o;
+            return moduleDirectory.equals(that.moduleDirectory) && reportFile.equals(that.reportFile);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(moduleDirectory, reportFile);
+        }
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportLocator.class);
