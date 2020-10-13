@@ -42,7 +42,8 @@ public class JQAssistantConfiguration {
     public static final String DISABLED = "sonar.jqassistant.disabled";
 
     /**
-     * Defines the path for the jQAssistant XML report relative to the root directory of the project.
+     * Defines the path for the jQAssistant XML report relative to the root
+     * directory of the project.
      */
     public static final String REPORT_PATH = "sonar.jqassistant.reportPath";
 
@@ -76,14 +77,12 @@ public class JQAssistantConfiguration {
 
     public static List<PropertyDefinition> getPropertyDefinitions() {
         return asList(
-            PropertyDefinition.builder(REPORT_PATH)
-                .category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).name("jQAssistant Report Path")
-                .description(
-                    "Absolute or relative path to the jQAssistant XML report file (default: '<projectRoot>/" + DEFAULT_REPORT_PATH + "').")
-                .onQualifiers(Qualifiers.PROJECT).build(),
-            PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
-                .category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).description("Disable the jQAssistant sensor.")
-                .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build());
+                PropertyDefinition.builder(REPORT_PATH).category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).name("jQAssistant Report Path")
+                        .description("Absolute or relative path to the jQAssistant XML report file (default: '<projectRoot>/" + DEFAULT_REPORT_PATH + "').")
+                        .onQualifiers(Qualifiers.PROJECT).build(),
+                PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
+                        .category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).description("Disable the jQAssistant sensor.")
+                        .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build());
     }
 
 }

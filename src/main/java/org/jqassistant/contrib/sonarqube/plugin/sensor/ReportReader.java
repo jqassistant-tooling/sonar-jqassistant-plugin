@@ -48,7 +48,8 @@ public final class ReportReader {
     /**
      * Read the report file.
      *
-     * @param reportFile The report file.
+     * @param reportFile
+     *            The report file.
      * @return The {@link JqassistantReport}.
      */
     public JqassistantReport read(File reportFile) {
@@ -80,21 +81,24 @@ public final class ReportReader {
     }
 
     /**
-     * Determines the target namespace from the root element registered in the {@link JAXBContext}.
+     * Determines the target namespace from the root element registered in the
+     * {@link JAXBContext}.
      *
      * @return The target namespace.
-     * @throws JAXBException If the root element cannot be determined.
+     * @throws JAXBException
+     *             If the root element cannot be determined.
      */
     private String getTargetNamespace() throws JAXBException {
         if (jaxbContext instanceof JAXBRIContext) {
             return ((JAXBRIContext) this.jaxbContext).getElementName(JqassistantReport.class).getNamespaceURI();
         }
-        throw new IllegalStateException("Expecting JAXBContext to be of type " + JAXBRIContext.class.getName() + " but got " + jaxbContext.getClass().getName());
+        throw new IllegalStateException(
+                "Expecting JAXBContext to be of type " + JAXBRIContext.class.getName() + " but got " + jaxbContext.getClass().getName());
     }
 
     /**
-     * A {@link StreamReaderDelegate} which maps all namespaces from a document to the
-     * specified target namespace.
+     * A {@link StreamReaderDelegate} which maps all namespaces from a document to
+     * the specified target namespace.
      */
     private static class NamespaceMappingStreamReader extends StreamReaderDelegate {
 

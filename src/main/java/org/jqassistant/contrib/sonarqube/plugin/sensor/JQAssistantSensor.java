@@ -38,8 +38,7 @@ public class JQAssistantSensor implements Sensor {
 
     @Override
     public void describe(SensorDescriptor descriptor) {
-        descriptor
-            .name("JQA");
+        descriptor.name("JQA");
     }
 
     @Override
@@ -55,13 +54,14 @@ public class JQAssistantSensor implements Sensor {
         String reportPath = configuration.getReportFile();
         File projectDir = getProjectDirectory(context);
         File baseDir = context.fileSystem().baseDir();
-        Optional<File> reportFile = ReportLocator.resolveReportFile(projectDir, baseDir, reportPath);
-        if (reportFile.isPresent()) {
-            File file = reportFile.get();
-            LOGGER.info("Found jQAssistant report at '{}'.", file.getAbsolutePath());
-            JqassistantReport report = ReportReader.getInstance().read(file);
+        Optional<ReportLocator.ReportLocation> optionalReportLocation = ReportLocator.resolveReportFile(projectDir, baseDir, reportPath);
+        if (optionalReportLocation.isPresent()) {
+            ReportLocator.ReportLocation reportLocation = optionalReportLocation.get();
+            File reportFile = reportLocation.getReportFile();
+            LOGGER.info("Found jQAssistant report at '{}'.", reportFile.getAbsolutePath());
+            JqassistantReport report = ReportReader.getInstance().read(reportFile);
             if (report != null) {
-                evaluate(context, projectDir, report.getGroupOrConceptOrConstraint());
+                evaluate(context, reportLocation.getModuleDirectory(), report.getGroupOrConceptOrConstraint());
             }
         } else {
             LOGGER.info("No jQAssistant report found, skipping.");
@@ -76,17 +76,17 @@ public class JQAssistantSensor implements Sensor {
         return context.fileSystem().baseDir();
     }
 
-    private void evaluate(SensorContext context, File projectPath, List<ReferencableRuleType> rules) {
+    private void evaluate(SensorContext context, File reportModulePath, List<ReferencableRuleType> rules) {
         for (ReferencableRuleType rule : rules) {
             if (rule instanceof GroupType) {
                 GroupType groupType = (GroupType) rule;
                 LOGGER.info("Processing group '{}'", groupType.getId());
-                evaluate(context, projectPath, groupType.getGroupOrConceptOrConstraint());
+                evaluate(context, reportModulePath, groupType.getGroupOrConceptOrConstraint());
             }
             if (rule instanceof ExecutableRuleType) {
                 ExecutableRuleType executableRuleType = (ExecutableRuleType) rule;
                 if (FAILURE.equals(executableRuleType.getStatus())) {
-                    issueHandler.process(context, projectPath, executableRuleType);
+                    issueHandler.process(context, reportModulePath, executableRuleType);
                 }
             }
         }
