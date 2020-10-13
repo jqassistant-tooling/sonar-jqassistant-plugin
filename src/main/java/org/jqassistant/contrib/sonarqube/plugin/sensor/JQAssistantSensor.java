@@ -57,11 +57,12 @@ public class JQAssistantSensor implements Sensor {
         Optional<ReportLocator.ReportLocation> optionalReportLocation = ReportLocator.resolveReportFile(projectDir, baseDir, reportPath);
         if (optionalReportLocation.isPresent()) {
             ReportLocator.ReportLocation reportLocation = optionalReportLocation.get();
+            File moduleDirectory = reportLocation.getModuleDirectory();
             File reportFile = reportLocation.getReportFile();
-            LOGGER.info("Found jQAssistant report at '{}'.", reportFile.getAbsolutePath());
+            LOGGER.info("Found jQAssistant report for module '{}' at '{}'.", moduleDirectory.getPath(), reportFile.getPath());
             JqassistantReport report = ReportReader.getInstance().read(reportFile);
             if (report != null) {
-                evaluate(context, reportLocation.getModuleDirectory(), report.getGroupOrConceptOrConstraint());
+                evaluate(context, moduleDirectory, report.getGroupOrConceptOrConstraint());
             }
         } else {
             LOGGER.info("No jQAssistant report found, skipping.");
