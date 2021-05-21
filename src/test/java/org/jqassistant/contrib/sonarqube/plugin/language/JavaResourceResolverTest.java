@@ -1,21 +1,24 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.sonar.api.batch.fs.*;
-import org.sonar.api.batch.fs.internal.DefaultIndexedFile;
-import org.sonar.api.batch.fs.internal.DefaultInputFile;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import org.sonar.api.batch.fs.FilePredicate;
+import org.sonar.api.batch.fs.FilePredicates;
+import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.InputPath;
+import org.sonar.java.model.GeneratedFile;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
@@ -63,7 +66,6 @@ public class JavaResourceResolverTest {
         verifySingleFileMatches("WriteField");
     }
 
-
     private void verifySingleFileMatches(String sourceType) {
         stubFileSystem();
         Path path = Paths.get("src/test/java/org/jqassistant/contrib/Test.java");
@@ -110,8 +112,7 @@ public class JavaResourceResolverTest {
         doReturn(predicate).when(predicates).matchesPathPattern(anyString());
     }
 
-    private DefaultInputFile toInputFile(Path javaPath) {
-        DefaultIndexedFile indexedFile = new DefaultIndexedFile("", javaPath, "", null);
-        return new DefaultInputFile(indexedFile, null);
+    private InputFile toInputFile(Path javaPath) {
+        return new GeneratedFile(javaPath);
     }
 }
