@@ -3,16 +3,18 @@ package org.jqassistant.contrib.sonarqube.plugin;
 import java.util.List;
 
 import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
-import org.jqassistant.contrib.sonarqube.plugin.sensor.RulesRepository;
 import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
 import org.jqassistant.contrib.sonarqube.plugin.sensor.RuleKeyResolver;
-import org.junit.Test;
+import org.jqassistant.contrib.sonarqube.plugin.sensor.RulesRepository;
+import org.junit.jupiter.api.Test;
 import org.sonar.api.Plugin;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.utils.Version;
+
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class JQAssistantPluginTest {
 

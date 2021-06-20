@@ -4,12 +4,12 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.8.2</version>
+        <version>1.10.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
     <artifactId>sonar-jqassistant-plugin</artifactId>
-    <version>1.9.1-SNAPSHOT</version>
+    <version>1.10.0-SNAPSHOT</version>
     <packaging>sonar-plugin</packaging>
 
     <name>Sonar jQAssistant Plugin</name>
@@ -41,7 +41,8 @@
     </scm>
 
     <properties>
-        <sonar.buildVersion>7.9</sonar.buildVersion>
+        <sonar-plugin-api.version>8.9.0.43852</sonar-plugin-api.version>
+        <sonar-java-plugin.version>6.15.1.26025</sonar-java-plugin.version>
         <sonar.projectKey>jqassistant-contrib_sonar-jqassistant-plugin</sonar.projectKey>
     </properties>
 
@@ -50,7 +51,7 @@
             <plugin>
                 <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
                 <artifactId>sonar-packaging-maven-plugin</artifactId>
-                <version>1.19.0.397</version>
+                <version>1.20.0.405</version>
                 <extensions>true</extensions>
                 <configuration>
                     <pluginKey>jqassistant</pluginKey>
@@ -72,18 +73,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -101,13 +90,19 @@
             <dependency>
                 <groupId>org.sonarsource.sonarqube</groupId>
                 <artifactId>sonar-plugin-api</artifactId>
-                <version>${sonar.buildVersion}</version>
+                <version>${sonar-plugin-api.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.sonar-plugins.java</groupId>
+                <groupId>org.sonarsource.sonarqube</groupId>
+                <artifactId>sonar-plugin-api-impl</artifactId>
+                <version>${sonar-plugin-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.sonarsource.java</groupId>
                 <artifactId>sonar-java-plugin</artifactId>
-                <version>3.2</version>
+                <version>${sonar-java-plugin.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -131,7 +126,7 @@
             <dependency>
                 <groupId>org.sonarsource.sonarqube</groupId>
                 <artifactId>sonar-testing-harness</artifactId>
-                <version>${sonar.buildVersion}</version>
+                <version>${sonar-plugin-api.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -178,7 +173,11 @@
             <artifactId>sonar-plugin-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.sonar-plugins.java</groupId>
+            <groupId>org.sonarsource.sonarqube</groupId>
+            <artifactId>sonar-plugin-api-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sonarsource.java</groupId>
             <artifactId>sonar-java-plugin</artifactId>
         </dependency>
         <dependency>

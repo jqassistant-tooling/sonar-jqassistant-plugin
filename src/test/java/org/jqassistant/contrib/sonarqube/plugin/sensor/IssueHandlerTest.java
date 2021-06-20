@@ -1,5 +1,8 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
+import java.io.File;
+import java.util.Optional;
+
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
@@ -12,9 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.InputPath;
-import org.sonar.api.batch.fs.internal.DefaultTextPointer;
-import org.sonar.api.batch.fs.internal.DefaultTextRange;
+import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.rule.Severity;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewExternalIssue;
@@ -24,9 +25,6 @@ import org.sonar.api.batch.sensor.rule.NewAdHocRule;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.rules.Rule;
 import org.sonar.api.scanner.fs.InputProject;
-
-import java.io.File;
-import java.util.Optional;
 
 import static com.buschmais.jqassistant.core.rule.api.model.Severity.CRITICAL;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
@@ -85,7 +83,6 @@ class IssueHandlerTest {
         doReturn(fileSystem).when(sensorContext).fileSystem();
     }
 
-
     /**
      * Verifies that invalid concepts are reported on project level
      */
@@ -123,7 +120,8 @@ class IssueHandlerTest {
     }
 
     /**
-     * Verifies that violated constraints without a source location are reported on project level
+     * Verifies that violated constraints without a source location are reported on
+     * project level
      */
     @Test
     public void constraintViolationWithoutSourceLocation() {
@@ -146,7 +144,8 @@ class IssueHandlerTest {
     }
 
     /**
-     * Verifies that violated constraints with a source location are reported on the referenced element if it can be resolved.
+     * Verifies that violated constraints with a source location are reported on the
+     * referenced element if it can be resolved.
      */
     @Test
     public void constraintViolationWithMatchingSourceLocation() {
@@ -176,7 +175,8 @@ class IssueHandlerTest {
     }
 
     /**
-     * Verifies that violated constraints with a source location are not reported on the referenced element if it cannot be resolved (e.g. in another module).
+     * Verifies that violated constraints with a source location are not reported on
+     * the referenced element if it cannot be resolved (e.g. in another module).
      */
     @Test
     public void constraintViolationWithoutMatchingSourceLocation() {
@@ -263,9 +263,8 @@ class IssueHandlerTest {
     }
 
     private void stubSourceLocation() {
-        InputPath javaResource = mock(InputPath.class, withSettings().extraInterfaces(InputFile.class));
+        InputFile javaResource = mock(InputFile.class);
         when(resourceResolver.resolve(any(FileSystem.class), any(String.class), any(String.class), any(String.class))).thenReturn(javaResource);
-        when(((InputFile) javaResource).selectLine(16))
-            .thenReturn(new DefaultTextRange(new DefaultTextPointer(16, 0), new DefaultTextPointer(16, 1)));
+        when(javaResource.selectLine(16)).thenReturn(mock(TextRange.class));
     }
 }

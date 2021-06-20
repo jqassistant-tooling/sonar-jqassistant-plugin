@@ -1,14 +1,14 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
+import java.util.Iterator;
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputPath;
 import org.sonar.api.scanner.ScannerSide;
-
-import java.util.Iterator;
-import java.util.Locale;
 
 /**
  * Implementation of a {@link ResourceResolver} for java elements.

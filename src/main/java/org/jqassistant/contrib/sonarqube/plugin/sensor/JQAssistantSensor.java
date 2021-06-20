@@ -1,5 +1,9 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
+import java.io.File;
+import java.util.List;
+import java.util.Optional;
+
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.schema.report.v1.ExecutableRuleType;
@@ -13,10 +17,6 @@ import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.scanner.fs.InputProject;
-
-import java.io.File;
-import java.util.List;
-import java.util.Optional;
 
 import static org.jqassistant.schema.report.v1.StatusEnumType.FAILURE;
 
