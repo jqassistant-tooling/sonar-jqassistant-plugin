@@ -1,25 +1,10 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
+import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
 import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
-import org.jqassistant.schema.report.v1.ColumnHeaderType;
-import org.jqassistant.schema.report.v1.ColumnType;
-import org.jqassistant.schema.report.v1.ColumnsHeaderType;
-import org.jqassistant.schema.report.v1.ConceptType;
-import org.jqassistant.schema.report.v1.ConstraintType;
-import org.jqassistant.schema.report.v1.ElementType;
-import org.jqassistant.schema.report.v1.ExecutableRuleType;
-import org.jqassistant.schema.report.v1.ResultType;
-import org.jqassistant.schema.report.v1.RowType;
-import org.jqassistant.schema.report.v1.SeverityType;
-import org.jqassistant.schema.report.v1.SourceType;
+import org.jqassistant.schema.report.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputComponent;
@@ -34,10 +19,15 @@ import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.scanner.ScannerSide;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+
 import static java.util.Optional.empty;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
-import static org.sonar.api.rules.RuleType.CODE_SMELL;
 
 /**
  * Base class to create issues.
@@ -51,11 +41,15 @@ public class IssueHandler {
 
     private static final String NEWLINE = "\n";
 
+
     private final Map<String, ResourceResolver> languageResourceResolvers;
+
+    private final org.sonar.api.rules.RuleType issueType;
 
     private final RuleKeyResolver ruleResolver;
 
-    public IssueHandler(JavaResourceResolver resourceResolver, RuleKeyResolver ruleResolver) {
+    public IssueHandler(JQAssistantConfiguration configuration, JavaResourceResolver resourceResolver, RuleKeyResolver ruleResolver) {
+        this.issueType = configuration.getIssueType();
         this.ruleResolver = ruleResolver;
         this.languageResourceResolvers = new HashMap<>();
         this.languageResourceResolvers.put(resourceResolver.getLanguage().toLowerCase(Locale.ENGLISH), resourceResolver);
@@ -89,7 +83,7 @@ public class IssueHandler {
     }
 
     private void newIssue(SensorContext sensorContext, File reportModulePath, Optional<SourceLocation> target, ExecutableRuleType executableRuleType,
-            RowType rowType, String primaryColumn) {
+                          RowType rowType, String primaryColumn) {
         if (target.isPresent()) {
             SourceLocation sourceLocation = target.get();
             Optional<InputComponent> inputComponent = sourceLocation.getResource();
@@ -106,13 +100,13 @@ public class IssueHandler {
     }
 
     private void newExternalIssue(SensorContext sensorContext, ExecutableRuleType executableRuleType, RowType rowType, InputComponent inputComponent,
-            Optional<Integer> lineNumber, Optional<String> matchedColumn) {
+                                  Optional<Integer> lineNumber, Optional<String> matchedColumn) {
         RuleType ruleType = getRuleType(executableRuleType);
 
         sensorContext.newAdHocRule().engineId(JQAssistant.NAME).ruleId(executableRuleType.getId()).name(executableRuleType.getId())
-                .description(executableRuleType.getDescription()).type(CODE_SMELL).severity(ruleType.getDefaultSeverity()).save();
+            .description(executableRuleType.getDescription()).type(issueType).severity(ruleType.getDefaultSeverity()).save();
 
-        NewExternalIssue newExternalIssue = sensorContext.newExternalIssue().type(CODE_SMELL);
+        NewExternalIssue newExternalIssue = sensorContext.newExternalIssue().type(issueType);
         StringBuilder message = appendResult(rowType, matchedColumn, new StringBuilder(executableRuleType.getDescription()));
         NewIssueLocation newIssueLocation = newExternalIssue.newLocation().message(message.toString()).on(inputComponent);
         if (lineNumber.isPresent()) {
@@ -130,7 +124,7 @@ public class IssueHandler {
             LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", executableRuleType.getId());
         } else {
             StringBuilder message = new StringBuilder().append('[').append(executableRuleType.getId()).append("]").append(" ")
-                    .append(createMessage(ruleType, executableRuleType));
+                .append(createMessage(ruleType, executableRuleType));
             appendResult(rowType, empty(), message);
             NewIssue newIssue = sensorContext.newIssue();
             NewIssueLocation newIssueLocation = newIssue.newLocation().message(message.toString()).on(inputComponent);
@@ -144,18 +138,18 @@ public class IssueHandler {
             return empty();
         }
         switch (severity.getLevel()) {
-        case 0:
-            return Optional.of(Severity.BLOCKER);
-        case 1:
-            return Optional.of(Severity.CRITICAL);
-        case 2:
-            return Optional.of(Severity.MAJOR);
-        case 3:
-            return Optional.of(Severity.MINOR);
-        case 4:
-            return Optional.of(Severity.INFO);
-        default:
-            return empty();
+            case 0:
+                return Optional.of(Severity.BLOCKER);
+            case 1:
+                return Optional.of(Severity.CRITICAL);
+            case 2:
+                return Optional.of(Severity.MAJOR);
+            case 3:
+                return Optional.of(Severity.MINOR);
+            case 4:
+                return Optional.of(Severity.INFO);
+            default:
+                return empty();
         }
     }
 
@@ -163,9 +157,7 @@ public class IssueHandler {
      * Determine the primary column from the result, i.e. the column which contains
      * the resource to create an issue for.
      *
-     * @param result
-     *            The result.
-     *
+     * @param result The result.
      * @return The name of the primary column or <code>null</code>.
      */
     private String getPrimaryColumn(ResultType result) {
@@ -206,7 +198,7 @@ public class IssueHandler {
                 String element = languageElement.getValue();
                 InputPath resource = resourceResolver.resolve(sensorContext.fileSystem(), element, source.getName(), column.getValue());
                 SourceLocation sourceLocation = SourceLocation.builder().resource(Optional.ofNullable(resource))
-                        .lineNumber(Optional.ofNullable(source.getLine())).build();
+                    .lineNumber(Optional.ofNullable(source.getLine())).build();
                 return Optional.of(sourceLocation);
             }
         }
@@ -216,12 +208,9 @@ public class IssueHandler {
     /**
      * Appends the result to a message.
      *
-     * @param rowType
-     *            The {@link RowType} containing values.
-     * @param matchedColumn
-     *            The name of the column that could be matched to a source location.
-     * @param message
-     *            The message builder.
+     * @param rowType       The {@link RowType} containing values.
+     * @param matchedColumn The name of the column that could be matched to a source location.
+     * @param message       The message builder.
      */
     private StringBuilder appendResult(RowType rowType, Optional<String> matchedColumn, StringBuilder message) {
         if (rowType != null) {
@@ -247,12 +236,12 @@ public class IssueHandler {
 
     private String createMessage(RuleType ruleType, ExecutableRuleType executableRuleType) {
         switch (ruleType) {
-        case CONCEPT:
-            return "The concept could not be applied: " + executableRuleType.getDescription();
-        case CONSTRAINT:
-            return executableRuleType.getDescription();
-        default:
-            throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
+            case CONCEPT:
+                return "The concept could not be applied: " + executableRuleType.getDescription();
+            case CONSTRAINT:
+                return executableRuleType.getDescription();
+            default:
+                throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
         }
     }
 

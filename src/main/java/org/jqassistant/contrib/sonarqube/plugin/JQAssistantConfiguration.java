@@ -24,12 +24,16 @@ import org.sonar.api.PropertyType;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
+import org.sonar.api.rules.RuleType;
 import org.sonar.api.scanner.ScannerSide;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
+import static org.sonar.api.rules.RuleType.CODE_SMELL;
 
 /**
  * Define settings for jQAssistant affecting the execution while SONAR run.
@@ -52,10 +56,16 @@ public class JQAssistantConfiguration {
      */
     public static final String DEFAULT_REPORT_PATH = "target/jqassistant/jqassistant-report.xml";
 
-    private final Configuration settings;
 
-    public JQAssistantConfiguration(Configuration settings) {
-        this.settings = settings;
+    /**
+     * Defines the issue type which shall be created, allowed values are defined by {@link org.sonar.api.rules.RuleType}.
+     */
+    public static final String ISSUE_TYPE = "sonar.jqassistant.issueType";
+
+    private final Configuration sonarConfiguration;
+
+    public JQAssistantConfiguration(Configuration sonarConfiguration) {
+        this.sonarConfiguration = sonarConfiguration;
     }
 
     /**
@@ -64,25 +74,36 @@ public class JQAssistantConfiguration {
      * @return The configured report path representing the jQAssistant XML report.
      */
     public String getReportFile() {
-        return settings.get(REPORT_PATH).orElse(DEFAULT_REPORT_PATH);
+        return sonarConfiguration.get(REPORT_PATH).orElse(DEFAULT_REPORT_PATH);
     }
 
     /**
      * @return FALSE if jQAssistant is enabled on project.
      */
     public boolean isSensorDisabled() {
-        Optional<Boolean> disabled = settings.getBoolean(DISABLED);
+        Optional<Boolean> disabled = sonarConfiguration.getBoolean(DISABLED);
         return disabled.isPresent() && disabled.get();
+    }
+
+    /**
+     * Return the configured issue type as {@link RuleType}.
+     *
+     * @return The issue type.
+     */
+    public RuleType getIssueType() {
+        return sonarConfiguration.get(ISSUE_TYPE).map(issueType -> RuleType.valueOf(issueType.toUpperCase(Locale.getDefault()))).orElse(CODE_SMELL);
     }
 
     public static List<PropertyDefinition> getPropertyDefinitions() {
         return asList(
-                PropertyDefinition.builder(REPORT_PATH).category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).name("jQAssistant Report Path")
-                        .description("Absolute or relative path to the jQAssistant XML report file (default: '<projectRoot>/" + DEFAULT_REPORT_PATH + "').")
-                        .onQualifiers(Qualifiers.PROJECT).build(),
-                PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
-                        .category(CoreProperties.CATEGORY_GENERAL).subCategory(JQAssistant.NAME).description("Disable the jQAssistant sensor.")
-                        .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build());
+            PropertyDefinition.builder(REPORT_PATH).category(CoreProperties.CATEGORY_EXTERNAL_ISSUES).subCategory(JQAssistant.NAME).name("jQAssistant Report Path")
+                .description("Absolute or relative path to the jQAssistant XML report file (default: '<projectRoot>/" + DEFAULT_REPORT_PATH + "').")
+                .onQualifiers(Qualifiers.PROJECT).build(),
+            PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
+                .category(CoreProperties.CATEGORY_EXTERNAL_ISSUES).subCategory(JQAssistant.NAME).description("Disable the jQAssistant sensor.")
+                .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build(),
+            PropertyDefinition.builder(JQAssistantConfiguration.ISSUE_TYPE).defaultValue(CODE_SMELL.toString()).name("Issue Type")
+                .category(CoreProperties.CATEGORY_EXTERNAL_ISSUES).subCategory(JQAssistant.NAME).description("The issue type to create, one of " + RuleType.names().stream().collect(joining(", ")))
+                .onQualifiers(Qualifiers.PROJECT).type(PropertyType.STRING).build());
     }
-
 }

@@ -1,18 +1,9 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
+import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
-import org.jqassistant.schema.report.v1.ColumnHeaderType;
-import org.jqassistant.schema.report.v1.ColumnType;
-import org.jqassistant.schema.report.v1.ColumnsHeaderType;
-import org.jqassistant.schema.report.v1.ConceptType;
-import org.jqassistant.schema.report.v1.ConstraintType;
-import org.jqassistant.schema.report.v1.ElementType;
-import org.jqassistant.schema.report.v1.ResultType;
-import org.jqassistant.schema.report.v1.RowType;
-import org.jqassistant.schema.report.v1.RowsType;
-import org.jqassistant.schema.report.v1.SeverityType;
-import org.jqassistant.schema.report.v1.SourceType;
+import org.jqassistant.schema.report.v1.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,12 +33,8 @@ import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
+import static org.mockito.Mockito.*;
+import static org.sonar.api.rules.RuleType.CODE_SMELL;
 
 @ExtendWith(MockitoExtension.class)
 class IssueHandlerTest {
@@ -85,12 +72,16 @@ class IssueHandlerTest {
     @Mock
     private RuleKeyResolver ruleResolver;
 
+    @Mock
+    private JQAssistantConfiguration configuration;
+
     private IssueHandler issueHandler;
 
     @BeforeEach
     public void setUp() {
+        doReturn(CODE_SMELL).when(configuration).getIssueType();
         doReturn("Java").when(resourceResolver).getLanguage();
-        issueHandler = new IssueHandler(resourceResolver, ruleResolver);
+        issueHandler = new IssueHandler(configuration, resourceResolver, ruleResolver);
         doReturn(fileSystem).when(sensorContext).fileSystem();
     }
 
@@ -175,10 +166,12 @@ class IssueHandlerTest {
         verify(newAdHocRule).description("TestConstraint");
         verify(newAdHocRule).severity(Severity.MAJOR);
 
+        verify(configuration).getIssueType();
         verify(sensorContext).newExternalIssue();
         verify(newExternalIssue).engineId(JQAssistant.NAME);
         verify(newExternalIssue).ruleId("test:Constraint");
         verify(newExternalIssue).severity(Severity.CRITICAL);
+        verify(newExternalIssue).type(CODE_SMELL);
         verify(newExternalIssue).newLocation();
     }
 
