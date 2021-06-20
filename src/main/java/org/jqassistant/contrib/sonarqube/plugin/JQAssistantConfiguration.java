@@ -19,7 +19,6 @@
  */
 package org.jqassistant.contrib.sonarqube.plugin;
 
-import org.sonar.api.CoreProperties;
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
@@ -32,7 +31,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static org.sonar.api.rules.RuleType.CODE_SMELL;
 
 /**
@@ -61,6 +60,8 @@ public class JQAssistantConfiguration {
      * Defines the issue type which shall be created, allowed values are defined by {@link org.sonar.api.rules.RuleType}.
      */
     public static final String ISSUE_TYPE = "sonar.jqassistant.issueType";
+
+    public static final String CATEGORY_JQASSISTANT = "jQAssistant";
 
     private final Configuration sonarConfiguration;
 
@@ -96,14 +97,14 @@ public class JQAssistantConfiguration {
 
     public static List<PropertyDefinition> getPropertyDefinitions() {
         return asList(
-            PropertyDefinition.builder(REPORT_PATH).category(CoreProperties.CATEGORY_EXTERNAL_ISSUES).subCategory(JQAssistant.NAME).name("jQAssistant Report Path")
+            PropertyDefinition.builder(REPORT_PATH).category(CATEGORY_JQASSISTANT).subCategory(JQAssistant.NAME).name("jQAssistant Report Path")
                 .description("Absolute or relative path to the jQAssistant XML report file (default: '<projectRoot>/" + DEFAULT_REPORT_PATH + "').")
                 .onQualifiers(Qualifiers.PROJECT).build(),
             PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
-                .category(CoreProperties.CATEGORY_EXTERNAL_ISSUES).subCategory(JQAssistant.NAME).description("Disable the jQAssistant sensor.")
+                .category(CATEGORY_JQASSISTANT).subCategory(JQAssistant.NAME).description("Disable the jQAssistant sensor.")
                 .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build(),
             PropertyDefinition.builder(JQAssistantConfiguration.ISSUE_TYPE).defaultValue(CODE_SMELL.toString()).name("Issue Type")
-                .category(CoreProperties.CATEGORY_EXTERNAL_ISSUES).subCategory(JQAssistant.NAME).description("The issue type to create, one of " + RuleType.names().stream().collect(joining(", ")))
-                .onQualifiers(Qualifiers.PROJECT).type(PropertyType.STRING).build());
+                .category(CATEGORY_JQASSISTANT).subCategory(JQAssistant.NAME).description("The issue type to create.")
+                .onQualifiers(Qualifiers.PROJECT).options(RuleType.names().stream().collect(toList())).type(PropertyType.SINGLE_SELECT_LIST).build());
     }
 }
