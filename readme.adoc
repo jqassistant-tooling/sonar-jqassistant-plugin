@@ -3,13 +3,9 @@
 
 This is the SonarQube plugin for jQAssistant integration
 
-== Maintainer
-
-The plugin is maintained by *http://msg.group[msg group]*.
-
 == Requirements
-* Java 8 or higher
-* SonarQube 7.9 or higher
+
+* SonarQube 8.9 or higher
 * Java project with jQAssistant setup
 
 == Installation
@@ -30,7 +26,7 @@ The plugin is maintained by *http://msg.group[msg group]*.
 The plugin provides two rules that need to be activated for the quality profile of your project(s).
 
 Constraint Violation::
-  Constraints that reported violations (default severity: Major).
+Constraints that reported violations (default severity: Major).
 Invalid Concept::
 Concepts that are defined but could not be applied successfully (default severity: Minor).
 
@@ -52,8 +48,8 @@ Therefore the following steps need to be performed in the SonarQube UI (as admin
 |===
 | Property                     | Description                                         | Default value
 | sonar.jqassistant.disabled   | Disable the jQAssistant sensor.                     | false
-| sonar.jqassistant.reportPath | The path to the jQAssistant XML report file,
-                                 either absolute or relative to the module directory | <projectRoot>/target/jqassistant/jqassistant-report.xml
+| sonar.jqassistant.reportPath | The path to the jQAssistant XML report file, either absolute or relative to the module directory | <projectRoot>/target/jqassistant/jqassistant-report.xml
+| sonar.jqassistant.issueType  | Determines the type of created issues, available options are `CODE_SMELL`, `BUG`, `VULNERABILITY` or `SECURITY_HOTSPOT`  | `CODE_SMELL`
 |===
 
 NOTE: By specifying a relative `reportPath` the first jQAssistant XML report file will be used for a module in a multi-module structure

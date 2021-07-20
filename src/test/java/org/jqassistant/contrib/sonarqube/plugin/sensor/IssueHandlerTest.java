@@ -1,8 +1,5 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import java.io.File;
-import java.util.Optional;
-
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
@@ -26,12 +23,16 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.rules.Rule;
 import org.sonar.api.scanner.fs.InputProject;
 
+import java.io.File;
+import java.util.Optional;
+
 import static com.buschmais.jqassistant.core.rule.api.model.Severity.CRITICAL;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.sonar.api.rules.RuleType.BUG;
 import static org.sonar.api.rules.RuleType.CODE_SMELL;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +78,6 @@ class IssueHandlerTest {
 
     @BeforeEach
     public void setUp() {
-        doReturn(CODE_SMELL).when(configuration).getIssueType();
         doReturn("Java").when(resourceResolver).getLanguage();
         issueHandler = new IssueHandler(configuration, resourceResolver, ruleResolver);
         doReturn(fileSystem).when(sensorContext).fileSystem();
@@ -143,17 +143,29 @@ class IssueHandlerTest {
         verify(newIssueLocation).message("[test:Constraint] TestConstraint\nValue:Test\n");
     }
 
+    @Test
+    public void constraintViolationAsCodeSmellWithMatchingSourceLocation() {
+        constraintViolationWithMatchingSourceLocation(CODE_SMELL);
+    }
+
+    @Test
+    public void constraintViolationAsBugWithMatchingSourceLocation() {
+        constraintViolationWithMatchingSourceLocation(BUG);
+    }
+
     /**
      * Verifies that violated constraints with a source location are reported on the
      * referenced element if it can be resolved.
      */
-    @Test
-    public void constraintViolationWithMatchingSourceLocation() {
+    private void constraintViolationWithMatchingSourceLocation(org.sonar.api.rules.RuleType ruleType) {
         ConstraintType constraintType = new ConstraintType();
         constraintType.setDescription("TestConstraint");
         constraintType.setId("test:Constraint");
         constraintType.setSeverity(getSeverityType(CRITICAL));
         constraintType.setResult(createResultType(true));
+
+        doReturn(ruleType).when(configuration).getIssueType();
+
         stubExternalNewIssue();
         stubSourceLocation();
 
@@ -170,7 +182,7 @@ class IssueHandlerTest {
         verify(newExternalIssue).engineId(JQAssistant.NAME);
         verify(newExternalIssue).ruleId("test:Constraint");
         verify(newExternalIssue).severity(Severity.CRITICAL);
-        verify(newExternalIssue).type(CODE_SMELL);
+        verify(newExternalIssue).type(ruleType);
         verify(newExternalIssue).newLocation();
     }
 

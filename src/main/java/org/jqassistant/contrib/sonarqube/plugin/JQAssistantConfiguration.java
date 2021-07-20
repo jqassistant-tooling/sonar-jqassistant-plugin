@@ -55,7 +55,6 @@ public class JQAssistantConfiguration {
      */
     public static final String DEFAULT_REPORT_PATH = "target/jqassistant/jqassistant-report.xml";
 
-
     /**
      * Defines the issue type which shall be created, allowed values are defined by {@link org.sonar.api.rules.RuleType}.
      */

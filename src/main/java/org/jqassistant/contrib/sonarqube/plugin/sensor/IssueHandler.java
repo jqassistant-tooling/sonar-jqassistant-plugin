@@ -41,15 +41,14 @@ public class IssueHandler {
 
     private static final String NEWLINE = "\n";
 
-
     private final Map<String, ResourceResolver> languageResourceResolvers;
 
-    private final org.sonar.api.rules.RuleType issueType;
+    private final JQAssistantConfiguration configuration;
 
     private final RuleKeyResolver ruleResolver;
 
     public IssueHandler(JQAssistantConfiguration configuration, JavaResourceResolver resourceResolver, RuleKeyResolver ruleResolver) {
-        this.issueType = configuration.getIssueType();
+        this.configuration = configuration;
         this.ruleResolver = ruleResolver;
         this.languageResourceResolvers = new HashMap<>();
         this.languageResourceResolvers.put(resourceResolver.getLanguage().toLowerCase(Locale.ENGLISH), resourceResolver);
@@ -102,6 +101,7 @@ public class IssueHandler {
     private void newExternalIssue(SensorContext sensorContext, ExecutableRuleType executableRuleType, RowType rowType, InputComponent inputComponent,
                                   Optional<Integer> lineNumber, Optional<String> matchedColumn) {
         RuleType ruleType = getRuleType(executableRuleType);
+        org.sonar.api.rules.RuleType issueType = configuration.getIssueType();
 
         sensorContext.newAdHocRule().engineId(JQAssistant.NAME).ruleId(executableRuleType.getId()).name(executableRuleType.getId())
             .description(executableRuleType.getDescription()).type(issueType).severity(ruleType.getDefaultSeverity()).save();
