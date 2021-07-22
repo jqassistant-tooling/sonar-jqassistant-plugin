@@ -9,7 +9,7 @@
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
     <artifactId>sonar-jqassistant-plugin</artifactId>
-    <version>1.10.0-SNAPSHOT</version>
+    <version>1.10.0</version>
     <packaging>sonar-plugin</packaging>
 
     <name>Sonar jQAssistant Plugin</name>
@@ -37,7 +37,7 @@
         <developerConnection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git
         </developerConnection>
         <url>https://github.com/jqassistant-contrib/sonar-jqassistant-plugin</url>
-        <tag>HEAD</tag>
+        <tag>1.10.0</tag>
     </scm>
 
     <properties>
