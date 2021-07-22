@@ -1,9 +1,9 @@
 :toc: left
 = Release Notes
 
-== 1.10.0 (not released yet)
+== 1.10.0
 
-* Upgraded to SonarQube 8.9 LTS APIs
+* Upgraded compatibility to SonarQube 8.9 LTS
 * Added a configuration option to select the issue type (i.e. CODE_SMELL, BUG, etc.)
 
 == 1.9.0
