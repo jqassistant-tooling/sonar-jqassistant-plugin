@@ -1,15 +1,14 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
+import com.buschmais.jqassistant.core.shared.annotation.ToBeRemovedInVersion;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
-import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
-import org.jqassistant.contrib.sonarqube.plugin.language.ResourceResolver;
+import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
 import org.jqassistant.schema.report.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.InputPath;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.rule.Severity;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -20,12 +19,10 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.scanner.ScannerSide;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Optional.empty;
+import static java.util.Optional.*;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 
@@ -41,17 +38,16 @@ public class IssueHandler {
 
     private static final String NEWLINE = "\n";
 
-    private final Map<String, ResourceResolver> languageResourceResolvers;
+    private final SourceFileResolver sourceFileResolver;
 
     private final JQAssistantConfiguration configuration;
 
     private final RuleKeyResolver ruleResolver;
 
-    public IssueHandler(JQAssistantConfiguration configuration, JavaResourceResolver resourceResolver, RuleKeyResolver ruleResolver) {
+    public IssueHandler(JQAssistantConfiguration configuration, SourceFileResolver sourceFileResolver, RuleKeyResolver ruleResolver) {
         this.configuration = configuration;
         this.ruleResolver = ruleResolver;
-        this.languageResourceResolvers = new HashMap<>();
-        this.languageResourceResolvers.put(resourceResolver.getLanguage().toLowerCase(Locale.ENGLISH), resourceResolver);
+        this.sourceFileResolver = sourceFileResolver;
     }
 
     /**
@@ -85,11 +81,11 @@ public class IssueHandler {
                           RowType rowType, String primaryColumn) {
         if (target.isPresent()) {
             SourceLocation sourceLocation = target.get();
-            Optional<InputComponent> inputComponent = sourceLocation.getResource();
-            if (inputComponent.isPresent()) {
+            Optional<InputFile> inputFile = sourceLocation.getInputFile();
+            if (inputFile.isPresent()) {
                 // Create an external issue if a SourceLocation exists and InputComponent could
                 // be resolved (e.g. a class in a module)
-                newExternalIssue(sensorContext, executableRuleType, rowType, inputComponent.get(), sourceLocation.getLineNumber(), Optional.of(primaryColumn));
+                newExternalIssue(sensorContext, executableRuleType, rowType, inputFile.get(), sourceLocation.getStartLine(), sourceLocation.getEndLine(), of(primaryColumn));
             }
         } else if (sensorContext.fileSystem().baseDir().equals(reportModulePath)) {
             // Create issue on project level for all items that cannot be mapped to a
@@ -98,8 +94,8 @@ public class IssueHandler {
         }
     }
 
-    private void newExternalIssue(SensorContext sensorContext, ExecutableRuleType executableRuleType, RowType rowType, InputComponent inputComponent,
-                                  Optional<Integer> lineNumber, Optional<String> matchedColumn) {
+    private void newExternalIssue(SensorContext sensorContext, ExecutableRuleType executableRuleType, RowType rowType, InputFile inputFile,
+                                  Optional<Integer> startLine, Optional<Integer> endLine, Optional<String> matchedColumn) {
         RuleType ruleType = getRuleType(executableRuleType);
         org.sonar.api.rules.RuleType issueType = configuration.getIssueType();
 
@@ -108,9 +104,9 @@ public class IssueHandler {
 
         NewExternalIssue newExternalIssue = sensorContext.newExternalIssue().type(issueType);
         StringBuilder message = appendResult(rowType, matchedColumn, new StringBuilder(executableRuleType.getDescription()));
-        NewIssueLocation newIssueLocation = newExternalIssue.newLocation().message(message.toString()).on(inputComponent);
-        if (lineNumber.isPresent()) {
-            TextRange textRange = ((InputFile) inputComponent).selectLine(lineNumber.get());
+        NewIssueLocation newIssueLocation = newExternalIssue.newLocation().message(message.toString()).on(inputFile);
+        if (startLine.isPresent()) {
+            TextRange textRange = inputFile.selectLine(startLine.get());
             newIssueLocation.at(textRange);
         }
         convertSeverity(executableRuleType.getSeverity()).ifPresent(newExternalIssue::severity);
@@ -139,15 +135,15 @@ public class IssueHandler {
         }
         switch (severity.getLevel()) {
             case 0:
-                return Optional.of(Severity.BLOCKER);
+                return of(Severity.BLOCKER);
             case 1:
-                return Optional.of(Severity.CRITICAL);
+                return of(Severity.CRITICAL);
             case 2:
-                return Optional.of(Severity.MAJOR);
+                return of(Severity.MAJOR);
             case 3:
-                return Optional.of(Severity.MINOR);
+                return of(Severity.MINOR);
             case 4:
-                return Optional.of(Severity.INFO);
+                return of(Severity.INFO);
             default:
                 return empty();
         }
@@ -185,21 +181,22 @@ public class IssueHandler {
         }
         for (ColumnType column : rowType.getColumn()) {
             String name = column.getName();
-            if (name.equals(primaryColumn)) {
-                ElementType languageElement = column.getElement();
-                if (languageElement == null) {
-                    return empty();
+            SourceLocationType source = column.getSource();
+            if (source != null && name.equals(primaryColumn)) {
+                String sourceFileName = source.getFileName();
+                if (sourceFileName != null) {
+                    InputFile inputFile = sourceFileResolver.resolve(sensorContext.fileSystem(), sourceFileName);
+                    SourceLocation sourceLocation = SourceLocation.builder().inputFile(ofNullable(inputFile))
+                        .startLine(ofNullable(source.getStartLine())).endLine(ofNullable(source.getEndLine())).build();
+                    return of(sourceLocation);
+                } else {
+                    // Fallback for pre 1.11 reports without legacy source location.
+                    String javaSourceFileName = getJavaSourceFileName(source.getName());
+                    InputFile inputFile = sourceFileResolver.resolve(sensorContext.fileSystem(), javaSourceFileName);
+                    SourceLocation sourceLocation = SourceLocation.builder().inputFile(ofNullable(inputFile))
+                        .startLine(ofNullable(source.getLine())).endLine(ofNullable(source.getLine())).build();
+                    return of(sourceLocation);
                 }
-                SourceType source = column.getSource();
-                ResourceResolver resourceResolver = languageResourceResolvers.get(languageElement.getLanguage().toLowerCase(Locale.ENGLISH));
-                if (resourceResolver == null) {
-                    return empty();
-                }
-                String element = languageElement.getValue();
-                InputPath resource = resourceResolver.resolve(sensorContext.fileSystem(), element, source.getName(), column.getValue());
-                SourceLocation sourceLocation = SourceLocation.builder().resource(Optional.ofNullable(resource))
-                    .lineNumber(Optional.ofNullable(source.getLine())).build();
-                return Optional.of(sourceLocation);
             }
         }
         return empty();
@@ -243,6 +240,32 @@ public class IssueHandler {
             default:
                 throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
         }
+    }
+
+    /**
+     * Convert a given entry like
+     * <code>com/buschmais/jqassistant/examples/sonar/project/Bar.class</code> into
+     * a source file name like
+     * <code>com/buschmais/jqassistant/examples/sonar/project/Bar.java</code>.
+     *
+     * @deprecated To be replaced by {@link SourceLocationType#getFileName()}.
+     */
+    @ToBeRemovedInVersion(major = 1, minor = 12)
+    @Deprecated
+    private String getJavaSourceFileName(String classFileName) {
+        if (classFileName == null || classFileName.isEmpty()) {
+            return null;
+        }
+        String result = classFileName;
+        if (result.toLowerCase(Locale.ENGLISH).endsWith(".class")) {
+            result = result.substring(0, result.length() - ".class".length());
+        }
+        // remove nested class fragments
+        int index = result.indexOf('$');
+        if (index > -1) {
+            result = result.substring(0, index);
+        }
+        return result.concat(".java");
     }
 
 }

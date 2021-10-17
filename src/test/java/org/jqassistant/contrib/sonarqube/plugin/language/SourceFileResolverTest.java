@@ -1,8 +1,5 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -11,8 +8,10 @@ import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.InputPath;
 import org.sonar.java.model.GeneratedFile;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -23,7 +22,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
-public class JavaResourceResolverTest {
+public class SourceFileResolverTest {
 
     @Mock
     private FileSystem fileSystem;
@@ -34,58 +33,29 @@ public class JavaResourceResolverTest {
     @Mock
     private FilePredicate predicate;
 
-    private JavaResourceResolver resourceResolver = new JavaResourceResolver();
+    private SourceFileResolver sourceFileResolver = new SourceFileResolver();
 
     @Test
-    public void typeMatches() {
-        verifySingleFileMatches("Type");
-    }
-
-    @Test
-    public void fieldMatches() {
-        verifySingleFileMatches("Field");
-    }
-
-    @Test
-    public void methodMatches() {
-        verifySingleFileMatches("Method");
-    }
-
-    @Test
-    public void methodInvocationMatches() {
-        verifySingleFileMatches("MethodInvocation");
-    }
-
-    @Test
-    public void readFieldMatches() {
-        verifySingleFileMatches("ReadField");
-    }
-
-    @Test
-    public void writeFieldMatches() {
-        verifySingleFileMatches("WriteField");
-    }
-
-    private void verifySingleFileMatches(String sourceType) {
+    public void singleFileMatches() {
         stubFileSystem();
         Path path = Paths.get("src/test/java/org/jqassistant/contrib/Test.java");
         Iterable<InputFile> it = singletonList(toInputFile(path));
         doReturn(it).when(fileSystem).inputFiles(predicate);
 
-        InputPath result = resourceResolver.resolve(fileSystem, sourceType, "/org/jqassistant/contrib/Test.class", null);
+        InputFile result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class");
 
         assertEquals(Paths.get(result.uri()), path.toAbsolutePath());
     }
 
     @Test
-    public void multipleFileMatches() {
+    public void multipleFilesMatch() {
         stubFileSystem();
         Path path1 = Paths.get("/src/main/java/org/jqassistant/contrib/Test.java");
         Path path2 = Paths.get("/src/test/java/org/jqassistant/contrib/Test.java");
         Iterable<InputFile> it = asList(toInputFile(path1), toInputFile(path2));
         doReturn(it).when(fileSystem).inputFiles(predicate);
 
-        InputPath result = resourceResolver.resolve(fileSystem, "Type", "/org/jqassistant/contrib/Test.class", null);
+        InputFile result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class");
 
         assertNull(result);
     }
@@ -95,14 +65,7 @@ public class JavaResourceResolverTest {
         stubFileSystem();
         doReturn(emptyList()).when(fileSystem).inputFiles(predicate);
 
-        InputPath result = resourceResolver.resolve(fileSystem, "Type", "/org/jqassistant/contrib/Test.class", null);
-
-        assertNull(result);
-    }
-
-    @Test
-    public void unsupportedType() {
-        InputPath result = resourceResolver.resolve(fileSystem, "Unsupported", "/org/jqassistant/contrib/Test.class", null);
+        InputFile result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class");
 
         assertNull(result);
     }

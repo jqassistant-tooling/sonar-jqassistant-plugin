@@ -1,8 +1,6 @@
 package org.jqassistant.contrib.sonarqube.plugin;
 
-import java.util.List;
-
-import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
+import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
 import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
 import org.jqassistant.contrib.sonarqube.plugin.sensor.RuleKeyResolver;
 import org.jqassistant.contrib.sonarqube.plugin.sensor.RulesRepository;
@@ -10,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.sonar.api.Plugin;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.utils.Version;
+
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,7 +28,7 @@ public class JQAssistantPluginTest {
         List<?> extensions = context.getExtensions();
         assertThat(extensions.contains(JQAssistantConfiguration.class), equalTo(true));
         assertThat(extensions.contains(JQAssistantSensor.class), equalTo(true));
-        assertThat(extensions.contains(JavaResourceResolver.class), equalTo(true));
+        assertThat(extensions.contains(SourceFileResolver.class), equalTo(true));
         assertThat(extensions.contains(RuleKeyResolver.class), equalTo(true));
         assertThat(extensions.contains(RulesRepository.class), equalTo(true));
     }

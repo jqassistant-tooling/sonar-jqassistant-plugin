@@ -2,7 +2,7 @@ package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
-import org.jqassistant.contrib.sonarqube.plugin.language.JavaResourceResolver;
+import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
 import org.jqassistant.schema.report.v1.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +66,7 @@ class IssueHandlerTest {
     private NewIssueLocation newIssueLocation;
 
     @Mock
-    private JavaResourceResolver resourceResolver;
+    private SourceFileResolver sourceFileResolver;
 
     @Mock
     private RuleKeyResolver ruleResolver;
@@ -78,8 +78,7 @@ class IssueHandlerTest {
 
     @BeforeEach
     public void setUp() {
-        doReturn("Java").when(resourceResolver).getLanguage();
-        issueHandler = new IssueHandler(configuration, resourceResolver, ruleResolver);
+        issueHandler = new IssueHandler(configuration, sourceFileResolver, ruleResolver);
         doReturn(fileSystem).when(sensorContext).fileSystem();
     }
 
@@ -230,7 +229,7 @@ class IssueHandlerTest {
             elementType.setLanguage("Java");
             elementType.setValue("WriteField");
             columnType.setElement(elementType);
-            SourceType sourceType = new SourceType();
+            SourceLocationType sourceType = new SourceLocationType();
             sourceType.setName("com/buschmais/jqassistant/examples/sonar/project/Bar.class");
             sourceType.setLine(16);
             columnType.setSource(sourceType);
@@ -275,8 +274,8 @@ class IssueHandlerTest {
     }
 
     private void stubSourceLocation() {
-        InputFile javaResource = mock(InputFile.class);
-        when(resourceResolver.resolve(any(FileSystem.class), any(String.class), any(String.class), any(String.class))).thenReturn(javaResource);
-        when(javaResource.selectLine(16)).thenReturn(mock(TextRange.class));
+        InputFile inputFile = mock(InputFile.class);
+        when(sourceFileResolver.resolve(any(FileSystem.class), any(String.class))).thenReturn(inputFile);
+        when(inputFile.selectLine(16)).thenReturn(mock(TextRange.class));
     }
 }
