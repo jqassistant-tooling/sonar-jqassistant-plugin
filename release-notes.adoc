@@ -1,6 +1,10 @@
 :toc: left
 = Release Notes
 
+== 1.11.0
+
+* Adopted changes of jQAssistant report resulting in improved matching of source code locations for displaying issues in SonarQube
+
 == 1.10.0
 
 * Upgraded compatibility to SonarQube 8.9 LTS

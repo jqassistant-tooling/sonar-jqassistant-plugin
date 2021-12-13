@@ -11,8 +11,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputComponent;
-import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
+import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.rule.Severity;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewExternalIssue;
@@ -230,8 +230,9 @@ class IssueHandlerTest {
             elementType.setValue("WriteField");
             columnType.setElement(elementType);
             SourceLocationType sourceType = new SourceLocationType();
-            sourceType.setName("com/buschmais/jqassistant/examples/sonar/project/Bar.class");
-            sourceType.setLine(16);
+            sourceType.setFileName("com/buschmais/jqassistant/examples/sonar/project/Bar.java");
+            sourceType.setStartLine(16);
+            sourceType.setEndLine(18);
             columnType.setSource(sourceType);
         }
 
@@ -274,8 +275,9 @@ class IssueHandlerTest {
     }
 
     private void stubSourceLocation() {
-        InputFile inputFile = mock(InputFile.class);
+        DefaultInputFile inputFile = mock(DefaultInputFile.class);
         when(sourceFileResolver.resolve(any(FileSystem.class), any(String.class))).thenReturn(inputFile);
-        when(inputFile.selectLine(16)).thenReturn(mock(TextRange.class));
+        doReturn(20).when(inputFile).lineLength(18);
+        doReturn(mock(TextRange.class)).when(inputFile).newRange(16, 0, 18, 20);
     }
 }

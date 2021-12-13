@@ -1,6 +1,7 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import com.buschmais.jqassistant.core.shared.annotation.ToBeRemovedInVersion;
+
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
+import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.rule.Severity;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewExternalIssue;
@@ -78,14 +80,15 @@ public class IssueHandler {
     }
 
     private void newIssue(SensorContext sensorContext, File reportModulePath, Optional<SourceLocation> target, ExecutableRuleType executableRuleType,
-                          RowType rowType, String primaryColumn) {
+        RowType rowType, String primaryColumn) {
         if (target.isPresent()) {
             SourceLocation sourceLocation = target.get();
             Optional<InputFile> inputFile = sourceLocation.getInputFile();
             if (inputFile.isPresent()) {
                 // Create an external issue if a SourceLocation exists and InputComponent could
                 // be resolved (e.g. a class in a module)
-                newExternalIssue(sensorContext, executableRuleType, rowType, inputFile.get(), sourceLocation.getStartLine(), sourceLocation.getEndLine(), of(primaryColumn));
+                newExternalIssue(sensorContext, executableRuleType, rowType, inputFile.get(), sourceLocation.getStartLine(), sourceLocation.getEndLine(),
+                    of(primaryColumn));
             }
         } else if (sensorContext.fileSystem().baseDir().equals(reportModulePath)) {
             // Create issue on project level for all items that cannot be mapped to a
@@ -95,7 +98,7 @@ public class IssueHandler {
     }
 
     private void newExternalIssue(SensorContext sensorContext, ExecutableRuleType executableRuleType, RowType rowType, InputFile inputFile,
-                                  Optional<Integer> startLine, Optional<Integer> endLine, Optional<String> matchedColumn) {
+        Optional<Integer> startLine, Optional<Integer> endLine, Optional<String> matchedColumn) {
         RuleType ruleType = getRuleType(executableRuleType);
         org.sonar.api.rules.RuleType issueType = configuration.getIssueType();
 
@@ -106,7 +109,13 @@ public class IssueHandler {
         StringBuilder message = appendResult(rowType, matchedColumn, new StringBuilder(executableRuleType.getDescription()));
         NewIssueLocation newIssueLocation = newExternalIssue.newLocation().message(message.toString()).on(inputFile);
         if (startLine.isPresent()) {
-            TextRange textRange = inputFile.selectLine(startLine.get());
+            TextRange textRange;
+            if (endLine.isPresent() && inputFile instanceof DefaultInputFile) {
+                DefaultInputFile defaultInputFile = (DefaultInputFile) inputFile;
+                textRange = defaultInputFile.newRange(startLine.get(), 0, endLine.get(), defaultInputFile.lineLength(endLine.get()));
+            } else {
+                textRange = inputFile.selectLine(startLine.get());
+            }
             newIssueLocation.at(textRange);
         }
         convertSeverity(executableRuleType.getSeverity()).ifPresent(newExternalIssue::severity);
@@ -134,18 +143,18 @@ public class IssueHandler {
             return empty();
         }
         switch (severity.getLevel()) {
-            case 0:
-                return of(Severity.BLOCKER);
-            case 1:
-                return of(Severity.CRITICAL);
-            case 2:
-                return of(Severity.MAJOR);
-            case 3:
-                return of(Severity.MINOR);
-            case 4:
-                return of(Severity.INFO);
-            default:
-                return empty();
+        case 0:
+            return of(Severity.BLOCKER);
+        case 1:
+            return of(Severity.CRITICAL);
+        case 2:
+            return of(Severity.MAJOR);
+        case 3:
+            return of(Severity.MINOR);
+        case 4:
+            return of(Severity.INFO);
+        default:
+            return empty();
         }
     }
 
@@ -186,15 +195,15 @@ public class IssueHandler {
                 String sourceFileName = source.getFileName();
                 if (sourceFileName != null) {
                     InputFile inputFile = sourceFileResolver.resolve(sensorContext.fileSystem(), sourceFileName);
-                    SourceLocation sourceLocation = SourceLocation.builder().inputFile(ofNullable(inputFile))
-                        .startLine(ofNullable(source.getStartLine())).endLine(ofNullable(source.getEndLine())).build();
+                    SourceLocation sourceLocation = SourceLocation.builder().inputFile(ofNullable(inputFile)).startLine(ofNullable(source.getStartLine()))
+                        .endLine(ofNullable(source.getEndLine())).build();
                     return of(sourceLocation);
                 } else {
                     // Fallback for pre 1.11 reports without legacy source location.
                     String javaSourceFileName = getJavaSourceFileName(source.getName());
                     InputFile inputFile = sourceFileResolver.resolve(sensorContext.fileSystem(), javaSourceFileName);
-                    SourceLocation sourceLocation = SourceLocation.builder().inputFile(ofNullable(inputFile))
-                        .startLine(ofNullable(source.getLine())).endLine(ofNullable(source.getLine())).build();
+                    SourceLocation sourceLocation = SourceLocation.builder().inputFile(ofNullable(inputFile)).startLine(ofNullable(source.getLine()))
+                        .endLine(ofNullable(source.getLine())).build();
                     return of(sourceLocation);
                 }
             }
@@ -233,12 +242,12 @@ public class IssueHandler {
 
     private String createMessage(RuleType ruleType, ExecutableRuleType executableRuleType) {
         switch (ruleType) {
-            case CONCEPT:
-                return "The concept could not be applied: " + executableRuleType.getDescription();
-            case CONSTRAINT:
-                return executableRuleType.getDescription();
-            default:
-                throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
+        case CONCEPT:
+            return "The concept could not be applied: " + executableRuleType.getDescription();
+        case CONSTRAINT:
+            return executableRuleType.getDescription();
+        default:
+            throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
         }
     }
 

@@ -46,7 +46,8 @@ public class JQAssistantSensorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "jqassistant-report-concept-issue.xml", "jqassistant-report-1_8.xml", "jqassistant-report-constraint-issue.xml" })
+    @ValueSource(strings = { "jqassistant-report-concept-issue.xml", "jqassistant-report-1_8.xml", "jqassistant-report-constraint-issue.xml",
+        "jqassistant-report-constraint-issue-1.8.xml" })
     public void issues(String reportWithIssue) {
         stubFileSystem(reportWithIssue);
 
