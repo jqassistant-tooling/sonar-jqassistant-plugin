@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputComponent;
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.rule.Severity;
@@ -143,12 +144,21 @@ class IssueHandlerTest {
     }
 
     @Test
-    public void constraintViolationAsCodeSmellWithMatchingSourceLocation() {
+    public void constraintViolationAsCodeSmellWithDefaultInputFileLocation() {
+        stubDefaultInputFileSourceLocation();
         constraintViolationWithMatchingSourceLocation(CODE_SMELL);
     }
 
     @Test
-    public void constraintViolationAsBugWithMatchingSourceLocation() {
+    public void constraintViolationAsCodeSmellWithInputFileLocation() {
+        stubInputFileSourceLocation();
+        constraintViolationWithMatchingSourceLocation(CODE_SMELL);
+    }
+
+
+    @Test
+    public void constraintViolationAsBugWithDefaultInputFIleLocation() {
+        stubDefaultInputFileSourceLocation();
         constraintViolationWithMatchingSourceLocation(BUG);
     }
 
@@ -166,7 +176,6 @@ class IssueHandlerTest {
         doReturn(ruleType).when(configuration).getIssueType();
 
         stubExternalNewIssue();
-        stubSourceLocation();
 
         issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
 
@@ -274,10 +283,16 @@ class IssueHandlerTest {
         doReturn(newIssueLocation).when(newIssueLocation).on(any(InputComponent.class));
     }
 
-    private void stubSourceLocation() {
+    private void stubDefaultInputFileSourceLocation() {
         DefaultInputFile inputFile = mock(DefaultInputFile.class);
         when(sourceFileResolver.resolve(any(FileSystem.class), any(String.class))).thenReturn(inputFile);
         doReturn(20).when(inputFile).lineLength(18);
         doReturn(mock(TextRange.class)).when(inputFile).newRange(16, 0, 18, 20);
+    }
+
+    private void stubInputFileSourceLocation() {
+        InputFile inputFile = mock(InputFile.class);
+        when(sourceFileResolver.resolve(any(FileSystem.class), any(String.class))).thenReturn(inputFile);
+        doReturn(mock(TextRange.class)).when(inputFile).selectLine(16);
     }
 }
