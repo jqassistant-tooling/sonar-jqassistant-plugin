@@ -1,7 +1,5 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import com.buschmais.jqassistant.core.shared.annotation.ToBeRemovedInVersion;
-
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
@@ -25,6 +23,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static java.util.Optional.*;
+import static java.util.stream.Collectors.joining;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
 import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 
@@ -106,7 +105,8 @@ public class IssueHandler {
             .description(executableRuleType.getDescription()).type(issueType).severity(ruleType.getDefaultSeverity()).save();
 
         NewExternalIssue newExternalIssue = sensorContext.newExternalIssue().type(issueType);
-        StringBuilder message = appendResult(rowType, matchedColumn, new StringBuilder(executableRuleType.getDescription()));
+        StringBuilder message = new StringBuilder(executableRuleType.getDescription()).append(NEWLINE);
+        message.append(convertRow(rowType, matchedColumn));
         NewIssueLocation newIssueLocation = newExternalIssue.newLocation().message(message.toString()).on(inputFile);
         if (startLine.isPresent()) {
             TextRange textRange;
@@ -126,11 +126,11 @@ public class IssueHandler {
         RuleType ruleType = getRuleType(executableRuleType);
         Optional<RuleKey> ruleKey = ruleResolver.resolve(ruleType);
         if (!ruleKey.isPresent()) {
-            LOGGER.warn("Cannot resolve rule key for id '{}', no issue will be created. Is the rule not activated?", executableRuleType.getId());
+            LOGGER.warn("Rule with id '{}' is not active, no issue will be created.", executableRuleType.getId());
         } else {
             StringBuilder message = new StringBuilder().append('[').append(executableRuleType.getId()).append("]").append(" ")
-                .append(createMessage(ruleType, executableRuleType));
-            appendResult(rowType, empty(), message);
+                .append(createMessage(ruleType, executableRuleType)).append(NEWLINE);
+            message.append(convertRow(rowType, empty()));
             NewIssue newIssue = sensorContext.newIssue();
             NewIssueLocation newIssueLocation = newIssue.newLocation().message(message.toString()).on(inputComponent);
             convertSeverity(executableRuleType.getSeverity()).ifPresent(newIssue::overrideSeverity);
@@ -162,7 +162,8 @@ public class IssueHandler {
      * Determine the primary column from the result, i.e. the column which contains
      * the resource to create an issue for.
      *
-     * @param result The result.
+     * @param result
+     *     The result.
      * @return The name of the primary column or <code>null</code>.
      */
     private String getPrimaryColumn(ResultType result) {
@@ -212,32 +213,20 @@ public class IssueHandler {
     }
 
     /**
-     * Appends the result to a message.
+     * Convert a result row to a comma separated string.
      *
-     * @param rowType       The {@link RowType} containing values.
-     * @param matchedColumn The name of the column that could be matched to a source location.
-     * @param message       The message builder.
+     * @param rowType
+     *     The {@link RowType} containing values.
+     * @param matchedColumn
+     *     The name of the column that could be matched to a source location.
+     * @return The result as String representation.
      */
-    private StringBuilder appendResult(RowType rowType, Optional<String> matchedColumn, StringBuilder message) {
+    private String convertRow(RowType rowType, Optional<String> matchedColumn) {
         if (rowType != null) {
-            message.append(NEWLINE);
-            int count = 0;
-            for (ColumnType column : rowType.getColumn()) {
-                if (count > 0) {
-                    message.append(", ").append(NEWLINE);
-                }
-                String name = column.getName();
-                if (!(matchedColumn.isPresent() && name.equals(matchedColumn.get()))) {
-                    String value = column.getValue();
-                    message.append(name);
-                    message.append(':');
-                    message.append(value);
-                    message.append(NEWLINE);
-                    count++;
-                }
-            }
+            return rowType.getColumn().stream().filter(columnType -> !(matchedColumn.isPresent() && columnType.getName().equals(matchedColumn.get())))
+                .map(columnType -> columnType.getName() + ":" + columnType.getValue()).collect(joining("," + NEWLINE));
         }
-        return message;
+        return "";
     }
 
     private String createMessage(RuleType ruleType, ExecutableRuleType executableRuleType) {
@@ -259,7 +248,6 @@ public class IssueHandler {
      *
      * @deprecated To be replaced by {@link SourceLocationType#getFileName()}.
      */
-    @ToBeRemovedInVersion(major = 1, minor = 12)
     @Deprecated
     private String getJavaSourceFileName(String classFileName) {
         if (classFileName == null || classFileName.isEmpty()) {

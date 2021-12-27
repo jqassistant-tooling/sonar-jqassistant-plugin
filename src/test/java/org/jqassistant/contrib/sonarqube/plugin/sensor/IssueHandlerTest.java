@@ -101,7 +101,7 @@ class IssueHandlerTest {
         verify(sensorContext).newIssue();
         verify(newIssue).forRule(CONCEPT_RULE.ruleKey());
         verify(newIssue).newLocation();
-        verify(newIssueLocation).message("[test:Concept] The concept could not be applied: TestConcept");
+        verify(newIssueLocation).message("[test:Concept] The concept could not be applied: TestConcept\n");
     }
 
     /**
@@ -140,7 +140,7 @@ class IssueHandlerTest {
         verify(newIssue).forRule(CONSTRAINT_RULE.ruleKey());
         verify(newIssue).newLocation();
         verify(newIssueLocation).on(inputProject);
-        verify(newIssueLocation).message("[test:Constraint] TestConstraint\nValue:Test\n");
+        verify(newIssueLocation).message("[test:Constraint] TestConstraint\nValue:Test");
     }
 
     @Test

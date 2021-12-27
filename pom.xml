@@ -138,20 +138,12 @@
             <artifactId>report</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>org.asciidoctor</groupId>
-                    <artifactId>*</artifactId>
+                    <groupId>com.buschmais.jqassistant.core</groupId>
+                    <artifactId>store</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.jruby</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>net.sourceforge.plantuml</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.snakeyaml</groupId>
-                    <artifactId>*</artifactId>
+                    <groupId>com.buschmais.jqassistant.core</groupId>
+                    <artifactId>rule</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>com.buschmais.xo</groupId>
@@ -180,11 +172,12 @@
             <groupId>org.sonarsource.java</groupId>
             <artifactId>sonar-java-plugin</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.google.collections</groupId>
-            <artifactId>google-collections</artifactId>
-        </dependency>
         <!-- unit tests -->
+        <dependency>
+            <groupId>com.buschmais.jqassistant.core</groupId>
+            <artifactId>rule</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.sonarsource.sonarqube</groupId>
             <artifactId>sonar-testing-harness</artifactId>
