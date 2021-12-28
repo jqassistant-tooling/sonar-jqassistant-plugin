@@ -3,7 +3,7 @@
 
 == 1.11.0
 
-* Adopted changes of jQAssistant report resulting in improved matching of source code locations for displaying issues in SonarQube
+* Adopted changes of jQAssistant XML reports to improve matching of source code locations for issues in SonarQube
 
 == 1.10.0
 
