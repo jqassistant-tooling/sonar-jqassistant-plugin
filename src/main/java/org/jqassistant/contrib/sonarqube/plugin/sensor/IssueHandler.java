@@ -194,17 +194,12 @@ public class IssueHandler {
             SourceLocationType source = column.getSource();
             if (source != null && name.equals(primaryColumn)) {
                 String sourceFileName = source.getFileName();
-                if (sourceFileName != null) {
+                if (sourceFileName == null) {
+                    LOGGER.warn("Cannot determine source location, please upgrade jQAssistant to 1.11 or newer.");
+                } else {
                     InputFile inputFile = sourceFileResolver.resolve(sensorContext.fileSystem(), sourceFileName);
                     SourceLocation sourceLocation = SourceLocation.builder().inputFile(ofNullable(inputFile)).startLine(ofNullable(source.getStartLine()))
                         .endLine(ofNullable(source.getEndLine())).build();
-                    return of(sourceLocation);
-                } else {
-                    // Fallback for pre 1.11 reports without legacy source location.
-                    String javaSourceFileName = getJavaSourceFileName(source.getName());
-                    InputFile inputFile = sourceFileResolver.resolve(sensorContext.fileSystem(), javaSourceFileName);
-                    SourceLocation sourceLocation = SourceLocation.builder().inputFile(ofNullable(inputFile)).startLine(ofNullable(source.getLine()))
-                        .endLine(ofNullable(source.getLine())).build();
                     return of(sourceLocation);
                 }
             }

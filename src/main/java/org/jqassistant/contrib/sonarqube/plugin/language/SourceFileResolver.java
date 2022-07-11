@@ -17,6 +17,10 @@ public class SourceFileResolver {
      * This resolver can find only resources in the current project, because only
      * such resources are part of the 'index cache'.
      *
+     * @param fileSystem
+     *     The {@link FileSystem}.
+     * @param sourceFile
+     *     The name of the source file.
      * @return The matching resource or <code>null</code> if nothing was found and
      * in case of multiple matches.
      */

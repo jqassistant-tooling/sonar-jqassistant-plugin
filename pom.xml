@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.11.0</version>
+        <version>1.12.0</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.sonarqube</groupId>
@@ -33,9 +33,8 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jqassistant-contrib/sonar-jqassistant-plugin.git
-        </developerConnection>
+        <connection>scm:git:https://github.com/jqassistant-contrib/sonar-jqassistant-plugin</connection>
+        <developerConnection>scm:git:https://github.com/jqassistant-contrib/sonar-jqassistant-plugin</developerConnection>
         <url>https://github.com/jqassistant-contrib/sonar-jqassistant-plugin</url>
         <tag>HEAD</tag>
     </scm>
@@ -43,6 +42,7 @@
     <properties>
         <sonar-plugin-api.version>8.9.0.43852</sonar-plugin-api.version>
         <sonar-java-plugin.version>6.15.1.26025</sonar-java-plugin.version>
+        <lombok.version>1.18.24</lombok.version>
         <sonar.projectKey>jqassistant-contrib_sonar-jqassistant-plugin</sonar.projectKey>
     </properties>
 
@@ -104,6 +104,12 @@
                 <artifactId>sonar-java-plugin</artifactId>
                 <version>${sonar-java-plugin.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <!-- libs -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
