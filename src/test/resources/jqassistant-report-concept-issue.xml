@@ -3,7 +3,7 @@
     <group id="MyQualityProfile" date="2014-04-29T18:11:46">
         <concept id="example:TestConcept">
             <description>A test concept.</description>
-            <status>failure</status>
+            <status>warning</status>
             <severity level="3">minor</severity>
             <duration>68</duration>
         </concept>

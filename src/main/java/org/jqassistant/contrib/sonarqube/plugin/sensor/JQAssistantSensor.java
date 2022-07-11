@@ -6,10 +6,7 @@ import java.util.Optional;
 
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
-import org.jqassistant.schema.report.v1.ExecutableRuleType;
-import org.jqassistant.schema.report.v1.GroupType;
-import org.jqassistant.schema.report.v1.JqassistantReport;
-import org.jqassistant.schema.report.v1.ReferencableRuleType;
+import org.jqassistant.schema.report.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.internal.DefaultInputProject;
@@ -19,6 +16,7 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.scanner.fs.InputProject;
 
 import static org.jqassistant.schema.report.v1.StatusEnumType.FAILURE;
+import static org.jqassistant.schema.report.v1.StatusEnumType.WARNING;
 
 /**
  * {@link Sensor} implementation scanning for jqassistant-report.xml files.
@@ -86,7 +84,8 @@ public class JQAssistantSensor implements Sensor {
             }
             if (rule instanceof ExecutableRuleType) {
                 ExecutableRuleType executableRuleType = (ExecutableRuleType) rule;
-                if (FAILURE.equals(executableRuleType.getStatus())) {
+                StatusEnumType ruleStatus = executableRuleType.getStatus();
+                if (FAILURE.equals(ruleStatus) || WARNING.equals(ruleStatus)) {
                     issueHandler.process(context, reportModulePath, executableRuleType);
                 }
             }
