@@ -42,7 +42,7 @@ public class JQAssistantSensorTest {
     @BeforeEach
     public void setUp() throws URISyntaxException {
         baseDir = new File(JQAssistantSensorTest.class.getResource("/").toURI().getPath());
-        sensor = new JQAssistantSensor(configuration, issueHandler);
+        sensor = new JQAssistantSensor(configuration, issueHandler, new ReportReader());
     }
 
     @ParameterizedTest

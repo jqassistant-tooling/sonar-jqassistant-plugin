@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.RequiredArgsConstructor;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.schema.report.v1.*;
@@ -21,6 +22,7 @@ import static org.jqassistant.schema.report.v1.StatusEnumType.WARNING;
 /**
  * {@link Sensor} implementation scanning for jqassistant-report.xml files.
  */
+@RequiredArgsConstructor
 public class JQAssistantSensor implements Sensor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JQAssistantSensor.class);
@@ -28,11 +30,7 @@ public class JQAssistantSensor implements Sensor {
     private final JQAssistantConfiguration configuration;
     private final IssueHandler issueHandler;
 
-    public JQAssistantSensor(JQAssistantConfiguration configuration, IssueHandler issueHandler) {
-        this.configuration = configuration;
-        this.issueHandler = issueHandler;
-
-    }
+    private final ReportReader reportReader;
 
     @Override
     public void describe(SensorDescriptor descriptor) {
@@ -57,8 +55,8 @@ public class JQAssistantSensor implements Sensor {
             ReportLocator.ReportLocation reportLocation = optionalReportLocation.get();
             File moduleDirectory = reportLocation.getModuleDirectory();
             File reportFile = reportLocation.getReportFile();
-            LOGGER.info("Found jQAssistant report for module '{}' at '{}'.", moduleDirectory.getPath(), reportFile.getPath());
-            JqassistantReport report = ReportReader.getInstance().read(reportFile);
+            LOGGER.info("Using jQAssistant report at '{}' for module '{}' .", moduleDirectory.getPath(), reportFile.getPath());
+            JqassistantReport report = reportReader.read(reportFile);
             if (report != null) {
                 evaluate(context, moduleDirectory, report.getGroupOrConceptOrConstraint());
             }

@@ -1,8 +1,12 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
-import com.sun.xml.bind.api.JAXBRIContext;
-import lombok.extern.slf4j.Slf4j;
-import org.jqassistant.schema.report.v1.JqassistantReport;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -11,16 +15,17 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.util.StreamReaderDelegate;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.function.Supplier;
+
+import com.sun.xml.bind.api.JAXBRIContext;
+import lombok.extern.slf4j.Slf4j;
+import org.jqassistant.schema.report.v1.JqassistantReport;
+import org.sonar.api.scanner.ScannerSide;
 
 /**
  * Reads jQA report files using JAXB.
  */
 @Slf4j
+@ScannerSide
 public final class ReportReader {
 
     public static ReportReader getInstance() {
@@ -29,11 +34,13 @@ public final class ReportReader {
 
     private static final ReportReader INSTANCE = new ReportReader();
 
-    private XMLInputFactory inputFactory;
+    private final XMLInputFactory inputFactory;
 
-    private JAXBContext jaxbContext;
+    private final JAXBContext jaxbContext;
 
-    private ReportReader() {
+    private final Map<File, JqassistantReport> reports = new HashMap<>();
+
+    public ReportReader() {
         inputFactory = XMLInputFactory.newInstance();
         inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
         jaxbContext = withPluginClassLoader(() -> {
@@ -53,13 +60,14 @@ public final class ReportReader {
      * @return The {@link JqassistantReport}.
      */
     public JqassistantReport read(File reportFile) {
-        return withPluginClassLoader(() -> {
-            try (InputStream inputStream = new FileInputStream(reportFile)) {
+        return reports.computeIfAbsent(reportFile, file -> withPluginClassLoader(() -> {
+            log.info("Reading report '{}'.", file);
+            try (InputStream inputStream = new FileInputStream(file)) {
                 return unmarshal(inputStream);
             } catch (IOException | XMLStreamException | JAXBException e) {
-                throw new IllegalStateException("Cannot read jQAssistant report from file " + reportFile, e);
+                throw new IllegalStateException("Cannot read jQAssistant report from file " + file, e);
             }
-        });
+        }));
     }
 
     private <T> T withPluginClassLoader(Supplier<T> supplier) {

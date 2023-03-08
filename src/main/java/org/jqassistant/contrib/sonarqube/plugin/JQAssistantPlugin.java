@@ -1,10 +1,7 @@
 package org.jqassistant.contrib.sonarqube.plugin;
 
 import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
-import org.jqassistant.contrib.sonarqube.plugin.sensor.IssueHandler;
-import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
-import org.jqassistant.contrib.sonarqube.plugin.sensor.RuleKeyResolver;
-import org.jqassistant.contrib.sonarqube.plugin.sensor.RulesRepository;
+import org.jqassistant.contrib.sonarqube.plugin.sensor.*;
 import org.sonar.api.Plugin;
 
 /**
@@ -20,5 +17,6 @@ public class JQAssistantPlugin implements Plugin {
         context.addExtension(RuleKeyResolver.class);
         context.addExtension(RulesRepository.class);
         context.addExtension(IssueHandler.class);
+        context.addExtension(ReportReader.class);
     }
 }
