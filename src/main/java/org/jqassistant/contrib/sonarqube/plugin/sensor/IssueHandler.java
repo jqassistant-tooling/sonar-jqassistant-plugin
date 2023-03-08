@@ -170,6 +170,13 @@ public class IssueHandler {
         if (result == null) {
             return null;
         }
+        // use primary attribute from columns element
+        String primary = result.getColumns()
+            .getPrimary();
+        if (primary != null) {
+            return primary;
+        }
+        // use deprecated primary attribute from column element
         ColumnsHeaderType columns = result.getColumns();
         for (ColumnHeaderType columnHeaderType : columns.getColumn()) {
             if (!columnHeaderType.isPrimary()) {
