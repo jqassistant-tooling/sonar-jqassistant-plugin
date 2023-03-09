@@ -14,7 +14,6 @@ public class JQAssistantPlugin implements Plugin {
         context.addExtension(SourceFileResolver.class);
         context.addExtension(JQAssistantConfiguration.class);
         context.addExtensions(JQAssistantConfiguration.getPropertyDefinitions());
-        context.addExtension(RuleKeyResolver.class);
         context.addExtension(RulesRepository.class);
         context.addExtension(IssueHandler.class);
         context.addExtension(ReportReader.class);

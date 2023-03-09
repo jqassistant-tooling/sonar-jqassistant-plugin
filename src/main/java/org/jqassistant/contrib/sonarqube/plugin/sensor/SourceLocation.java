@@ -1,11 +1,11 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
+import java.util.Optional;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.sonar.api.batch.fs.InputFile;
-
-import java.util.Optional;
 
 /**
  * Helper class to hold resource + line number of source together.
@@ -17,7 +17,7 @@ import java.util.Optional;
 @ToString
 final class SourceLocation {
 
-    private Optional<InputFile> inputFile;
+    private InputFile inputFile;
 
     private Optional<Integer> startLine;
 

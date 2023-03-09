@@ -1,5 +1,12 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
+import java.io.File;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
@@ -13,14 +20,8 @@ import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.rule.Severity;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.issue.NewExternalIssue;
-import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
-import org.sonar.api.rule.RuleKey;
 import org.sonar.api.scanner.ScannerSide;
-
-import java.io.File;
-import java.util.Locale;
-import java.util.Optional;
 
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.joining;
@@ -43,11 +44,13 @@ public class IssueHandler {
 
     private final JQAssistantConfiguration configuration;
 
-    private final RuleKeyResolver ruleResolver;
+    /**
+     * Keeps the already processed rows from the jQAssistant report (to avoid duplicates).
+     */
+    private final Set<String> processedRowIds = new HashSet<>();
 
-    public IssueHandler(JQAssistantConfiguration configuration, SourceFileResolver sourceFileResolver, RuleKeyResolver ruleResolver) {
+    public IssueHandler(JQAssistantConfiguration configuration, SourceFileResolver sourceFileResolver) {
         this.configuration = configuration;
-        this.ruleResolver = ruleResolver;
         this.sourceFileResolver = sourceFileResolver;
     }
 
@@ -61,7 +64,8 @@ public class IssueHandler {
             newIssue(sensorContext, reportModulePath, empty(), executableRuleType, null, null);
         } else {
             String primaryColumn = getPrimaryColumn(result);
-            for (RowType rowType : result.getRows().getRow()) {
+            for (RowType rowType : result.getRows()
+                .getRow()) {
                 Optional<SourceLocation> target = resolveSourceLocation(sensorContext, rowType, primaryColumn);
                 newIssue(sensorContext, reportModulePath, target, executableRuleType, rowType, primaryColumn);
             }
@@ -82,32 +86,24 @@ public class IssueHandler {
         RowType rowType, String primaryColumn) {
         if (target.isPresent()) {
             SourceLocation sourceLocation = target.get();
-            Optional<InputFile> inputFile = sourceLocation.getInputFile();
-            if (inputFile.isPresent()) {
-                // Create an external issue if a SourceLocation exists and InputComponent could
-                // be resolved (e.g. a class in a module)
-                newExternalIssue(sensorContext, executableRuleType, rowType, inputFile.get(), sourceLocation.getStartLine(), sourceLocation.getEndLine(),
-                    of(primaryColumn));
-            }
-        } else if (sensorContext.fileSystem().baseDir().equals(reportModulePath)) {
+            InputFile inputFile = sourceLocation.getInputFile();
+            // Create an external issue if a SourceLocation exists and InputComponent could
+            // be resolved (e.g. a class in a module)
+            Optional<Integer> startLine = sourceLocation.getStartLine();
+            Optional<Integer> endLine = sourceLocation.getEndLine();
+            newExternalIssue(sensorContext, executableRuleType, rowType, inputFile,
+                newIssueLocation -> selectText(newIssueLocation, inputFile, startLine, endLine), of(primaryColumn));
+        } else if (sensorContext.fileSystem()
+            .baseDir()
+            .equals(reportModulePath)) {
             // Create issue on project level for all items that cannot be mapped to a
             // SourceLocation (e.g. packages or empty concepts)
-            newIssue(sensorContext, executableRuleType, rowType, sensorContext.project());
+            newExternalIssue(sensorContext, executableRuleType, rowType, sensorContext.project(), newIssueLocation -> {
+            }, empty());
         }
     }
 
-    private void newExternalIssue(SensorContext sensorContext, ExecutableRuleType executableRuleType, RowType rowType, InputFile inputFile,
-        Optional<Integer> startLine, Optional<Integer> endLine, Optional<String> matchedColumn) {
-        RuleType ruleType = getRuleType(executableRuleType);
-        org.sonar.api.rules.RuleType issueType = configuration.getIssueType();
-
-        sensorContext.newAdHocRule().engineId(JQAssistant.NAME).ruleId(executableRuleType.getId()).name(executableRuleType.getId())
-            .description(executableRuleType.getDescription()).type(issueType).severity(ruleType.getDefaultSeverity()).save();
-
-        NewExternalIssue newExternalIssue = sensorContext.newExternalIssue().type(issueType);
-        StringBuilder message = new StringBuilder(executableRuleType.getDescription()).append(NEWLINE);
-        message.append(convertRow(rowType, matchedColumn));
-        NewIssueLocation newIssueLocation = newExternalIssue.newLocation().message(message.toString()).on(inputFile);
+    private static void selectText(NewIssueLocation newIssueLocation, InputFile inputFile, Optional<Integer> startLine, Optional<Integer> endLine) {
         if (startLine.isPresent()) {
             TextRange textRange;
             if (endLine.isPresent() && inputFile instanceof DefaultInputFile) {
@@ -118,25 +114,49 @@ public class IssueHandler {
             }
             newIssueLocation.at(textRange);
         }
-        convertSeverity(executableRuleType.getSeverity()).ifPresent(newExternalIssue::severity);
-        newExternalIssue.engineId(JQAssistant.NAME).ruleId(executableRuleType.getId()).at(newIssueLocation).save();
     }
 
-    private void newIssue(SensorContext sensorContext, ExecutableRuleType executableRuleType, RowType rowType, InputComponent inputComponent) {
+    private void newExternalIssue(SensorContext sensorContext, ExecutableRuleType executableRuleType, RowType rowType, InputComponent inputComponent,
+        Consumer<NewIssueLocation> locationConsumer, Optional<String> matchedColumn) {
         RuleType ruleType = getRuleType(executableRuleType);
-        Optional<RuleKey> ruleKey = ruleResolver.resolve(ruleType);
-        if (!ruleKey.isPresent()) {
-            LOGGER.warn("Rule with id '{}' is not active, no issue will be created.", executableRuleType.getId());
-        } else {
-            StringBuilder message = new StringBuilder().append('[').append(executableRuleType.getId()).append("]").append(" ")
-                .append(createMessage(ruleType, executableRuleType)).append(NEWLINE);
-            message.append(convertRow(rowType, empty()));
-            NewIssue newIssue = sensorContext.newIssue();
-            NewIssueLocation newIssueLocation = newIssue.newLocation().message(message.toString()).on(inputComponent);
-            convertSeverity(executableRuleType.getSeverity()).ifPresent(newIssue::overrideSeverity);
-            newIssue.forRule(ruleKey.get()).at(newIssueLocation).save();
+        if (processedRowIds.add(getRowId(ruleType, executableRuleType.getId(), rowType))) {
+            org.sonar.api.rules.RuleType issueType = configuration.getIssueType();
+            sensorContext.newAdHocRule()
+                .engineId(JQAssistant.NAME)
+                .ruleId(executableRuleType.getId())
+                .name(executableRuleType.getId())
+                .description(executableRuleType.getDescription())
+                .type(issueType)
+                .severity(ruleType.getDefaultSeverity())
+                .save();
+            NewExternalIssue newExternalIssue = sensorContext.newExternalIssue()
+                .type(issueType);
+            StringBuilder message = new StringBuilder(executableRuleType.getDescription()).append(NEWLINE);
+            message.append(convertRow(rowType, matchedColumn));
+            NewIssueLocation newIssueLocation = newExternalIssue.newLocation()
+                .message(message.toString())
+                .on(inputComponent);
+            locationConsumer.accept(newIssueLocation);
+            convertSeverity(executableRuleType.getSeverity()).ifPresent(newExternalIssue::severity);
+            newExternalIssue.engineId(JQAssistant.NAME)
+                .ruleId(executableRuleType.getId())
+                .at(newIssueLocation)
+                .save();
         }
     }
+
+    private String getRowId(RuleType ruleType, String ruleId, RowType rowType) {
+        StringBuilder id = new StringBuilder(ruleType.name()).append("|")
+            .append(ruleId)
+            .append("|");
+        if (rowType != null) {
+            rowType.getColumn()
+                .stream()
+                .forEach(columnType -> id.append(columnType.getValue()));
+        }
+        return id.toString();
+    }
+
 
     private Optional<Severity> convertSeverity(SeverityType severity) {
         if (severity == null) {
@@ -204,10 +224,13 @@ public class IssueHandler {
                 if (sourceFileName == null) {
                     LOGGER.warn("Cannot determine source location, please upgrade jQAssistant to 1.11 or newer.");
                 } else {
-                    InputFile inputFile = sourceFileResolver.resolve(sensorContext.fileSystem(), sourceFileName);
-                    SourceLocation sourceLocation = SourceLocation.builder().inputFile(ofNullable(inputFile)).startLine(ofNullable(source.getStartLine()))
-                        .endLine(ofNullable(source.getEndLine())).build();
-                    return of(sourceLocation);
+                    boolean isRelative = source.getParent() != null;
+                    Optional<InputFile> inputFile = sourceFileResolver.resolve(sensorContext.fileSystem(), sourceFileName, isRelative);
+                    return inputFile.map(file -> SourceLocation.builder()
+                        .inputFile(file)
+                        .startLine(ofNullable(source.getStartLine()))
+                        .endLine(ofNullable(source.getEndLine()))
+                        .build());
                 }
             }
         }
@@ -225,8 +248,12 @@ public class IssueHandler {
      */
     private String convertRow(RowType rowType, Optional<String> matchedColumn) {
         if (rowType != null) {
-            return rowType.getColumn().stream().filter(columnType -> !(matchedColumn.isPresent() && columnType.getName().equals(matchedColumn.get())))
-                .map(columnType -> columnType.getName() + ":" + columnType.getValue()).collect(joining("," + NEWLINE));
+            return rowType.getColumn()
+                .stream()
+                .filter(columnType -> !(matchedColumn.isPresent() && columnType.getName()
+                    .equals(matchedColumn.get())))
+                .map(columnType -> columnType.getName() + ":" + columnType.getValue())
+                .collect(joining("," + NEWLINE));
         }
         return "";
     }
@@ -256,7 +283,8 @@ public class IssueHandler {
             return null;
         }
         String result = classFileName;
-        if (result.toLowerCase(Locale.ENGLISH).endsWith(".class")) {
+        if (result.toLowerCase(Locale.ENGLISH)
+            .endsWith(".class")) {
             result = result.substring(0, result.length() - ".class".length());
         }
         // remove nested class fragments

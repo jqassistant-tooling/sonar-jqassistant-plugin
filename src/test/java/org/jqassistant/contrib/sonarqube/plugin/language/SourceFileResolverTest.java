@@ -1,5 +1,9 @@
 package org.jqassistant.contrib.sonarqube.plugin.language;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -10,14 +14,10 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.java.model.GeneratedFile;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
@@ -42,9 +42,10 @@ public class SourceFileResolverTest {
         Iterable<InputFile> it = singletonList(toInputFile(path));
         doReturn(it).when(fileSystem).inputFiles(predicate);
 
-        InputFile result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class");
+        Optional<InputFile> result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class", true);
 
-        assertEquals(Paths.get(result.uri()), path.toAbsolutePath());
+        assertTrue(result.isPresent());
+        assertEquals(Paths.get(result.get().uri()), path.toAbsolutePath());
     }
 
     @Test
@@ -55,9 +56,9 @@ public class SourceFileResolverTest {
         Iterable<InputFile> it = asList(toInputFile(path1), toInputFile(path2));
         doReturn(it).when(fileSystem).inputFiles(predicate);
 
-        InputFile result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class");
+        Optional<InputFile> result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class", true);
 
-        assertNull(result);
+        assertFalse(result.isPresent());
     }
 
     @Test
@@ -65,9 +66,9 @@ public class SourceFileResolverTest {
         stubFileSystem();
         doReturn(emptyList()).when(fileSystem).inputFiles(predicate);
 
-        InputFile result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class");
+        Optional<InputFile> result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class", true);
 
-        assertNull(result);
+        assertFalse(result.isPresent());
     }
 
     private void stubFileSystem() {

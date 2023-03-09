@@ -2,7 +2,6 @@ package org.jqassistant.contrib.sonarqube.plugin;
 
 import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
 import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
-import org.jqassistant.contrib.sonarqube.plugin.sensor.RuleKeyResolver;
 import org.jqassistant.contrib.sonarqube.plugin.sensor.RulesRepository;
 import org.junit.jupiter.api.Test;
 import org.sonar.api.Plugin;
@@ -29,7 +28,6 @@ public class JQAssistantPluginTest {
         assertThat(extensions.contains(JQAssistantConfiguration.class), equalTo(true));
         assertThat(extensions.contains(JQAssistantSensor.class), equalTo(true));
         assertThat(extensions.contains(SourceFileResolver.class), equalTo(true));
-        assertThat(extensions.contains(RuleKeyResolver.class), equalTo(true));
         assertThat(extensions.contains(RulesRepository.class), equalTo(true));
     }
 }

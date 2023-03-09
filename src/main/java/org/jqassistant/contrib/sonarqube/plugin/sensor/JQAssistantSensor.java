@@ -49,13 +49,14 @@ public class JQAssistantSensor implements Sensor {
     private void startScan(SensorContext context) {
         String reportPath = configuration.getReportFile();
         File projectDir = getProjectDirectory(context);
-        File baseDir = context.fileSystem().baseDir();
+        File baseDir = context.fileSystem()
+            .baseDir();
         Optional<ReportLocator.ReportLocation> optionalReportLocation = ReportLocator.resolveReportFile(projectDir, baseDir, reportPath);
         if (optionalReportLocation.isPresent()) {
             ReportLocator.ReportLocation reportLocation = optionalReportLocation.get();
             File moduleDirectory = reportLocation.getModuleDirectory();
             File reportFile = reportLocation.getReportFile();
-            LOGGER.info("Using jQAssistant report at '{}' for module '{}' .", moduleDirectory.getPath(), reportFile.getPath());
+            LOGGER.info("Using jQAssistant report at '{}' for module '{}' .", reportFile.getPath(), moduleDirectory.getPath());
             JqassistantReport report = reportReader.read(reportFile);
             if (report != null) {
                 evaluate(context, moduleDirectory, report.getGroupOrConceptOrConstraint());
@@ -68,9 +69,11 @@ public class JQAssistantSensor implements Sensor {
     private File getProjectDirectory(SensorContext context) {
         InputProject project = context.project();
         if (project instanceof DefaultInputProject) {
-            return ((DefaultInputProject) project).getBaseDir().toFile();
+            return ((DefaultInputProject) project).getBaseDir()
+                .toFile();
         }
-        return context.fileSystem().baseDir();
+        return context.fileSystem()
+            .baseDir();
     }
 
     private void evaluate(SensorContext context, File reportModulePath, List<ReferencableRuleType> rules) {
