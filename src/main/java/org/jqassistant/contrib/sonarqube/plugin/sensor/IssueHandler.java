@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
@@ -154,7 +155,7 @@ public class IssueHandler {
                 .stream()
                 .forEach(columnType -> id.append(columnType.getValue()));
         }
-        return id.toString();
+        return DigestUtils.sha256Hex(id.toString());
     }
 
 

@@ -178,6 +178,12 @@
             <groupId>org.sonarsource.java</groupId>
             <artifactId>sonar-java-plugin</artifactId>
         </dependency>
+        <!-- Commons Codec for SHA256 hashing -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+        </dependency>
         <!-- unit tests -->
         <dependency>
             <groupId>com.buschmais.jqassistant.core</groupId>
