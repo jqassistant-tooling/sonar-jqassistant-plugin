@@ -258,31 +258,4 @@ public class IssueHandler {
         }
         return "";
     }
-
-    /**
-     * Convert a given entry like
-     * <code>com/buschmais/jqassistant/examples/sonar/project/Bar.class</code> into
-     * a source file name like
-     * <code>com/buschmais/jqassistant/examples/sonar/project/Bar.java</code>.
-     *
-     * @deprecated To be replaced by {@link SourceLocationType#getFileName()}.
-     */
-    @Deprecated
-    private String getJavaSourceFileName(String classFileName) {
-        if (classFileName == null || classFileName.isEmpty()) {
-            return null;
-        }
-        String result = classFileName;
-        if (result.toLowerCase(Locale.ENGLISH)
-            .endsWith(".class")) {
-            result = result.substring(0, result.length() - ".class".length());
-        }
-        // remove nested class fragments
-        int index = result.indexOf('$');
-        if (index > -1) {
-            result = result.substring(0, index);
-        }
-        return result.concat(".java");
-    }
-
 }
