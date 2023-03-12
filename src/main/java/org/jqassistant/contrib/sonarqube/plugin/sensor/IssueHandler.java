@@ -259,17 +259,6 @@ public class IssueHandler {
         return "";
     }
 
-    private String createMessage(RuleType ruleType, ExecutableRuleType executableRuleType) {
-        switch (ruleType) {
-        case CONCEPT:
-            return "The concept could not be applied: " + executableRuleType.getDescription();
-        case CONSTRAINT:
-            return executableRuleType.getDescription();
-        default:
-            throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
-        }
-    }
-
     /**
      * Convert a given entry like
      * <code>com/buschmais/jqassistant/examples/sonar/project/Bar.class</code> into

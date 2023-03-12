@@ -71,7 +71,7 @@ class IssueHandlerTest {
     private IssueHandler issueHandler;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         issueHandler = new IssueHandler(configuration, sourceFileResolver);
         doReturn(fileSystem).when(sensorContext)
             .fileSystem();
@@ -81,7 +81,7 @@ class IssueHandlerTest {
      * Verifies that invalid concepts are reported on project level
      */
     @Test
-    public void invalidConceptOnProjectLevel() {
+    void invalidConceptOnProjectLevel() {
         ConceptType conceptType = new ConceptType();
         conceptType.setDescription("TestConcept");
         conceptType.setId("test:Concept");
@@ -100,7 +100,7 @@ class IssueHandlerTest {
      * Verifies that invalid concepts are not reported on module level
      */
     @Test
-    public void invalidConceptOnModuleLevel() {
+    void invalidConceptOnModuleLevel() {
         ConceptType conceptType = new ConceptType();
         conceptType.setDescription("TestConcept");
         conceptType.setId("test:Concept");
@@ -117,7 +117,7 @@ class IssueHandlerTest {
      * project level
      */
     @Test
-    public void constraintViolationWithoutSourceLocation() {
+    void constraintViolationWithoutSourceLocation() {
         ConstraintType constraintType = new ConstraintType();
         constraintType.setDescription("TestConstraint");
         constraintType.setId("test:Constraint");
@@ -135,21 +135,21 @@ class IssueHandlerTest {
     }
 
     @Test
-    public void constraintViolationAsCodeSmellWithDefaultInputFileLocation() {
+    void constraintViolationAsCodeSmellWithDefaultInputFileLocation() {
         stubDefaultInputFileSourceLocation();
         constraintViolationWithMatchingSourceLocation(CODE_SMELL);
         verify(newIssueLocation).on(defaultInputFile);
     }
 
     @Test
-    public void constraintViolationAsCodeSmellWithInputFileLocation() {
+    void constraintViolationAsCodeSmellWithInputFileLocation() {
         stubInputFileSourceLocation();
         constraintViolationWithMatchingSourceLocation(CODE_SMELL);
         verify(newIssueLocation).on(inputFile);
     }
 
     @Test
-    public void constraintViolationAsBugWithDefaultInputFIleLocation() {
+    void constraintViolationAsBugWithDefaultInputFIleLocation() {
         stubDefaultInputFileSourceLocation();
         constraintViolationWithMatchingSourceLocation(BUG);
         verify(newIssueLocation).on(defaultInputFile);
