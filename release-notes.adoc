@@ -3,7 +3,8 @@
 
 == 1.12.1
 
-* Re-use cached XML reports in Maven multi-module reactors
+* Improved sensor performance by caching XML reports in Maven multi-module reactors
+* Ensure that all issues that cannot be attached to a file are displayed on project level
 
 == 1.12.0
 
