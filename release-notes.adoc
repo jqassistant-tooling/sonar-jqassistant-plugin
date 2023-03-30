@@ -3,7 +3,7 @@
 
 == 2.0.0
 
-* Upgraded compatibility to jQAssistant 2.0
+* Upgraded compatibility to jQAssistant 2.0 and SonarQube 9.9 (LTS)
 
 == 1.12.1
 

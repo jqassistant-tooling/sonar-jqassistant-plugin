@@ -40,8 +40,10 @@
     </scm>
 
     <properties>
-        <sonar-plugin-api.version>8.9.0.43852</sonar-plugin-api.version>
-        <sonar-java-plugin.version>6.15.1.26025</sonar-java-plugin.version>
+        <sonar-plugin-api.version>9.14.0.375</sonar-plugin-api.version>
+        <sonar-plugin-api-impl.version>9.9.0.65466</sonar-plugin-api-impl.version>
+        <sonar-java-plugin.version>7.17.0.31219</sonar-java-plugin.version>
+        <sonar-testing-harness.version>9.9.0.65466</sonar-testing-harness.version>
         <lombok.version>1.18.24</lombok.version>
         <sonar.projectKey>jqassistant-contrib_sonar-jqassistant-plugin</sonar.projectKey>
     </properties>
@@ -88,7 +90,7 @@
             </dependency>
             <!-- SonarQ -->
             <dependency>
-                <groupId>org.sonarsource.sonarqube</groupId>
+                <groupId>org.sonarsource.api.plugin</groupId>
                 <artifactId>sonar-plugin-api</artifactId>
                 <version>${sonar-plugin-api.version}</version>
                 <scope>provided</scope>
@@ -96,7 +98,7 @@
             <dependency>
                 <groupId>org.sonarsource.sonarqube</groupId>
                 <artifactId>sonar-plugin-api-impl</artifactId>
-                <version>${sonar-plugin-api.version}</version>
+                <version>${sonar-plugin-api-impl.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -132,7 +134,7 @@
             <dependency>
                 <groupId>org.sonarsource.sonarqube</groupId>
                 <artifactId>sonar-testing-harness</artifactId>
-                <version>${sonar-plugin-api.version}</version>
+                <version>${sonar-testing-harness.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -167,7 +169,7 @@
         </dependency>
         <!-- SonarQube -->
         <dependency>
-            <groupId>org.sonarsource.sonarqube</groupId>
+            <groupId>org.sonarsource.api.plugin</groupId>
             <artifactId>sonar-plugin-api</artifactId>
         </dependency>
         <dependency>

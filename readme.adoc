@@ -5,7 +5,7 @@ This is the SonarQube plugin for jQAssistant integration
 
 == Requirements
 
-* SonarQube 8.9 or higher
+* SonarQube 9.9 or higher
 * Java project with jQAssistant setup
 
 == Installation
