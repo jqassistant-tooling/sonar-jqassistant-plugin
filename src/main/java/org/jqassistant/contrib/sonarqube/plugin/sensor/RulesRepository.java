@@ -1,9 +1,11 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
+import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.plugins.java.Java;
 
+@ScannerSide
 public final class RulesRepository implements RulesDefinition {
 
     @Override

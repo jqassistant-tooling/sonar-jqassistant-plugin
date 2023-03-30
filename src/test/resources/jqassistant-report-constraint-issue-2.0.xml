@@ -1,35 +1,33 @@
-<?xml version="1.0" ?>
-<jqassistant-report xmlns="http://schema.jqassistant.org/report/v1.11">
+<?xml version="1.0" encoding="UTF-8"?>
+<jqassistant-report xmlns="http://schema.jqassistant.org/report/v2.0">
     <group id="MyQualityProfile" date="2014-04-29T18:11:46">
         <constraint id="example:TestConstraint">
             <description>A test constraint.</description>
             <result>
                 <columns count="1" primary="WriteAccess">
                     <column>SomeOtherValue</column>
-                    <column primary="true">WriteAccess</column>
+                    <column>WriteAccess</column>
                 </columns>
                 <rows count="2">
-                    <row>
+                    <row key="1">
                         <column name="SomeOtherValue">
                             <value>test</value>
                         </column>
                         <column name="WriteAccess">
                             <element language="Java">WriteField</element>
-                            <source name="com/buschmais/jqassistant/examples/sonar/project/Bar.class" line="16"
-                                    fileName="/com/buschmais/jqassistant/examples/sonar/project/Bar.java" startLine="10" endLine="20">
+                            <source fileName="/com/buschmais/jqassistant/examples/sonar/project/Bar.java" startLine="10" endLine="20">
                                 <parent fileName="test.jar" group="com.acme" name="test" type="jar" version="1.0.0"></parent>
                             </source>
                             <value>com.buschmais.jqassistant.examples.sonar.project.Bar#void setValue(java.lang.String)</value>
                         </column>
                     </row>
-                    <row>
+                    <row key="2">
                         <column name="SomeOtherValue">
                             <value>test</value>
                         </column>
                         <column name="WriteAccess">
                             <element language="Java">WriteField</element>
-                            <source name="com/buschmais/jqassistant/examples/sonar/project/Foo.class" line="16"
-                                    fileName="/com/buschmais/jqassistant/examples/sonar/project/Foo.java">
+                            <source fileName="/com/buschmais/jqassistant/examples/sonar/project/Foo.java">
                                 <parent fileName="test.jar" group="com.acme" name="test" type="jar" version="1.0.0"></parent>
                             </source>
                             <value>com.buschmais.jqassistant.examples.sonar.project.Foo#void setValue(int)</value>

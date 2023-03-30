@@ -4,24 +4,28 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
+import com.buschmais.jqassistant.core.report.api.ReportReader;
+
 import lombok.RequiredArgsConstructor;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
-import org.jqassistant.schema.report.v1.*;
+import org.jqassistant.schema.report.v2.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.internal.DefaultInputProject;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.scanner.ScannerSide;
 import org.sonar.api.scanner.fs.InputProject;
 
-import static org.jqassistant.schema.report.v1.StatusEnumType.FAILURE;
-import static org.jqassistant.schema.report.v1.StatusEnumType.WARNING;
+import static org.jqassistant.schema.report.v2.StatusEnumType.FAILURE;
+import static org.jqassistant.schema.report.v2.StatusEnumType.WARNING;
 
 /**
  * {@link Sensor} implementation scanning for jqassistant-report.xml files.
  */
+@ScannerSide
 @RequiredArgsConstructor
 public class JQAssistantSensor implements Sensor {
 
@@ -29,8 +33,6 @@ public class JQAssistantSensor implements Sensor {
 
     private final JQAssistantConfiguration configuration;
     private final IssueHandler issueHandler;
-
-    private final ReportReader reportReader;
 
     @Override
     public void describe(SensorDescriptor descriptor) {
@@ -57,6 +59,8 @@ public class JQAssistantSensor implements Sensor {
             File moduleDirectory = reportLocation.getModuleDirectory();
             File reportFile = reportLocation.getReportFile();
             LOGGER.info("Using jQAssistant report at '{}' for module '{}' .", reportFile.getPath(), moduleDirectory.getPath());
+            ReportReader reportReader = new ReportReader(this.getClass()
+                .getClassLoader());
             JqassistantReport report = reportReader.read(reportFile);
             if (report != null) {
                 evaluate(context, moduleDirectory, report.getGroupOrConceptOrConstraint());

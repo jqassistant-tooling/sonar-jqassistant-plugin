@@ -2,11 +2,12 @@ package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
-import org.jqassistant.schema.report.v1.*;
+import org.jqassistant.schema.report.v2.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,11 +69,14 @@ class IssueHandlerTest {
     @Mock
     private JQAssistantConfiguration configuration;
 
+    @Mock
+    private IssueKeyProvider issueKeyProvider;
+
     private IssueHandler issueHandler;
 
     @BeforeEach
     void setUp() {
-        issueHandler = new IssueHandler(configuration, sourceFileResolver);
+        issueHandler = new IssueHandler(configuration, sourceFileResolver, issueKeyProvider);
         doReturn(fileSystem).when(sensorContext)
             .fileSystem();
     }
@@ -137,35 +141,66 @@ class IssueHandlerTest {
     @Test
     void constraintViolationAsCodeSmellWithDefaultInputFileLocation() {
         stubDefaultInputFileSourceLocation();
-        constraintViolationWithMatchingSourceLocation(CODE_SMELL);
+        verifyConstraintViolationWithMatchingSourceLocation(CODE_SMELL);
         verify(newIssueLocation).on(defaultInputFile);
     }
 
     @Test
     void constraintViolationAsCodeSmellWithInputFileLocation() {
         stubInputFileSourceLocation();
-        constraintViolationWithMatchingSourceLocation(CODE_SMELL);
+        verifyConstraintViolationWithMatchingSourceLocation(CODE_SMELL);
         verify(newIssueLocation).on(inputFile);
     }
 
     @Test
     void constraintViolationAsBugWithDefaultInputFIleLocation() {
         stubDefaultInputFileSourceLocation();
-        constraintViolationWithMatchingSourceLocation(BUG);
+        verifyConstraintViolationWithMatchingSourceLocation(BUG);
         verify(newIssueLocation).on(defaultInputFile);
+    }
+
+    @Test
+    void uniqueConstraintViolation() {
+        stubDefaultInputFileSourceLocation();
+        ConstraintType constraintType = stubConstraintViolationWithRowKey(BUG);
+
+        issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
+        issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
+
+        verify(newIssueLocation).on(defaultInputFile);
+    }
+
+    @Test
+    void constraintViolationWithRowKey() {
+        stubDefaultInputFileSourceLocation();
+        ConstraintType constraintType = stubConstraintViolationWithRowKey(BUG);
+
+        issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
+
+        verify(newIssueLocation).on(defaultInputFile);
+        verify(issueKeyProvider).getIssueKey(any(), any(), any());
+    }
+
+    @Test
+    void constraintViolationWithoutRowKey() {
+        stubDefaultInputFileSourceLocation();
+        doReturn(UUID.randomUUID()
+            .toString()).when(issueKeyProvider)
+            .getIssueKey(any(), any(), any());
+        ConstraintType constraintType = stubConstraintViolation(BUG, null);
+
+        issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
+
+        verify(newIssueLocation).on(defaultInputFile);
+        verify(issueKeyProvider).getIssueKey(any(), any(), any());
     }
 
     /**
      * Verifies that violated constraints with a source location are reported on the
      * referenced element if it can be resolved.
      */
-    private void constraintViolationWithMatchingSourceLocation(org.sonar.api.rules.RuleType ruleType) {
-        ConstraintType constraintType = new ConstraintType();
-        constraintType.setDescription("TestConstraint");
-        constraintType.setId("test:Constraint");
-        constraintType.setSeverity(getSeverityType(com.buschmais.jqassistant.core.rule.api.model.Severity.CRITICAL));
-        constraintType.setResult(createResultType(true));
-        stubExternalNewIssue(ruleType, of(Severity.CRITICAL));
+    private void verifyConstraintViolationWithMatchingSourceLocation(org.sonar.api.rules.RuleType ruleType) {
+        ConstraintType constraintType = stubConstraintViolationWithRowKey(ruleType);
 
         issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
 
@@ -197,18 +232,21 @@ class IssueHandlerTest {
     }
 
     private ResultType createResultType(boolean includeSourceLocation) {
+        return createResultType(includeSourceLocation, null);
+    }
+
+    private ResultType createResultType(boolean includeSourceLocation, String rowKey) {
         ResultType resultType = new ResultType();
         ColumnsHeaderType columnsHeaderType = new ColumnsHeaderType();
         columnsHeaderType.setCount(1);
-        ColumnHeaderType columnHeaderType = new ColumnHeaderType();
-        columnHeaderType.setValue("Value");
-        columnHeaderType.setPrimary(true);
+        columnsHeaderType.setPrimary("Value");
         columnsHeaderType.getColumn()
-            .add(columnHeaderType);
+            .add("Value");
         resultType.setColumns(columnsHeaderType);
 
         RowsType rowsType = new RowsType();
         RowType rowType = new RowType();
+        rowType.setKey(rowKey);
         ColumnType columnType = new ColumnType();
         columnType.setName("Value");
         columnType.setValue("Test");
@@ -231,6 +269,20 @@ class IssueHandlerTest {
             .add(rowType);
         resultType.setRows(rowsType);
         return resultType;
+    }
+
+    private ConstraintType stubConstraintViolationWithRowKey(org.sonar.api.rules.RuleType ruleType) {
+        return stubConstraintViolation(ruleType, "1");
+    }
+
+    private ConstraintType stubConstraintViolation(org.sonar.api.rules.RuleType ruleType, String rowKey) {
+        ConstraintType constraintType = new ConstraintType();
+        constraintType.setDescription("TestConstraint");
+        constraintType.setId("test:Constraint");
+        constraintType.setSeverity(getSeverityType(com.buschmais.jqassistant.core.rule.api.model.Severity.CRITICAL));
+        constraintType.setResult(createResultType(true, rowKey));
+        stubExternalNewIssue(ruleType, of(Severity.CRITICAL));
+        return constraintType;
     }
 
     private void stubExternalNewIssue(org.sonar.api.rules.RuleType ruleType, Optional<Severity> issueSeverity) {

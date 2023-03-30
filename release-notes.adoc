@@ -1,6 +1,10 @@
 :toc: left
 = Release Notes
 
+== 2.0.0
+
+* Upgraded compatibility to jQAssistant 2.0
+
 == 1.12.1
 
 * Improved sensor performance by caching XML reports in Maven multi-module reactors

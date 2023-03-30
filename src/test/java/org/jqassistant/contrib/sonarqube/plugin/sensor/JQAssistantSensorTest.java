@@ -1,7 +1,10 @@
 package org.jqassistant.contrib.sonarqube.plugin.sensor;
 
+import java.io.File;
+import java.net.URISyntaxException;
+
 import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
-import org.jqassistant.schema.report.v1.ExecutableRuleType;
+import org.jqassistant.schema.report.v2.ExecutableRuleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,9 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.SensorContext;
-
-import java.io.File;
-import java.net.URISyntaxException;
 
 import static org.mockito.Mockito.*;
 
@@ -42,12 +42,12 @@ public class JQAssistantSensorTest {
     @BeforeEach
     public void setUp() throws URISyntaxException {
         baseDir = new File(JQAssistantSensorTest.class.getResource("/").toURI().getPath());
-        sensor = new JQAssistantSensor(configuration, issueHandler, new ReportReader());
+        sensor = new JQAssistantSensor(configuration, issueHandler);
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "jqassistant-report-concept-issue.xml", "jqassistant-report-1_8.xml", "jqassistant-report-constraint-issue.xml",
-        "jqassistant-report-constraint-issue-1.8.xml" })
+        "jqassistant-report-constraint-issue-1.8.xml", "jqassistant-report-constraint-issue-2.0.xml" })
     public void issues(String reportWithIssue) {
         stubFileSystem(reportWithIssue);
 
