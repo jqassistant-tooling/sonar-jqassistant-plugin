@@ -33,14 +33,14 @@ class JQAssistantConfigurationTest {
 
     @Test
     public void disabledNotSet() {
-        assertThat(configuration.isSensorDisabled()).isEqualTo(false);
+        assertThat(configuration.isSensorDisabled()).isFalse();
     }
 
     @Test
     public void disabledSet() {
         doReturn(Optional.of(Boolean.TRUE)).when(sonarConfiguration).getBoolean(DISABLED);
 
-        assertThat(configuration.isSensorDisabled()).isEqualTo(true);
+        assertThat(configuration.isSensorDisabled()).isTrue();
     }
 
     @Test

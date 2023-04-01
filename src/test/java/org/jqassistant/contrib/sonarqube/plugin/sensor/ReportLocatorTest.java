@@ -18,7 +18,7 @@ class ReportLocatorTest {
     private static final String NON_EXISTING_REPORT_PATH = "build/non-existing-jqassistant-report.xml";
 
     @Test
-    public void relativePathWithReportInModule() {
+    void relativePathWithReportInModule() {
         File moduleDir = new File(MODULE_2);
         Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, REPORT_PATH);
         assertThat(reportLocation).isPresent()
@@ -26,7 +26,7 @@ class ReportLocatorTest {
     }
 
     @Test
-    public void relativePathWithWithReportInParent() {
+    void relativePathWithWithReportInParent() {
         File moduleDir = new File(MODULE_1);
         Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, REPORT_PATH);
         assertThat(reportLocation).isPresent()
@@ -34,14 +34,14 @@ class ReportLocatorTest {
     }
 
     @Test
-    public void noNExistingRelativePath() {
+    void noNExistingRelativePath() {
         File moduleDir = new File(MODULE_1);
         Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, NON_EXISTING_REPORT_PATH);
         assertThat(reportLocation).isEmpty();
     }
 
     @Test
-    public void absolutePath() {
+    void absolutePath() {
         File moduleDir = new File(MODULE_2);
         Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, new File(PROJECT_DIR, REPORT_PATH).getAbsolutePath());
         assertThat(reportLocation).isPresent()
@@ -49,7 +49,7 @@ class ReportLocatorTest {
     }
 
     @Test
-    public void nonExistingAbsolutePath() {
+    void nonExistingAbsolutePath() {
         File moduleDir = new File(MODULE_2);
         Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir,
                 new File(PROJECT_DIR, NON_EXISTING_REPORT_PATH).getAbsolutePath());

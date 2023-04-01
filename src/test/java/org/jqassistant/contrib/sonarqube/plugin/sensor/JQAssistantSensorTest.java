@@ -44,7 +44,7 @@ public class JQAssistantSensorTest {
     private JQAssistantSensor sensor;
 
     @BeforeEach
-    public void setUp() throws URISyntaxException {
+    void setUp() throws URISyntaxException {
         baseDir = new File(JQAssistantSensorTest.class.getResource("/").toURI().getPath());
         sensor = new JQAssistantSensor(configuration, issueHandler);
     }
@@ -68,7 +68,7 @@ public class JQAssistantSensorTest {
     @ParameterizedTest
     @ValueSource(strings = { "jqassistant-report-concept-issue.xml", "jqassistant-report-1_8.xml", "jqassistant-report-constraint-issue.xml",
         "jqassistant-report-constraint-issue-1.8.xml", "jqassistant-report-constraint-issue-2.0.xml" })
-    public void issues(String reportFile) {
+    void issues(String reportFile) {
         stubFileSystem(reportFile);
 
         sensor.execute(sensorContext);
@@ -86,7 +86,7 @@ public class JQAssistantSensorTest {
     }
 
     @Test
-    public void reportWithoutIssue() {
+    void reportWithoutIssue() {
         stubFileSystem("jqassistant-report-no-issue.xml");
 
         sensor.execute(sensorContext);

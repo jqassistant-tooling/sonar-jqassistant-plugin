@@ -18,7 +18,7 @@ public final class RulesRepository implements RulesDefinition {
             newRule.setName(value.getName());
             newRule.setInternalKey(value.getKey());
             newRule.setSeverity(value.getDefaultSeverity().name());
-            newRule.setMarkdownDescription(value.getDescription());
+            newRule.setHtmlDescription(value.getDescription());
         }
 
         newRepository.done();
