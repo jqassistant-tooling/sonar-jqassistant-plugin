@@ -33,7 +33,7 @@ public class SourceFileResolverTest {
     @Mock
     private FilePredicate predicate;
 
-    private SourceFileResolver sourceFileResolver = new SourceFileResolver();
+    private final SourceFileResolver sourceFileResolver = new SourceFileResolver();
 
     @Test
     public void singleFileMatches() {
@@ -60,6 +60,21 @@ public class SourceFileResolverTest {
 
         assertFalse(result.isPresent());
     }
+
+    @Test
+    public void absolutePath() {
+        stubFileSystem();
+        doReturn(Paths.get("/home/user/project/").toFile()).when(fileSystem).baseDir();
+        Path path = Paths.get("/home/user/project/src/test/java/org/jqassistant/contrib/Test.java");
+        Iterable<InputFile> it = singletonList(toInputFile(path));
+        doReturn(it).when(fileSystem).inputFiles(predicate);
+
+        Optional<InputFile> result = sourceFileResolver.resolve(fileSystem, "/org/jqassistant/contrib/Test.class", false);
+
+        assertTrue(result.isPresent());
+        assertEquals(Paths.get(result.get().uri()), path.toAbsolutePath());
+    }
+
 
     @Test
     public void noFilesMatch() {
