@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
 import org.jqassistant.schema.report.v2.ColumnType;
 import org.jqassistant.schema.report.v2.ExecutableRuleType;
@@ -10,8 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 import static org.mockito.Mockito.*;
 
 /**
@@ -30,7 +28,7 @@ class IssueKeyProviderTest {
         doReturn("test:Concept").when(executableRuleType)
             .getId();
 
-        String issueKey = issueKeyProvider.getIssueKey(executableRuleType, CONCEPT);
+        String issueKey = issueKeyProvider.getIssueKey(executableRuleType, RuleType.CONCEPT);
 
         assertThat(issueKey).hasSize(64);
         verify(executableRuleType).getId();
@@ -42,7 +40,7 @@ class IssueKeyProviderTest {
         doReturn("1").when(rowType)
             .getKey();
 
-        String issueKey = issueKeyProvider.getIssueKey(executableRuleType, rowType, CONSTRAINT);
+        String issueKey = issueKeyProvider.getIssueKey(executableRuleType, rowType, RuleType.CONSTRAINT);
 
         assertThat(issueKey).isEqualTo("1");
         verify(executableRuleType, never()).getId();
@@ -60,7 +58,7 @@ class IssueKeyProviderTest {
         doReturn("value").when(columnType)
             .getValue();
 
-        String issueKey = issueKeyProvider.getIssueKey(executableRuleType, rowType, CONSTRAINT);
+        String issueKey = issueKeyProvider.getIssueKey(executableRuleType, rowType, RuleType.CONSTRAINT);
 
         assertThat(issueKey).hasSize(64);
         verify(rowType).getKey();

@@ -1,12 +1,12 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
 import java.io.File;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
-import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
+import org.jqassistant.tooling.sonarqube.plugin.JQAssistant;
+import org.jqassistant.tooling.sonarqube.plugin.JQAssistantConfiguration;
+import org.jqassistant.tooling.sonarqube.plugin.language.SourceFileResolver;
 import org.jqassistant.schema.report.v2.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

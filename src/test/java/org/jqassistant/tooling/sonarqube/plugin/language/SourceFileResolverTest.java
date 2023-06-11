@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonarqube.plugin.language;
+package org.jqassistant.tooling.sonarqube.plugin.language;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

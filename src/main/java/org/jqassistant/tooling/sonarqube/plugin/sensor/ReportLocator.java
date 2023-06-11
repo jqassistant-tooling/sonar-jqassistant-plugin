@@ -1,14 +1,12 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
 import java.io.File;
 import java.util.Objects;
 import java.util.Optional;
 
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

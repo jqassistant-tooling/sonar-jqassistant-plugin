@@ -1,6 +1,6 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
+import org.jqassistant.tooling.sonarqube.plugin.JQAssistant;
 import org.sonar.api.batch.rule.Severity;
 
 import static org.sonar.api.batch.rule.Severity.MAJOR;

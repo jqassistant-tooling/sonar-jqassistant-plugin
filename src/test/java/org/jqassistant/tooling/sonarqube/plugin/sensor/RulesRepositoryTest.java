@@ -1,6 +1,6 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
+import org.jqassistant.tooling.sonarqube.plugin.JQAssistant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,8 +11,8 @@ import org.sonar.api.server.rule.RulesDefinition.Context;
 import org.sonar.api.server.rule.RulesDefinition.NewRepository;
 import org.sonar.plugins.java.Java;
 
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
+import static org.jqassistant.tooling.sonarqube.plugin.sensor.RuleType.CONCEPT;
+import static org.jqassistant.tooling.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;

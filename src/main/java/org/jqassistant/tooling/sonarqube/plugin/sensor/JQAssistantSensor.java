@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
 import java.io.File;
 import java.util.List;
@@ -7,8 +7,8 @@ import java.util.Optional;
 import com.buschmais.jqassistant.core.report.api.ReportReader;
 
 import lombok.RequiredArgsConstructor;
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
+import org.jqassistant.tooling.sonarqube.plugin.JQAssistant;
+import org.jqassistant.tooling.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.schema.report.v2.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

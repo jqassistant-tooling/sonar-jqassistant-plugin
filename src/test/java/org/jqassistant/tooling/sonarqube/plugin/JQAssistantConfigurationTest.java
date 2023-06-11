@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonarqube.plugin;
+package org.jqassistant.tooling.sonarqube.plugin;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration.*;
 import static org.mockito.Mockito.doReturn;
 import static org.sonar.api.rules.RuleType.BUG;
 import static org.sonar.api.rules.RuleType.CODE_SMELL;
@@ -38,7 +37,7 @@ class JQAssistantConfigurationTest {
 
     @Test
     public void disabledSet() {
-        doReturn(Optional.of(Boolean.TRUE)).when(sonarConfiguration).getBoolean(DISABLED);
+        doReturn(Optional.of(Boolean.TRUE)).when(sonarConfiguration).getBoolean(JQAssistantConfiguration.DISABLED);
 
         assertThat(configuration.isSensorDisabled()).isTrue();
     }
@@ -50,7 +49,7 @@ class JQAssistantConfigurationTest {
 
     @Test
     public void getRelativeReportFile() {
-        doReturn(Optional.of("customReport.xml")).when(sonarConfiguration).get(REPORT_PATH);
+        doReturn(Optional.of("customReport.xml")).when(sonarConfiguration).get(JQAssistantConfiguration.REPORT_PATH);
 
         assertThat(configuration.getReportFile()).isEqualTo("customReport.xml");
     }
@@ -59,7 +58,7 @@ class JQAssistantConfigurationTest {
     void getPropertyDefinitions() {
         List<PropertyDefinition> propertyDefinitions = JQAssistantConfiguration.getPropertyDefinitions();
         List<String> properties = propertyDefinitions.stream().map(PropertyDefinition::key).collect(toList());
-        assertThat(properties).containsExactly(REPORT_PATH, DISABLED, ISSUE_TYPE);
+        assertThat(properties).containsExactly(JQAssistantConfiguration.REPORT_PATH, JQAssistantConfiguration.DISABLED, JQAssistantConfiguration.ISSUE_TYPE);
     }
 
     @Test
@@ -69,13 +68,13 @@ class JQAssistantConfigurationTest {
 
     @Test
     void getUpperCaseIssueType() {
-        doReturn(Optional.of("BUG")).when(sonarConfiguration).get(ISSUE_TYPE);
+        doReturn(Optional.of("BUG")).when(sonarConfiguration).get(JQAssistantConfiguration.ISSUE_TYPE);
         assertThat(configuration.getIssueType()).isEqualTo(BUG);
     }
 
     @Test
     void getLowerCaseIssueType() {
-        doReturn(Optional.of("bug")).when(sonarConfiguration).get(ISSUE_TYPE);
+        doReturn(Optional.of("bug")).when(sonarConfiguration).get(JQAssistantConfiguration.ISSUE_TYPE);
         assertThat(configuration.getIssueType()).isEqualTo(BUG);
     }
 

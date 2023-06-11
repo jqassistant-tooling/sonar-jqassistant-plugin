@@ -1,9 +1,9 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
 import java.io.File;
 import java.net.URISyntaxException;
 
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
+import org.jqassistant.tooling.sonarqube.plugin.JQAssistantConfiguration;
 import org.jqassistant.schema.report.v2.ExecutableRuleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

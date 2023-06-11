@@ -1,6 +1,5 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
-import org.jqassistant.contrib.sonarqube.plugin.sensor.ReportLocator.ReportLocation;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -20,38 +19,38 @@ class ReportLocatorTest {
     @Test
     void relativePathWithReportInModule() {
         File moduleDir = new File(MODULE_2);
-        Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, REPORT_PATH);
+        Optional<ReportLocator.ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, REPORT_PATH);
         assertThat(reportLocation).isPresent()
-                .contains(ReportLocation.builder().moduleDirectory(moduleDir).reportFile(new File(moduleDir, REPORT_PATH)).build());
+                .contains(ReportLocator.ReportLocation.builder().moduleDirectory(moduleDir).reportFile(new File(moduleDir, REPORT_PATH)).build());
     }
 
     @Test
     void relativePathWithWithReportInParent() {
         File moduleDir = new File(MODULE_1);
-        Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, REPORT_PATH);
+        Optional<ReportLocator.ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, REPORT_PATH);
         assertThat(reportLocation).isPresent()
-                .contains(ReportLocation.builder().moduleDirectory(PROJECT_DIR).reportFile(new File(PROJECT_DIR, REPORT_PATH)).build());
+                .contains(ReportLocator.ReportLocation.builder().moduleDirectory(PROJECT_DIR).reportFile(new File(PROJECT_DIR, REPORT_PATH)).build());
     }
 
     @Test
     void noNExistingRelativePath() {
         File moduleDir = new File(MODULE_1);
-        Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, NON_EXISTING_REPORT_PATH);
+        Optional<ReportLocator.ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, NON_EXISTING_REPORT_PATH);
         assertThat(reportLocation).isEmpty();
     }
 
     @Test
     void absolutePath() {
         File moduleDir = new File(MODULE_2);
-        Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, new File(PROJECT_DIR, REPORT_PATH).getAbsolutePath());
+        Optional<ReportLocator.ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir, new File(PROJECT_DIR, REPORT_PATH).getAbsolutePath());
         assertThat(reportLocation).isPresent()
-                .contains(ReportLocation.builder().moduleDirectory(PROJECT_DIR).reportFile(new File(PROJECT_DIR, REPORT_PATH).getAbsoluteFile()).build());
+                .contains(ReportLocator.ReportLocation.builder().moduleDirectory(PROJECT_DIR).reportFile(new File(PROJECT_DIR, REPORT_PATH).getAbsoluteFile()).build());
     }
 
     @Test
     void nonExistingAbsolutePath() {
         File moduleDir = new File(MODULE_2);
-        Optional<ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir,
+        Optional<ReportLocator.ReportLocation> reportLocation = ReportLocator.resolveReportFile(PROJECT_DIR, moduleDir,
                 new File(PROJECT_DIR, NON_EXISTING_REPORT_PATH).getAbsolutePath());
         assertThat(reportLocation).isEmpty();
     }

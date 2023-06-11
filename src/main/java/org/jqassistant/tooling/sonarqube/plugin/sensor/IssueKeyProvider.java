@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
 import org.jqassistant.schema.report.v2.ExecutableRuleType;
 import org.jqassistant.schema.report.v2.RowType;

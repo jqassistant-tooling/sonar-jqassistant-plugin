@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.sonarqube.plugin.sensor;
+package org.jqassistant.tooling.sonarqube.plugin.sensor;
 
 import java.io.File;
 import java.util.HashSet;
@@ -7,9 +7,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import lombok.RequiredArgsConstructor;
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistant;
-import org.jqassistant.contrib.sonarqube.plugin.JQAssistantConfiguration;
-import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
+import org.jqassistant.tooling.sonarqube.plugin.JQAssistant;
+import org.jqassistant.tooling.sonarqube.plugin.JQAssistantConfiguration;
+import org.jqassistant.tooling.sonarqube.plugin.language.SourceFileResolver;
 import org.jqassistant.schema.report.v2.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +25,6 @@ import org.sonar.api.scanner.ScannerSide;
 
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.joining;
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONCEPT;
-import static org.jqassistant.contrib.sonarqube.plugin.sensor.RuleType.CONSTRAINT;
 
 /**
  * Base class to create issues.
@@ -76,9 +74,9 @@ public class IssueHandler {
 
     private RuleType getRuleType(ExecutableRuleType executableRuleType) {
         if (executableRuleType instanceof ConceptType) {
-            return CONCEPT;
+            return RuleType.CONCEPT;
         } else if (executableRuleType instanceof ConstraintType) {
-            return CONSTRAINT;
+            return RuleType.CONSTRAINT;
         } else {
             throw new IllegalArgumentException("Rule type not supported; " + executableRuleType.getClass());
         }

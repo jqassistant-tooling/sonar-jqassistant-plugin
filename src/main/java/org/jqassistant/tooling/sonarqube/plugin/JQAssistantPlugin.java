@@ -1,7 +1,10 @@
-package org.jqassistant.contrib.sonarqube.plugin;
+package org.jqassistant.tooling.sonarqube.plugin;
 
-import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
-import org.jqassistant.contrib.sonarqube.plugin.sensor.*;
+import org.jqassistant.tooling.sonarqube.plugin.language.SourceFileResolver;
+import org.jqassistant.tooling.sonarqube.plugin.sensor.IssueHandler;
+import org.jqassistant.tooling.sonarqube.plugin.sensor.IssueKeyProvider;
+import org.jqassistant.tooling.sonarqube.plugin.sensor.JQAssistantSensor;
+import org.jqassistant.tooling.sonarqube.plugin.sensor.RulesRepository;
 import org.sonar.api.Plugin;
 
 /**

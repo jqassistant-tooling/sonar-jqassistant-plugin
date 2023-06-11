@@ -1,8 +1,8 @@
-package org.jqassistant.contrib.sonarqube.plugin;
+package org.jqassistant.tooling.sonarqube.plugin;
 
-import org.jqassistant.contrib.sonarqube.plugin.language.SourceFileResolver;
-import org.jqassistant.contrib.sonarqube.plugin.sensor.JQAssistantSensor;
-import org.jqassistant.contrib.sonarqube.plugin.sensor.RulesRepository;
+import org.jqassistant.tooling.sonarqube.plugin.language.SourceFileResolver;
+import org.jqassistant.tooling.sonarqube.plugin.sensor.JQAssistantSensor;
+import org.jqassistant.tooling.sonarqube.plugin.sensor.RulesRepository;
 import org.junit.jupiter.api.Test;
 import org.sonar.api.Plugin;
 import org.sonar.api.SonarRuntime;
