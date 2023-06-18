@@ -45,7 +45,6 @@
         <sonar-java-plugin.version>7.17.0.31219</sonar-java-plugin.version>
         <sonar-testing-harness.version>9.9.0.65466</sonar-testing-harness.version>
         <lombok.version>1.18.24</lombok.version>
-        <sonar.projectKey>jqassistant-tooling_sonar-jqassistant-plugin</sonar.projectKey>
     </properties>
 
     <build>
