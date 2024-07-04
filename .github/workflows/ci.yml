@@ -19,7 +19,6 @@ concurrency:
 jobs:
   build:
     uses: jqassistant-tooling/jqassistant-github-actions/.github/workflows/ci.yml@bug-fix-snapshots
-
     with:
       publish_snapshots: true
     secrets:
