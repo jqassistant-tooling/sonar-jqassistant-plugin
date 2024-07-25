@@ -43,7 +43,7 @@
         <sonar-plugin-api.version>9.9.0.229</sonar-plugin-api.version>
         <sonar-plugin-api-impl.version>9.9.0.65466</sonar-plugin-api-impl.version>
         <sonar-java-plugin.version>7.17.0.31219</sonar-java-plugin.version>
-        <sonar-testing-harness.version>10.6.0.92116</sonar-testing-harness.version>
+        <sonar-testing-harness.version>9.9.0.65466</sonar-testing-harness.version>
     </properties>
 
     <build>
@@ -169,7 +169,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.15</version>
+            <version>1.17.1</version>
         </dependency>
         <!-- unit tests -->
         <dependency>
