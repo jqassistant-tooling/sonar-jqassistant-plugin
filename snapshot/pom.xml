@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jqassistant.tooling.common</groupId>
+        <artifactId>parent</artifactId>
+        <version>2.4.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.jqassistant.tooling.sonarqube</groupId>
+    <artifactId>sonar-jqassistant-plugin</artifactId>
+    <version>2.1.0-SNAPSHOT</version>
+    <packaging>sonar-plugin</packaging>
+
+    <name>Sonar jQAssistant Plugin</name>
+    <description>SonarQube plugin for jQAssistant providing rules for invalid concepts and constraint violations.
+    </description>
+    <url>https://github.com/jqassistant-tooling/sonar-jqassistant-plugin</url>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License, v3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>dirk-mahler</id>
+            <name>Dirk Mahler</name>
+            <email>dirk.mahler@buschmais.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/jqassistant-tooling/sonar-jqassistant-plugin</connection>
+        <developerConnection>scm:git:https://github.com/jqassistant-tooling/sonar-jqassistant-plugin</developerConnection>
+        <url>https://github.com/jqassistant-tooling/sonar-jqassistant-plugin</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <properties>
+        <sonar-plugin-api.version>9.9.0.229</sonar-plugin-api.version>
+        <sonar-plugin-api-impl.version>9.9.0.65466</sonar-plugin-api-impl.version>
+        <sonar-java-plugin.version>7.17.0.31219</sonar-java-plugin.version>
+        <sonar-testing-harness.version>9.9.0.65466</sonar-testing-harness.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
+                <artifactId>sonar-packaging-maven-plugin</artifactId>
+                <version>1.20.0.405</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <pluginKey>jqassistant</pluginKey>
+                    <pluginName>jQAssistant</pluginName>
+                    <pluginClass>org.jqassistant.tooling.sonarqube.plugin.JQAssistantPlugin</pluginClass>
+                    <addMavenDescriptor>false</addMavenDescriptor>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- UTF-8 bundles are not supported by Java, so they must be converted during build -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native2ascii-maven-plugin</artifactId>
+                <version>1.0-beta-1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>native2ascii</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <detectJavaApiLink>false</detectJavaApiLink>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- SonarQ -->
+            <dependency>
+                <groupId>org.sonarsource.api.plugin</groupId>
+                <artifactId>sonar-plugin-api</artifactId>
+                <version>${sonar-plugin-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.sonarsource.sonarqube</groupId>
+                <artifactId>sonar-plugin-api-impl</artifactId>
+                <version>${sonar-plugin-api-impl.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.sonarsource.java</groupId>
+                <artifactId>sonar-java-plugin</artifactId>
+                <version>${sonar-java-plugin.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <!-- libs -->
+            <dependency>
+                <groupId>com.google.collections</groupId>
+                <artifactId>google-collections</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <!-- unit tests -->
+            <dependency>
+                <groupId>org.sonarsource.sonarqube</groupId>
+                <artifactId>sonar-testing-harness</artifactId>
+                <version>${sonar-testing-harness.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.buschmais.jqassistant.core</groupId>
+            <artifactId>report</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.buschmais.jqassistant.core</groupId>
+                    <artifactId>store</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.buschmais.jqassistant.core</groupId>
+                    <artifactId>rule</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.buschmais.xo</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <!-- SonarQube -->
+        <dependency>
+            <groupId>org.sonarsource.api.plugin</groupId>
+            <artifactId>sonar-plugin-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sonarsource.sonarqube</groupId>
+            <artifactId>sonar-plugin-api-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sonarsource.java</groupId>
+            <artifactId>sonar-java-plugin</artifactId>
+        </dependency>
+        <!-- Commons Codec for SHA256 hashing -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+        </dependency>
+        <!-- unit tests -->
+        <dependency>
+            <groupId>com.buschmais.jqassistant.core</groupId>
+            <artifactId>rule</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.sonarsource.sonarqube</groupId>
+            <artifactId>sonar-testing-harness</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>java-hamcrest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+    </dependencies>
+</project>

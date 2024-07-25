@@ -1,0 +1,246 @@
+:toc: left
+= jQAssistant SonarQube Plugin
+
+This is the SonarQube plugin for jQAssistant integration
+
+== Requirements
+
+* SonarQube 9.9 or higher
+* Java project with jQAssistant setup
+
+== Installation
+
+=== SonarQube Marketplace
+
+* Login into SonarQube as administrator and navigate to `Administration`/`MarketPlace`
+* Enter `jQAssistant` in the filter panel, click `Install` and restart the SonarQube server
+
+=== Manual
+
+* https://search.maven.org/search?q=g:org.jqassistant.contrib.sonarqube[Download] the plugin JAR for your SonarQube release
+* Copy the plugin (i.e. JAR file) to the `extensions/plugins` folder of the SonarQube installation
+* (Re-)Start the SonarQube server
+
+== Configuration
+
+The plugin provides two rules that need to be activated for the quality profile of your project(s).
+
+Constraint Violation::
+Constraints that reported violations (default severity: Major).
+Invalid Concept::
+Concepts that are defined but could not be applied successfully (default severity: Minor).
+
+Therefore the following steps need to be performed in the SonarQube UI (as administrator):
+
+* Navigate to `Quality Profiles`
+* Select your desired quality profile
+* Activate the jQAssistant rules
+** Open the view to manage the rules of the quality profile
+** Search for inactive rules in the repository `jQAssistant` (by using the filters on the left side)
+** Activate the desired rules
+* Add your project to the quality profile (if not already done)
+** Navigate back to the overview screen of the selected quality profile
+** Select `Projects`
+** Add your project
+
+[options=header]
+.Supported properties
+|===
+| Property                     | Description                                         | Default value
+| sonar.jqassistant.disabled   | Disable the jQAssistant sensor.                     | false
+| sonar.jqassistant.reportPath | The path to the jQAssistant XML report file, either absolute or relative to the module directory | <projectRoot>/target/jqassistant/jqassistant-report.xml
+| sonar.jqassistant.issueType  | Determines the type of created issues, available options are `CODE_SMELL`, `BUG`, `VULNERABILITY` or `SECURITY_HOTSPOT`  | `CODE_SMELL`
+|===
+
+NOTE: By specifying a relative `reportPath` the first jQAssistant XML report file will be used for a module in a multi-module structure
+which can be found by traversing the module hierarchy upwards until the project's root directory is reached.
+
+== Execution
+
+In case of a Maven project with a jQAssistant setup the following steps need to be executed:
+
+`mvn verify`::
+  Build the project including scan and analysis by jQAssistant.
+  A file `target/jqassistant/jqassistant-report.xml` will be created containing an XML report.
+`mvn sonar:sonar`::
+  Run the SonarQube analysis.
+  The sensor of the jQAssistant SonarQube plugin will evaluate the report and create issues for failed rules.
+
+== Example Setup
+
+This section describes an example setup for a Maven project with the following structure:
+
+.Example Maven Project
+[source,raw]
+----
+project/
+  pom.xml      <1>
+  jqassistant/ <2>
+    index.adoc
+  src/
+    main/
+      java/
+----
+<1> Maven build descriptor containing the jQAssistant setup.
+<2> The directory where jQAssistant searches for project specific rules (`.adoc` or `.xml` files)
+
+For executing jQAssistant during the build the jQAssistant Maven plugin must be configured in the file `pom.xml`:
+
+./pom.xml
+[source,xml]
+----
+<project>
+...
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.buschmais.jqassistant</groupId>
+        <artifactId>jqassistant-maven-plugin</artifactId>
+        <version>${jqassistant-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>scan</goal>
+              <goal>analyze</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <warnOnSeverity>MINOR</warnOnSeverity>
+          <failOnSeverity>CRITICAL</failOnSeverity>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+...
+</project>
+----
+
+Project specific rules are loaded from the directory `jqassistant`.
+
+The following example contains a group `default` which is automatically executed by jQAssistant.
+It includes the constraint `model:JpaEntityLocation` that is defined in the same document and verifies that all JPA entities are located in packages called `model`.
+Therefore the constraint relies on a pre-defined concept `jpa2:Entity` which adds a label `Entity` to all classes that are annotated with `javax.persistence.Entity`.
+
+./jqassistant/index.adoc
+[source,adoc]
+....
+:toc: left
+= Project Rules
+
+This document describes coding guide lines for the project.
+
+[[default]]                                      <1>
+[role=group,includesConstraints="model:JpaEntityLocation"]
+== Continuous Integration Rules
+
+The following rules are executed during a CI build:
+
+* <<model:JpaEntityLocation>>
+
+== JPA Model
+
+[[model:JpaEntityLocation]]                      <2>
+.All JPA entities must be located in a package with the name "model"
+[source,cypher,role=concept,requiresConcepts="jpa2:Entity",primaryReportColumn="EntityInWrongPackage"]
+----
+MATCH
+  (package:Package)-[:CONTAINS]->(entity:Entity:Class)
+WHERE
+  package.name <> "model"
+RETURN
+  package as Package, entity as EntityInWrongPackage
+----
+....
+<1> Defines the group `default` that includes the constraint
+<2> Defines the constraint `model:JpaEntityLocation` that relies on the concept `jpa2:Entity`
+
+NOTE: The constraint defines a property called `primaryReportColumn`.
+It specifies the column of the result containing the elements (e.g. classes, packages) which shall be used to create issues in SonarQube.
+The property is optional, if omitted the first column is used by default (recommended).
+
+== Feedback & Issues
+
+For any questions don't hesitate to ask them on the https://groups.google.com/forum/#!forum/jqassistant[jQAssistant Google Group] or http://stackoverflow.com/questions/tagged/jqassistant[Stackoverflow].
+
+Feature requests or bugs can be reported on the https://github.com/jqassistant-contrib/sonar-jqassistant-plugin/issues[GitHub issue tracker].
+
+== From jQAssistant queries to SonarQube issues
+
+In the following we're describing some best practises of the usage of jQAssistant in combination with the SonarQube jQAssistant plugin.
+
+The following example describes a method invocation from a class of the persistence layer to a class of the core layer.
+
+[source,cypher]
+MATCH
+    (persistenceClass:Class:Persistence) -[:DECLARES]-> (persistenceMethod:Method)
+        -[invocation:INVOKES]->
+    (coreMethod:Method) <-[:DECLARES]- (coreClass:Class:Core)
+
+
+We're now comparing three different examples of possible return values and their jQA report results which are
+the base of processing new Sonar issues.
+
+When you build you project with `mvn clean verfiy` jQA will execute all the rules you provided and generate the file `jqassistant-report.xml`.
+This report is evaluated by the Sonar jQAssistant plugin to generate Sonar issues.
+The plugin processes the report file.
+For each contained violation the value of the `primary report column` of the rule (i.e. or first if not specified) is used
+to generate an issue on the matching element (e.g. class, method, field, etc.) in SonarQube.
+The values of the other columns are used to provide additional information.
+
+In the following you three example of possible primary return values are provided:
+
+1.) RETURN persistenceClass.name
+
+[source,xml]
+    <result>
+        <columns count="3">
+            <column primary="true">persistenceClass.name</column>
+        </columns>
+        <rows count="1">
+            <row>
+                <column name="persistenceClass.name">
+                    <value>AnyPersistenceClass</value>
+                </column>
+            </row>
+        </rows>
+    </result>
+
+2.) RETURN coreclass
+
+[soruce,xml]
+    <result>
+        <columns count="1">
+            <column primary="true">coreClass</column>
+        </columns>
+        <rows count="1">
+            <row>
+                <column name="coreClass">
+                    <element language="Java">Type</element>
+                    <source name="org/jqassistant/example/core/AnyCoreClass.class"></source>
+                    <value>org/jqassistant/example/core/InvokedCoreMethod</value>
+                </column>
+            </row>
+        </rows>
+    </result>
+
+3.) RETURN i
+
+[source,xml]
+    <result>
+        <columns count="1">
+            <column primary="true">invocation</column>
+        </columns>
+        <rows count="1">
+            <row>
+              <column name="invocation">
+                <element language="Java">MethodInvocation</element>
+                <source name="/org/jqassistant/example/persistence/AnyPersistenceClass.class" line="64"></source>
+                <value>org/jqassistant/example/persistence/AnyPersistenceClass#java.util.List coreMethodInvocation(java.lang.Long), line 64</value>
+              </column>
+            </row>
+        </rows>
+    </result>
+
+It can bee seen third variant is the one providing most detailed information.
+In this case the return value is the whole relationship between the persistence and core class.
