@@ -40,7 +40,7 @@
     </scm>
 
     <properties>
-        <sonar-plugin-api.version>9.17.0.587</sonar-plugin-api.version>
+        <sonar-plugin-api.version>11.2.0.2797</sonar-plugin-api.version>
         <sonar-plugin-api-impl.version>9.9.0.65466</sonar-plugin-api-impl.version>
         <sonar-java-plugin.version>7.17.0.31219</sonar-java-plugin.version>
         <sonar-testing-harness.version>25.2.0.102705</sonar-testing-harness.version>
