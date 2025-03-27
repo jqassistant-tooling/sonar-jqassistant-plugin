@@ -23,23 +23,7 @@ This is the SonarQube plugin for jQAssistant integration
 
 == Configuration
 
-The plugin provides two rules that need to be activated for the quality profile of your project(s).
-
-Constraint Violation::
-Constraints that reported violations (default severity: Major).
-Invalid Concept::
-Concepts that are defined but could not be applied successfully (default severity: Minor).
-
-Therefore the following steps need to be performed in the SonarQube UI (as administrator):
-
-* Navigate to `Quality Profiles`
-* Select your desired quality profile
-* Activate the jQAssistant rules
-** Open the view to manage the rules of the quality profile
-** Search for inactive rules in the repository `jQAssistant` (by using the filters on the left side)
-** Activate the desired rules
-* Add your project to the quality profile (if not already done)
-** Navigate back to the overview screen of the selected quality profile
+** Navigate to the SonarQube overview screen
 ** Select `Projects`
 ** Add your project
 
