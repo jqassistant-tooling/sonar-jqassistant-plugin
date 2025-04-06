@@ -1,6 +1,10 @@
 :toc: left
 = Release Notes
 
+== 3.0.0
+
+* Upgraded compatibility to SonarQube 2025 (LTA) and newer.
+
 == 2.0.0
 
 * Upgraded compatibility to jQAssistant 2.0 and SonarQube 9.9 (LTS)
