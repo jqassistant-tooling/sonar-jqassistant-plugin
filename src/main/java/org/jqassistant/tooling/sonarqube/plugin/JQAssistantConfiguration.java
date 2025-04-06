@@ -22,16 +22,15 @@ package org.jqassistant.tooling.sonarqube.plugin;
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.resources.Qualifiers;
 import org.sonar.api.rules.RuleType;
 import org.sonar.api.scanner.ScannerSide;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import static org.sonar.api.rules.RuleType.CODE_SMELL;
 
 /**
@@ -98,12 +97,12 @@ public class JQAssistantConfiguration {
         return asList(
             PropertyDefinition.builder(REPORT_PATH).category(CATEGORY_JQASSISTANT).subCategory(JQAssistant.NAME).name("jQAssistant Report Path")
                 .description("Absolute or relative path to the jQAssistant XML report file (default: '<projectRoot>/" + DEFAULT_REPORT_PATH + "').")
-                .onQualifiers(Qualifiers.PROJECT).build(),
+                .onConfigScopes(PropertyDefinition.ConfigScope.PROJECT).build(),
             PropertyDefinition.builder(JQAssistantConfiguration.DISABLED).defaultValue(Boolean.toString(false)).name("Disable")
                 .category(CATEGORY_JQASSISTANT).subCategory(JQAssistant.NAME).description("Disable the jQAssistant sensor.")
-                .onQualifiers(Qualifiers.PROJECT).type(PropertyType.BOOLEAN).build(),
+                .onConfigScopes(PropertyDefinition.ConfigScope.PROJECT).type(PropertyType.BOOLEAN).build(),
             PropertyDefinition.builder(JQAssistantConfiguration.ISSUE_TYPE).defaultValue(CODE_SMELL.toString()).name("Issue Type")
                 .category(CATEGORY_JQASSISTANT).subCategory(JQAssistant.NAME).description("The issue type to create.")
-                .onQualifiers(Qualifiers.PROJECT).options(RuleType.names().stream().collect(toList())).type(PropertyType.SINGLE_SELECT_LIST).build());
+                .onConfigScopes(PropertyDefinition.ConfigScope.PROJECT).options(new ArrayList<>(RuleType.names())).type(PropertyType.SINGLE_SELECT_LIST).build());
     }
 }
