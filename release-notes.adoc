@@ -1,6 +1,10 @@
 :toc: left
 = Release Notes
 
+== 3.0.1
+
+* Fixed compatibility issue with SonarQube 2025 (LTA).
+
 == 3.0.0
 
 * Upgraded compatibility to SonarQube 2025 (LTA) and newer.
