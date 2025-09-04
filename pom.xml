@@ -41,7 +41,7 @@
 
     <properties>
         <sonar-plugin-api.version>11.1.0.2693</sonar-plugin-api.version>
-        <sonar-plugin-api-impl.version>25.8.0.112029</sonar-plugin-api-impl.version>
+        <sonar-plugin-api-impl.version>25.9.0.112764</sonar-plugin-api-impl.version>
         <sonar-java-plugin.version>8.18.0.40025</sonar-java-plugin.version>
         <sonar-testing-harness.version>25.9.0.112764</sonar-testing-harness.version>
         <!-- SonarQube -->
