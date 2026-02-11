@@ -27,8 +27,7 @@ import org.sonar.api.scanner.fs.InputProject;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.sonar.api.batch.rule.Severity.MAJOR;
 import static org.sonar.api.batch.rule.Severity.MINOR;
@@ -191,7 +190,8 @@ class IssueHandlerTest {
 
         issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
 
-        verify(issueKeyProvider).getIssueKey(any(), any(), any());
+        verify(issueKeyProvider).getIssueKey(any(), argThat(rowType -> rowType.getKey()
+                .equals("1")), any());
     }
 
     @Test
