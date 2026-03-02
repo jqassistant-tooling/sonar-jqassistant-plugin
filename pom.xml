@@ -40,6 +40,7 @@
     </scm>
 
     <properties>
+        <jqassistant.version>2.10.0-M1</jqassistant.version>
         <sonar-plugin-api.version>11.1.0.2693</sonar-plugin-api.version>
         <sonar-plugin-api-impl.version>26.2.0.119303</sonar-plugin-api-impl.version>
         <sonar-java-plugin.version>8.24.0.42567</sonar-java-plugin.version>
