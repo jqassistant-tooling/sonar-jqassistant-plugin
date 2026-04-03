@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jqassistant-report xmlns="http://schema.jqassistant.org/report/v2.7">
+  <context>
+    <build>
+      <name>Sonar jQAssistant Plugin</name>
+      <timestamp>2026-04-03T08:24:36.962Z</timestamp>
+      <properties></properties>
+    </build>
+  </context>
+  <group id="jqassistant-tooling:Default" date="2026-04-03T08:25:16">
+    <group id="jqassistant-tooling-package:Default" date="2026-04-03T08:25:16">
+      <concept id="jqassistant-tooling-maven:ParentProject">
+        <description>Labels all Maven projects which declare "org.jqassistant.tooling.common:parent" as parent module with "Parent".</description>
+        <result>
+          <columns count="1" primary="parent">
+            <column>parent</column>
+          </columns>
+          <rows count="1">
+            <row key="b35b28c601a3c51400fa77b12c72da8b54fa6c1af7ee9ce2f90939ae73970e23">
+              <column name="parent">
+                <element language="Generic">Named</element>
+                <source fileName="/home/runner/work/sonar-jqassistant-plugin/sonar-jqassistant-plugin"></source>
+                <value>Sonar jQAssistant Plugin</value>
+              </column>
+            </row>
+          </rows>
+        </result>
+        <verificationResult>
+          <success>true</success>
+          <rowCount>1</rowCount>
+        </verificationResult>
+        <status>success</status>
+        <severity level="4">info</severity>
+        <duration>149</duration>
+      </concept>
+      <constraint id="jqassistant-tooling-package:PackagesMustHaveGroupIdPrefix">
+        <description>All package names used in a Maven project must start with the groupId.</description>
+        <verificationResult>
+          <success>true</success>
+          <rowCount>0</rowCount>
+        </verificationResult>
+        <status>success</status>
+        <severity level="2">major</severity>
+        <duration>199</duration>
+        <required-concept id="jqassistant-tooling-maven:ParentProject">
+          <status>success</status>
+        </required-concept>
+      </constraint>
+      <duration>551</duration>
+    </group>
+    <group id="jqassistant-tooling-maven:Default" date="2026-04-03T08:25:17">
+      <constraint id="jqassistant-tooling-maven:GroupId">
+        <description>The groupId for jQAssistant tooling Maven projects must follow the pattern 'org.jqassistant.tooling.&lt;project&gt;'.</description>
+        <verificationResult>
+          <success>true</success>
+          <rowCount>0</rowCount>
+        </verificationResult>
+        <status>success</status>
+        <severity level="2">major</severity>
+        <duration>76</duration>
+      </constraint>
+      <constraint id="jqassistant-tooling-maven:MavenModulesMustUseParentGroupId">
+        <description>All Maven projects must define the same groupId as the parent of the tooling project.</description>
+        <verificationResult>
+          <success>true</success>
+          <rowCount>0</rowCount>
+        </verificationResult>
+        <status>success</status>
+        <severity level="2">major</severity>
+        <duration>105</duration>
+        <required-concept id="jqassistant-tooling-maven:ParentProject">
+          <status>success</status>
+        </required-concept>
+      </constraint>
+      <constraint id="jqassistant-tooling-maven:ParentProjectMustDefineDeveloper">
+        <description>At least one developer must be specified in the "developers" section of the parent pom.xml of a tooling project.</description>
+        <verificationResult>
+          <success>true</success>
+          <rowCount>0</rowCount>
+        </verificationResult>
+        <status>success</status>
+        <severity level="2">major</severity>
+        <duration>72</duration>
+        <required-concept id="jqassistant-tooling-maven:ParentProject">
+          <status>success</status>
+        </required-concept>
+      </constraint>
+      <constraint id="jqassistant-tooling-maven:ParentProjectMustDefineScmSection">
+        <description>A SCM section having both connection and developerConnection set to "scm:git:https://github.com/jqassistant-tooling/_repository-name_" must be specified in the parent pom.xml of a tooling project.</description>
+        <verificationResult>
+          <success>true</success>
+          <rowCount>0</rowCount>
+        </verificationResult>
+        <status>success</status>
+        <severity level="2">major</severity>
+        <duration>88</duration>
+        <required-concept id="jqassistant-tooling-maven:ParentProject">
+          <status>success</status>
+        </required-concept>
+      </constraint>
+      <constraint id="jqassistant-tooling-maven:ParentProjectMustDefineUrl">
+        <description>The project URL must be defined in the parent pom.xml of a tooling project.</description>
+        <verificationResult>
+          <success>true</success>
+          <rowCount>0</rowCount>
+        </verificationResult>
+        <status>success</status>
+        <severity level="2">major</severity>
+        <duration>162</duration>
+        <required-concept id="jqassistant-tooling-maven:ParentProject">
+          <status>success</status>
+        </required-concept>
+      </constraint>
+      <duration>527</duration>
+    </group>
+    <duration>527</duration>
+  </group>
+</jqassistant-report>
