@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <testsuite name="jqassistant.Group_jqassistant-tooling-maven_Default" tests="5" failures="0" errors="0" time="0.0">
+    <testcase name="Constraint_jqassistant-tooling-maven_ParentProjectMustDefineDeveloper" time="0.0" classname="jqassistant.Group_jqassistant-tooling-maven_Default"/>
     <testcase name="Constraint_jqassistant-tooling-maven_GroupId" time="0.0" classname="jqassistant.Group_jqassistant-tooling-maven_Default"/>
     <testcase name="Constraint_jqassistant-tooling-maven_ParentProjectMustDefineScmSection" time="0.0" classname="jqassistant.Group_jqassistant-tooling-maven_Default"/>
-    <testcase name="Constraint_jqassistant-tooling-maven_ParentProjectMustDefineDeveloper" time="0.0" classname="jqassistant.Group_jqassistant-tooling-maven_Default"/>
-    <testcase name="Constraint_jqassistant-tooling-maven_ParentProjectMustDefineUrl" time="0.0" classname="jqassistant.Group_jqassistant-tooling-maven_Default"/>
     <testcase name="Constraint_jqassistant-tooling-maven_MavenModulesMustUseParentGroupId" time="0.0" classname="jqassistant.Group_jqassistant-tooling-maven_Default"/>
+    <testcase name="Constraint_jqassistant-tooling-maven_ParentProjectMustDefineUrl" time="0.0" classname="jqassistant.Group_jqassistant-tooling-maven_Default"/>
 </testsuite>
