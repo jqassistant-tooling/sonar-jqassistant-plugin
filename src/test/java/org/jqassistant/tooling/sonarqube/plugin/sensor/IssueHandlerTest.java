@@ -27,8 +27,7 @@ import org.sonar.api.scanner.fs.InputProject;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.sonar.api.batch.rule.Severity.MAJOR;
 import static org.sonar.api.batch.rule.Severity.MINOR;
@@ -181,6 +180,20 @@ class IssueHandlerTest {
         verify(issueKeyProvider).getIssueKey(any(), any(), any());
     }
 
+    /**
+     * Verifies, if getIssueKey() is only called ones for the non-hidden row.
+     */
+    @Test
+    void constraintViolationWithHiddenRow() {
+        stubDefaultInputFileSourceLocation();
+        ConstraintType constraintType = stubConstraintViolationWithHiddenRow();
+
+        issueHandler.process(sensorContext, PROJECT_PATH, constraintType);
+
+        verify(issueKeyProvider).getIssueKey(any(), argThat(rowType -> rowType.getKey()
+                .equals("1")), any());
+    }
+
     @Test
     void constraintViolationWithoutRowKey() {
         stubDefaultInputFileSourceLocation();
@@ -271,6 +284,55 @@ class IssueHandlerTest {
         return resultType;
     }
 
+    private ResultType createResultTypeWithHiddenRows() {
+        ResultType resultType = new ResultType();
+        ColumnsHeaderType columnsHeaderType = new ColumnsHeaderType();
+        columnsHeaderType.setCount(1);
+        columnsHeaderType.setPrimary("Value");
+        columnsHeaderType.getColumn()
+                .add("Value");
+        resultType.setColumns(columnsHeaderType);
+
+        RowsType rowsType = new RowsType();
+        RowType rowType = new RowType();
+        rowType.setKey("1");
+        ColumnType columnType = new ColumnType();
+        columnType.setName("Value");
+        columnType.setValue("Test");
+
+        RowType hiddenRowType = new RowType();
+        hiddenRowType.setKey("2");
+        HiddenType hiddenType = new HiddenType();
+        hiddenRowType.setHidden(hiddenType);
+        ColumnType hiddenColumnType = new ColumnType();
+        hiddenColumnType.setName("Value");
+        hiddenColumnType.setValue("Hidden");
+
+        ElementType elementType = new ElementType();
+        elementType.setLanguage("Java");
+        elementType.setValue("WriteField");
+        columnType.setElement(elementType);
+        hiddenColumnType.setElement(elementType);
+        SourceLocationType sourceType = new SourceLocationType();
+        sourceType.setFileName("com/buschmais/jqassistant/examples/sonar/project/Bar.java");
+        sourceType.setStartLine(16);
+        sourceType.setEndLine(18);
+        columnType.setSource(sourceType);
+        hiddenColumnType.setSource(sourceType);
+
+        rowType.getColumn()
+                .add(columnType);
+        rowsType.getRow()
+                .add(rowType);
+
+        hiddenRowType.getColumn()
+                .add(hiddenColumnType);
+        rowsType.getRow()
+                .add(hiddenRowType);
+        resultType.setRows(rowsType);
+        return resultType;
+    }
+
     private ConstraintType stubConstraintViolationWithRowKey(org.sonar.api.rules.RuleType ruleType) {
         return stubConstraintViolation(ruleType, "1");
     }
@@ -282,6 +344,16 @@ class IssueHandlerTest {
         constraintType.setSeverity(getSeverityType(com.buschmais.jqassistant.core.rule.api.model.Severity.CRITICAL));
         constraintType.setResult(createResultType(true, rowKey));
         stubExternalNewIssue(ruleType, of(Severity.CRITICAL));
+        return constraintType;
+    }
+
+    private ConstraintType stubConstraintViolationWithHiddenRow() {
+        ConstraintType constraintType = new ConstraintType();
+        constraintType.setDescription("TestConstraint");
+        constraintType.setId("test:Constraint");
+        constraintType.setSeverity(getSeverityType(com.buschmais.jqassistant.core.rule.api.model.Severity.CRITICAL));
+        constraintType.setResult(createResultTypeWithHiddenRows());
+        stubExternalNewIssue(BUG, of(Severity.CRITICAL));
         return constraintType;
     }
 
