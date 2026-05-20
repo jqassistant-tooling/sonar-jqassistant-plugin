@@ -64,10 +64,12 @@ public class IssueHandler {
             String primaryColumn = getPrimaryColumn(result);
             for (RowType rowType : result.getRows()
                 .getRow()) {
-                String rowKey = issueKeyProvider.getIssueKey(executableRuleType, rowType, ruleType);
-                Optional<SourceLocation> target = resolveSourceLocation(sensorContext, rowType, primaryColumn);
-                String message = convertRow(rowType);
-                newIssue(sensorContext, executableRuleType, getRuleType(executableRuleType), rowKey, reportModulePath, target, message);
+                if (rowType.getHidden() == null) {
+                    String rowKey = issueKeyProvider.getIssueKey(executableRuleType, rowType, ruleType);
+                    Optional<SourceLocation> target = resolveSourceLocation(sensorContext, rowType, primaryColumn);
+                    String message = convertRow(rowType);
+                    newIssue(sensorContext, executableRuleType, getRuleType(executableRuleType), rowKey, reportModulePath, target, message);
+                }
             }
         }
     }
