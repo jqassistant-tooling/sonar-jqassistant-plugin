@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <testsuite name="jqassistant.Group_jqassistant-tooling-package_Default" tests="2" failures="0" errors="0" time="0.0">
-    <testcase name="Concept_jqassistant-tooling-maven_ParentProject" time="0.0" classname="jqassistant.Group_jqassistant-tooling-package_Default"/>
     <testcase name="Constraint_jqassistant-tooling-package_PackagesMustHaveGroupIdPrefix" time="0.0" classname="jqassistant.Group_jqassistant-tooling-package_Default"/>
+    <testcase name="Concept_jqassistant-tooling-maven_ParentProject" time="0.0" classname="jqassistant.Group_jqassistant-tooling-package_Default"/>
 </testsuite>
