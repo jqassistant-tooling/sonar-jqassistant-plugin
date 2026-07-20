@@ -43,7 +43,7 @@
         <sonar-plugin-api.version>11.1.0.2693</sonar-plugin-api.version>
         <sonar-plugin-api-impl.version>26.6.0.123539</sonar-plugin-api-impl.version>
         <sonar-java-plugin.version>8.36.0.45637</sonar-java-plugin.version>
-        <sonar-testing-harness.version>26.6.0.123539</sonar-testing-harness.version>
+        <sonar-testing-harness.version>26.7.0.124771</sonar-testing-harness.version>
         <!-- SonarQube -->
         <sonar.organization>jqassistant-tooling</sonar.organization>
         <sonar.projectKey>jqassistant-tooling_sonar-jqassistant-plugin</sonar.projectKey>
