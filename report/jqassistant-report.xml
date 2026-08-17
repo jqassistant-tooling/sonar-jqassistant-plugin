@@ -3,12 +3,12 @@
   <context>
     <build>
       <name>Sonar jQAssistant Plugin</name>
-      <timestamp>2026-08-12T15:22:23.713Z</timestamp>
+      <timestamp>2026-08-17T09:48:11.682Z</timestamp>
       <properties></properties>
     </build>
   </context>
-  <group id="jqassistant-tooling:Default" date="2026-08-12T15:23:12">
-    <group id="jqassistant-tooling-package:Default" date="2026-08-12T15:23:12">
+  <group id="jqassistant-tooling:Default" date="2026-08-17T09:48:53">
+    <group id="jqassistant-tooling-package:Default" date="2026-08-17T09:48:53">
       <concept id="jqassistant-tooling-maven:ParentProject" abstract="false">
         <description>Labels all Maven projects which declare "org.jqassistant.tooling.common:parent" as parent module with "Parent".</description>
         <result>
@@ -31,7 +31,7 @@
         </verificationResult>
         <status>success</status>
         <severity level="4">info</severity>
-        <duration>135</duration>
+        <duration>158</duration>
       </concept>
       <constraint id="jqassistant-tooling-package:PackagesMustHaveGroupIdPrefix">
         <description>All package names used in a Maven project must start with the groupId.</description>
@@ -41,14 +41,14 @@
         </verificationResult>
         <status>success</status>
         <severity level="2">major</severity>
-        <duration>219</duration>
+        <duration>209</duration>
         <required-concept id="jqassistant-tooling-maven:ParentProject">
           <status>success</status>
         </required-concept>
       </constraint>
-      <duration>564</duration>
+      <duration>587</duration>
     </group>
-    <group id="jqassistant-tooling-maven:Default" date="2026-08-12T15:23:13">
+    <group id="jqassistant-tooling-maven:Default" date="2026-08-17T09:48:54">
       <constraint id="jqassistant-tooling-maven:GroupId">
         <description>The groupId for jQAssistant tooling Maven projects must follow the pattern 'org.jqassistant.tooling.&lt;project&gt;'.</description>
         <verificationResult>
@@ -57,7 +57,7 @@
         </verificationResult>
         <status>success</status>
         <severity level="2">major</severity>
-        <duration>63</duration>
+        <duration>71</duration>
       </constraint>
       <constraint id="jqassistant-tooling-maven:MavenModulesMustUseParentGroupId">
         <description>All Maven projects must define the same groupId as the parent of the tooling project.</description>
@@ -67,7 +67,7 @@
         </verificationResult>
         <status>success</status>
         <severity level="2">major</severity>
-        <duration>78</duration>
+        <duration>85</duration>
         <required-concept id="jqassistant-tooling-maven:ParentProject">
           <status>success</status>
         </required-concept>
@@ -80,7 +80,7 @@
         </verificationResult>
         <status>success</status>
         <severity level="2">major</severity>
-        <duration>73</duration>
+        <duration>82</duration>
         <required-concept id="jqassistant-tooling-maven:ParentProject">
           <status>success</status>
         </required-concept>
@@ -93,7 +93,7 @@
         </verificationResult>
         <status>success</status>
         <severity level="2">major</severity>
-        <duration>95</duration>
+        <duration>93</duration>
         <required-concept id="jqassistant-tooling-maven:ParentProject">
           <status>success</status>
         </required-concept>
@@ -106,13 +106,13 @@
         </verificationResult>
         <status>success</status>
         <severity level="2">major</severity>
-        <duration>174</duration>
+        <duration>156</duration>
         <required-concept id="jqassistant-tooling-maven:ParentProject">
           <status>success</status>
         </required-concept>
       </constraint>
-      <duration>526</duration>
+      <duration>524</duration>
     </group>
-    <duration>528</duration>
+    <duration>526</duration>
   </group>
 </jqassistant-report>
